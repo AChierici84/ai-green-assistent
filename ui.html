@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Green Assistant</title>
+  <style>
+    :root {
+      --green: #2e7d32;
+      --light-green: #a5d6a7;
+      --bg: #f1f8f1;
+      --card: #ffffff;
+      --text: #1b1b1b;
+      --muted: #666;
+      --radius: 12px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: "Segoe UI", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 2rem 1rem;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+
+    header h1 {
+      color: var(--green);
+      font-size: 2rem;
+    }
+
+    header p { color: var(--muted); margin-top: .4rem; }
+
+    .tabs {
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .tab-btn {
+      padding: .55rem 1.6rem;
+      border: 2px solid var(--green);
+      border-radius: 999px;
+      background: transparent;
+      color: var(--green);
+      font-size: .95rem;
+      cursor: pointer;
+      transition: background .2s, color .2s;
+    }
+
+    .tab-btn.active, .tab-btn:hover {
+      background: var(--green);
+      color: #fff;
+    }
+
+    .panel { display: none; }
+    .panel.active { display: block; }
+
+    .card {
+      background: var(--card);
+      border-radius: var(--radius);
+      padding: 1.8rem;
+      max-width: 720px;
+      margin: 0 auto;
+      box-shadow: 0 2px 12px rgba(0,0,0,.08);
+    }
+
+    label { display: block; font-weight: 600; margin-bottom: .5rem; }
+
+    input[type="file"],
+    input[type="text"],
+    input[type="number"],
+    select {
+      width: 100%;
+      padding: .55rem .8rem;
+      border: 1.5px solid #ccc;
+      border-radius: 8px;
+      font-size: .95rem;
+      margin-bottom: 1rem;
+      background: #fafafa;
+    }
+
+    input:focus, select:focus {
+      outline: none;
+      border-color: var(--green);
+    }
+
+    .row { display: flex; gap: 1rem; }
+    .row > * { flex: 1; }
+
+    button.submit {
+      width: 100%;
+      padding: .7rem;
+      background: var(--green);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background .2s;
+    }
+
+    button.submit:hover { background: #1b5e20; }
+    button.submit:disabled { background: #aaa; cursor: not-allowed; }
+
+    /* Preview immagine caricata */
+    #preview-wrap {
+      margin-bottom: 1rem;
+      display: none;
+      text-align: center;
+    }
+
+    #preview-wrap img {
+      max-height: 200px;
+      border-radius: 8px;
+      box-shadow: 0 1px 6px rgba(0,0,0,.15);
+    }
+
+    /* Risultati ricerca immagine */
+    .result-list { margin-top: 1.5rem; }
+
+    .result-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: .6rem .9rem;
+      border-radius: 8px;
+      margin-bottom: .5rem;
+      background: var(--bg);
+    }
+
+    .result-item .species {
+      font-weight: 600;
+      color: #1e5f26;
+      text-decoration: underline;
+      cursor: pointer;
+    }
+    .result-item .score { color: var(--green); font-weight: 700; }
+
+    .bar-wrap { flex: 1; margin: 0 1rem; height: 8px; background: #ddd; border-radius: 4px; }
+    .bar { height: 100%; background: var(--light-green); border-radius: 4px; transition: width .5s; }
+
+    /* Info pianta */
+    .plant-header {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      margin-bottom: 1.2rem;
+    }
+
+    .plant-header img {
+      height: 160px;
+      border-radius: 8px;
+      object-fit: cover;
+      box-shadow: 0 1px 6px rgba(0,0,0,.15);
+      flex-shrink: 0;
+    }
+
+    .plant-text p { line-height: 1.6; color: #333; margin-top: .5rem; }
+
+    .more-btn {
+      margin-top: .8rem;
+      padding: .45rem .9rem;
+      border: 1px solid var(--green);
+      background: #fff;
+      color: var(--green);
+      border-radius: 999px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    .more-btn:hover { background: #f3faf3; }
+
+    .more-text {
+      margin-top: .8rem;
+      white-space: pre-wrap;
+      line-height: 1.6;
+      color: #2b2b2b;
+    }
+
+    .markdown-content h1,
+    .markdown-content h2,
+    .markdown-content h3 {
+      color: #1e5f26;
+      margin: .6rem 0;
+    }
+
+    .markdown-content p {
+      margin: .55rem 0;
+      line-height: 1.65;
+    }
+
+    .markdown-content ul,
+    .markdown-content ol {
+      margin: .5rem 0 .5rem 1.2rem;
+    }
+
+    .markdown-content code {
+      background: #eef6ef;
+      padding: .08rem .35rem;
+      border-radius: 4px;
+      font-size: .9em;
+    }
+
+    .plant-title { font-size: 1.4rem; font-weight: 700; color: var(--green); }
+
+    .wiki-link {
+      display: inline-block;
+      margin-top: 1rem;
+      color: var(--green);
+      font-weight: 600;
+      text-decoration: none;
+    }
+
+    .wiki-link:hover { text-decoration: underline; }
+
+    .chat-link-btn {
+      display: inline-block;
+      margin-top: 1rem;
+      margin-left: .7rem;
+      color: #fff;
+      background: var(--green);
+      border: 1px solid var(--green);
+      border-radius: 999px;
+      padding: .35rem .8rem;
+      font-size: .88rem;
+      cursor: pointer;
+      text-decoration: none;
+    }
+
+    .chat-link-btn:hover { background: #1b5e20; }
+
+    textarea {
+      width: 100%;
+      min-height: 96px;
+      padding: .55rem .8rem;
+      border: 1.5px solid #ccc;
+      border-radius: 8px;
+      font-size: .95rem;
+      margin-bottom: 1rem;
+      background: #fafafa;
+      resize: vertical;
+      font-family: inherit;
+    }
+
+    textarea:focus {
+      outline: none;
+      border-color: var(--green);
+    }
+
+    .chat-response {
+      margin-top: 1rem;
+      white-space: pre-wrap;
+      line-height: 1.6;
+      background: var(--bg);
+      border-radius: 10px;
+      padding: 1rem;
+      border: 1px solid #d8ead9;
+    }
+
+    .chat-meta {
+      color: var(--muted);
+      font-size: .86rem;
+      margin-top: .7rem;
+    }
+
+    .gallery {
+      display: flex;
+      gap: .6rem;
+      flex-wrap: wrap;
+      margin-top: 1rem;
+    }
+
+    .gallery img {
+      height: 130px;
+      border-radius: 8px;
+      object-fit: cover;
+      cursor: pointer;
+      transition: transform .2s;
+    }
+
+    .gallery img:hover { transform: scale(1.04); }
+
+    .spinner {
+      text-align: center;
+      padding: 2rem;
+      color: var(--muted);
+      font-size: .95rem;
+    }
+
+    .error-box {
+      background: #ffebee;
+      color: #c62828;
+      border-radius: 8px;
+      padding: .8rem 1rem;
+      margin-top: 1rem;
+      font-size: .9rem;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>🌿 AI Green Assistant</h1>
+  <p>Riconosci piante e scopri informazioni botaniche</p>
+</header>
+
+<div class="tabs">
+  <button class="tab-btn active" data-tab="search" onclick="switchTab('search')">Ricerca per immagine</button>
+  <button class="tab-btn" data-tab="info" onclick="switchTab('info')">Info su una pianta</button>
+  <button class="tab-btn" data-tab="chat" onclick="switchTab('chat')">Chatbot cura</button>
+</div>
+
+<!-- ── TAB 1: Ricerca per immagine ── -->
+<div id="panel-search" class="panel active">
+  <div class="card">
+    <label for="img-input">Carica un'immagine</label>
+    <input type="file" id="img-input" accept="image/*" onchange="previewImage()" />
+
+    <div id="preview-wrap">
+      <img id="preview-img" src="" alt="anteprima" />
+    </div>
+
+    <div class="row">
+      <div>
+        <label for="k-input">Numero di risultati (k)</label>
+        <input type="number" id="k-input" value="5" min="1" max="50" />
+      </div>
+    </div>
+
+    <button class="submit" id="search-btn" onclick="doSearch()">Cerca specie simili</button>
+
+    <div id="search-result"></div>
+  </div>
+</div>
+
+<!-- ── TAB 2: Info pianta ── -->
+<div id="panel-info" class="panel">
+  <div class="card">
+    <label for="plant-name">Nome della pianta</label>
+    <input type="text" id="plant-name" placeholder="es. Rosa canina" onkeydown="if(event.key==='Enter') doPlantInfo()" />
+
+    <div class="row">
+      <div>
+        <label for="lang-select">Lingua Wikipedia</label>
+        <select id="lang-select">
+          <option value="it">Italiano</option>
+          <option value="en">English</option>
+          <option value="fr">Français</option>
+          <option value="de">Deutsch</option>
+          <option value="es">Español</option>
+        </select>
+      </div>
+    </div>
+
+    <button class="submit" id="info-btn" onclick="doPlantInfo()">Cerca informazioni</button>
+
+    <div id="info-result"></div>
+  </div>
+</div>
+
+<!-- ── TAB 3: Chatbot cura piante ── -->
+<div id="panel-chat" class="panel">
+  <div class="card">
+    <label for="chat-plant-name">Nome della pianta</label>
+    <input type="text" id="chat-plant-name" placeholder="es. Rosa canina" />
+
+    <label for="chat-question">Domanda</label>
+    <textarea id="chat-question" placeholder="es. Quanta acqua devo dare in estate?"></textarea>
+
+    <div class="row">
+      <div>
+        <label for="chat-lang-select">Lingua contesto Wikipedia</label>
+        <select id="chat-lang-select">
+          <option value="it">Italiano</option>
+          <option value="en">English</option>
+          <option value="fr">Français</option>
+          <option value="de">Deutsch</option>
+          <option value="es">Español</option>
+        </select>
+      </div>
+    </div>
+
+    <button class="submit" id="chat-btn" onclick="askPlantCareChat()">Chiedi al chatbot</button>
+    <div id="chat-result"></div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dompurify@3.1.7/dist/purify.min.js"></script>
+<script>
+  function switchTab(tab) {
+    document.querySelectorAll('.tab-btn').forEach((b) => {
+      b.classList.toggle('active', b.dataset.tab === tab);
+    });
+    document.getElementById('panel-search').classList.toggle('active', tab === 'search');
+    document.getElementById('panel-info').classList.toggle('active', tab === 'info');
+    document.getElementById('panel-chat').classList.toggle('active', tab === 'chat');
+  }
+
+  function previewImage() {
+    const file = document.getElementById('img-input').files[0];
+    if (!file) return;
+    const wrap = document.getElementById('preview-wrap');
+    const img = document.getElementById('preview-img');
+    img.src = URL.createObjectURL(file);
+    wrap.style.display = 'block';
+  }
+
+  async function doSearch() {
+    const fileInput = document.getElementById('img-input');
+    const k = parseInt(document.getElementById('k-input').value) || 5;
+    const out = document.getElementById('search-result');
+    const btn = document.getElementById('search-btn');
+
+    if (!fileInput.files.length) {
+      out.innerHTML = '<div class="error-box">Seleziona un\'immagine prima di cercare.</div>';
+      return;
+    }
+
+    btn.disabled = true;
+    out.innerHTML = '<div class="spinner">⏳ Ricerca in corso…</div>';
+
+    const formData = new FormData();
+    formData.append('file', fileInput.files[0]);
+
+    try {
+      const resp = await fetch(`/search?k=${k}`, { method: 'POST', body: formData });
+      if (!resp.ok) {
+        const err = await resp.json();
+        if (resp.status === 503) {
+          let extra = '';
+          try {
+            const stResp = await fetch('/search/status');
+            if (stResp.ok) {
+              const st = await stResp.json();
+              const mods = st.modules || {};
+              const lines = Object.keys(mods).map(k => `${k}: ${mods[k]}`);
+              extra = `<br><br><b>Diagnostica backend:</b><br>${lines.map(escHtml).join('<br>')}`;
+            }
+          } catch (_) {
+            // niente: mantieni almeno il messaggio principale
+          }
+          out.innerHTML = `<div class="error-box">${escHtml(err.detail || 'Backend immagini non disponibile.')}${extra}<br><br>Serve allowlist IT per librerie native Torch/FAISS nella cartella .venv.</div>`;
+          return;
+        }
+        out.innerHTML = `<div class="error-box">${err.detail || 'Errore sconosciuto'}</div>`;
+        return;
+      }
+      const data = await resp.json();
+      renderSearchResults(data.results, out);
+    } catch (e) {
+      out.innerHTML = `<div class="error-box">Errore di rete: ${e.message}</div>`;
+    } finally {
+      btn.disabled = false;
+    }
+  }
+
+  function renderSearchResults(results, container) {
+    if (!results.length) {
+      container.innerHTML = '<div class="error-box">Nessun risultato trovato.</div>';
+      return;
+    }
+    const maxScore = Math.max(...results.map(r => r.score));
+    const items = results.map(r => {
+      const pct = maxScore > 0 ? (r.score / maxScore * 100).toFixed(1) : 0;
+      return `
+        <div class="result-item">
+          <span class="species" onclick='openPlantInfoFromResult(${JSON.stringify(r.species)})' title="Apri informazioni su questa specie">${escHtml(r.species)}</span>
+          <div class="bar-wrap"><div class="bar" style="width:${pct}%"></div></div>
+          <span class="score">${r.score.toFixed(4)}</span>
+        </div>`;
+    }).join('');
+
+    container.innerHTML = `<div class="result-list">${items}</div>`;
+  }
+
+  function openPlantInfoFromResult(species) {
+    document.getElementById('plant-name').value = species;
+    switchTab('info');
+    doPlantInfo();
+  }
+
+  function openChatFromPlant(plantName) {
+    document.getElementById('chat-plant-name').value = plantName || '';
+    if (!document.getElementById('chat-question').value.trim()) {
+      document.getElementById('chat-question').value = 'Come posso prendermi cura di questa pianta?';
+    }
+    const infoLang = document.getElementById('lang-select').value;
+    if (infoLang) {
+      document.getElementById('chat-lang-select').value = infoLang;
+    }
+    switchTab('chat');
+  }
+
+  async function doPlantInfo() {
+    const name = document.getElementById('plant-name').value.trim();
+    const lang = document.getElementById('lang-select').value;
+    const out = document.getElementById('info-result');
+    const btn = document.getElementById('info-btn');
+
+    if (!name) {
+      out.innerHTML = '<div class="error-box">Inserisci il nome di una pianta.</div>';
+      return;
+    }
+
+    btn.disabled = true;
+    out.innerHTML = '<div class="spinner">⏳ Recupero informazioni…</div>';
+
+    try {
+      const resp = await fetch(`/plant/${encodeURIComponent(name)}?lang=${lang}`);
+      if (!resp.ok) {
+        const err = await resp.json();
+        out.innerHTML = `<div class="error-box">${err.detail || 'Errore sconosciuto'}</div>`;
+        return;
+      }
+      const data = await resp.json();
+      renderPlantInfo(data, out);
+    } catch (e) {
+      out.innerHTML = `<div class="error-box">Errore di rete: ${e.message}</div>`;
+    } finally {
+      btn.disabled = false;
+    }
+  }
+
+  function renderPlantInfo(data, container) {
+    // Estrai immagini dal markdown (tag <img src="...">)
+    const imgRegex = /<img src="([^"]+)"/g;
+    const imgs = [];
+    let m;
+    while ((m = imgRegex.exec(data.markdown)) !== null) imgs.push(m[1]);
+
+    // Estrai testo puro (rimuovi tag HTML dal markdown)
+    const textOnly = (data.summary || data.markdown
+      .replace(/<[^>]+>/g, '')
+      .replace(/^#+ .+\n?/m, '')
+      .replace(/---[\s\S]*$/, '')
+      .trim());
+
+    const markdownMain = (data.markdown || '')
+      .replace(/<img[^>]*>/g, '')
+      .replace(/\n---[\s\S]*$/, '')
+      .trim();
+
+    const moreText = (data.extended_text || '').trim();
+    const moreId = `more-text-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+
+    const gallery = imgs.length
+      ? `<div class="gallery">${imgs.map(s => `<img src="${escHtml(s)}" alt="${escHtml(data.title)}" onerror="this.style.display='none'" />`).join('')}</div>`
+      : '';
+
+    container.innerHTML = `
+      <div style="margin-top:1.5rem">
+        <div class="plant-title">${escHtml(data.title)}</div>
+        ${gallery}
+        <div class="plant-text markdown-content">${renderMarkdown(markdownMain || textOnly)}</div>
+        ${moreText ? `<button type="button" class="more-btn" onclick="toggleMore('${moreId}', this)">More</button>
+        <div id="${moreId}" class="more-text markdown-content" style="display:none;">${renderMarkdown(moreText)}</div>` : ''}
+        <a class="wiki-link" href="${escHtml(data.wikipedia_url)}" target="_blank" rel="noopener">
+          📖 Leggi su Wikipedia
+        </a>
+        <button type="button" class="chat-link-btn" onclick='openChatFromPlant(${JSON.stringify(data.title)})'>💬 Apri chatbot</button>
+      </div>`;
+  }
+
+  async function askPlantCareChat() {
+    const plantName = document.getElementById('chat-plant-name').value.trim();
+    const question = document.getElementById('chat-question').value.trim();
+    const lang = document.getElementById('chat-lang-select').value;
+    const out = document.getElementById('chat-result');
+    const btn = document.getElementById('chat-btn');
+
+    if (!plantName || !question) {
+      out.innerHTML = '<div class="error-box">Inserisci nome pianta e domanda.</div>';
+      return;
+    }
+
+    btn.disabled = true;
+    out.innerHTML = '<div class="spinner">⏳ Il chatbot sta rispondendo…</div>';
+
+    try {
+      const resp = await fetch('/chat/plant-care', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ plant_name: plantName, question, lang })
+      });
+
+      const data = await resp.json();
+      if (!resp.ok) {
+        out.innerHTML = `<div class="error-box">${escHtml(data.detail || 'Errore sconosciuto')}</div>`;
+        return;
+      }
+
+      out.innerHTML = `
+        <div class="chat-response markdown-content">${renderMarkdown(data.answer || '')}</div>
+        <div class="chat-meta">Fonte: <a href="${escHtml(data.source || '#')}" target="_blank" rel="noopener">Wikipedia</a> · Modello: ${escHtml(data.model || '')}</div>
+      `;
+    } catch (e) {
+      out.innerHTML = `<div class="error-box">Errore di rete: ${escHtml(e.message)}</div>`;
+    } finally {
+      btn.disabled = false;
+    }
+  }
+
+  function toggleMore(id, btn) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const isHidden = el.style.display === 'none' || !el.style.display;
+    el.style.display = isHidden ? 'block' : 'none';
+    btn.textContent = isHidden ? 'Less' : 'More';
+  }
+
+  function escHtml(str) {
+    return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  function renderMarkdown(md) {
+    const text = String(md || '').trim();
+    if (!text) return '';
+
+    if (window.marked) {
+      const rawHtml = window.marked.parse(text, {
+        gfm: true,
+        breaks: true,
+      });
+      if (window.DOMPurify) {
+        return window.DOMPurify.sanitize(rawHtml);
+      }
+      return rawHtml;
+    }
+
+    return `<p>${escHtml(text).replace(/\n/g, '<br>')}</p>`;
+  }
+</script>
+</body>
+</html>
