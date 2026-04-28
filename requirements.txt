@@ -10,3 +10,7 @@ pydantic==1.10.17
 starlette==0.27.0
 openai
 python-dotenv
+# RAG / plant knowledge base
+chromadb>=1.5.0
+sentence-transformers>=5.0.0
+requests>=2.28.0

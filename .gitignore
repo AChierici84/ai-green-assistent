@@ -2,3 +2,6 @@
 /.env.example
 /.venv
 /__pycache__
+/data/images/
+/data/plant_rag/
+/logs/
