@@ -211,16 +211,6 @@
 
     .plant-title { font-size: 1.4rem; font-weight: 700; color: var(--green); }
 
-    .wiki-link {
-      display: inline-block;
-      margin-top: 1rem;
-      color: var(--green);
-      font-weight: 600;
-      text-decoration: none;
-    }
-
-    .wiki-link:hover { text-decoration: underline; }
-
     .chat-link-btn {
       display: inline-block;
       margin-top: 1rem;
@@ -563,9 +553,6 @@
         <div class="plant-text markdown-content">${renderMarkdown(markdownMain || textOnly)}</div>
         ${moreText ? `<button type="button" class="more-btn" onclick="toggleMore('${moreId}', this)">More</button>
         <div id="${moreId}" class="more-text markdown-content" style="display:none;">${renderMarkdown(moreText)}</div>` : ''}
-        <a class="wiki-link" href="${escHtml(data.wikipedia_url)}" target="_blank" rel="noopener">
-          📖 Leggi su Wikipedia
-        </a>
         <button type="button" class="chat-link-btn" onclick='openChatFromPlant(${JSON.stringify(data.title)})'>💬 Apri chatbot</button>
       </div>`;
   }
