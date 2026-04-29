@@ -54,6 +54,7 @@ Puoi impostare le variabili in `.env` (caricato automaticamente) o via shell.
 - `PLANCLEF_CACHE_PATH` (default: `data/planclef_cache.pt`)
 - `PLANCLEF_MODEL_NAME` (default: `ViT-B-32`)
 - `RAG_DB_PATH` (default: `data/plant_rag`)
+- `PLANTS_SQLITE_PATH` (default: `data/plants.db`)
 - `WIKI_USER_AGENT` (default: `ai-green-assistant/1.0 (contact: local-dev)`)
 - `OPENAI_API_KEY` (obbligatoria per `/plant/{name}` e `/chat/plant-care`)
 - `OPENAI_MODEL` (default: `gpt-4o-mini`)
@@ -67,8 +68,57 @@ PLANCLEF_INDEX_PATH=data/planclef.faiss
 PLANCLEF_CACHE_PATH=data/planclef_cache.pt
 PLANCLEF_MODEL_NAME=ViT-B-32
 RAG_DB_PATH=data/plant_rag
+PLANTS_SQLITE_PATH=data/plants.db
 WIKI_USER_AGENT=ai-green-assistant/1.0 (contact: local-dev)
 ```
+
+## Build database SQLite piante
+
+Per creare un database SQLite con tabella `plants`, campo `indexed` (0/1) e campi di cura estratti da RAG + OpenAI:
+
+```powershell
+python build_plants_sqlite.py
+```
+
+Opzioni utili:
+
+```powershell
+# solo prime 20 specie (test rapido)
+python build_plants_sqlite.py --limit 20
+
+# ricalcola anche specie gia arricchite
+python build_plants_sqlite.py --force-refresh
+
+# disattiva fallback OpenAI generico per campi mancanti
+python build_plants_sqlite.py --no-generic-fallback
+
+# disattiva integrazione fonti esterne (RHS, Missouri, EPPO)
+python build_plants_sqlite.py --no-external-sources
+```
+
+Campi valorizzati quando `indexed=1`:
+- `annaffiatura_gg`
+- `annaffiatura_time`
+- `luce`
+- `temperatura`
+- `umidita`
+- `altezza_media`
+- `pulizia`
+- `terriccio`
+- `concimazione`
+- `prevenzione`
+
+Se `OPENAI_API_KEY` non e impostata, lo script compila comunque `indexed` e lascia i campi descrittivi a `NULL`.
+
+Con `--generic-fallback` (attivo di default), se alcuni campi restano `NULL` dopo estrazione da RAG,
+lo script esegue una seconda chiamata OpenAI basata su conoscenza generale botanica per tentare di completarli.
+
+Con `--external-sources` (attivo di default), lo script prova anche a integrare evidenze da:
+- RHS (cura pratica)
+- Missouri Botanical Garden (cura pratica)
+- EPPO (prevenzione fitosanitaria)
+
+Infine usa OpenAI come normalizzatore finale dei dati aggregati (RAG + fonti esterne) verso il JSON strutturato del DB.
 
 ## Endpoint API
 
