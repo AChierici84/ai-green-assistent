@@ -1,6 +1,8 @@
 import json
+import logging
 import os
 import tempfile
+from logging.handlers import TimedRotatingFileHandler
 from pathlib import Path
 from typing import Any
 
@@ -26,6 +28,75 @@ OPENAI_MODEL = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
 
 index: Any = None
 rag_collection: Any = None
+
+
+logger = logging.getLogger("ai_green_assistant.api")
+
+
+def configure_logging() -> None:
+    """Configure API logging to console and daily-rotating file."""
+    if logger.handlers:
+        return
+
+    log_level_name = os.getenv("LOG_LEVEL", "INFO").upper()
+    log_level = getattr(logging, log_level_name, logging.INFO)
+
+    log_dir = Path(os.getenv("LOG_DIR", "logs"))
+    log_dir.mkdir(parents=True, exist_ok=True)
+    log_file = log_dir / os.getenv("LOG_FILE", "api.log")
+
+    fmt = logging.Formatter(
+        "%(asctime)s | %(levelname)s | %(name)s | %(message)s",
+        datefmt="%Y-%m-%d %H:%M:%S",
+    )
+
+    file_handler = TimedRotatingFileHandler(
+        filename=log_file,
+        when="midnight",
+        interval=1,
+        backupCount=14,
+        encoding="utf-8",
+        utc=False,
+    )
+    file_handler.setFormatter(fmt)
+    file_handler.setLevel(log_level)
+
+    console_handler = logging.StreamHandler()
+    console_handler.setFormatter(fmt)
+    console_handler.setLevel(log_level)
+
+    logger.setLevel(log_level)
+    logger.propagate = False
+    logger.addHandler(file_handler)
+    logger.addHandler(console_handler)
+
+
+configure_logging()
+
+
+def _truncate(value: Any, max_len: int = 500) -> str:
+    text = str(value or "")
+    if len(text) <= max_len:
+        return text
+    return text[:max_len] + "..."
+
+
+def _log_api(endpoint: str, event: str, payload: dict[str, Any]) -> None:
+    try:
+        serialized = json.dumps(payload, ensure_ascii=False, default=str)
+    except Exception:
+        serialized = str(payload)
+    logger.info("%s | %s | %s", endpoint, event, serialized)
+
+
+def _normalize_image_path(raw_path: str) -> str:
+    """Normalize image path to be relative to data/images."""
+    normalized = str(raw_path or "").replace("\\", "/").strip().lstrip("/")
+    if normalized.lower().startswith("data/"):
+        normalized = normalized[5:]
+    if normalized.lower().startswith("images/"):
+        normalized = normalized[7:]
+    return normalized
 
 
 def get_rag_collection():
@@ -150,11 +221,14 @@ def fetch_wikipedia_text_context(name: str, lang: str):
         else:
             extended_text = long_text
 
+    thumbnail = summary.get("thumbnail", {}).get("source", "")
+
     return {
         "title": title,
         "summary": extract,
         "extended_text": extended_text,
         "wikipedia_url": page_url,
+        "thumbnail": thumbnail,
     }
 
 
@@ -184,6 +258,16 @@ async def search_similar(
     file: UploadFile = File(..., description="Immagine della pianta da ricercare"),
     k: int = Query(default=5, ge=1, le=50, description="Numero di risultati da restituire"),
 ):
+    _log_api(
+        "/search",
+        "input",
+        {
+            "filename": file.filename,
+            "content_type": file.content_type,
+            "k": k,
+        },
+    )
+
     if not file.content_type or not file.content_type.startswith("image/"):
         raise HTTPException(status_code=400, detail="Il file caricato non è un'immagine valida.")
 
@@ -213,6 +297,15 @@ async def search_similar(
     )
 
 
+@app.middleware("http")
+async def log_requests(request, call_next):
+    # Keep a lightweight request/response trail for diagnostics.
+    _log_api(request.url.path, "request", {"method": request.method})
+    response = await call_next(request)
+    _log_api(request.url.path, "response", {"status_code": response.status_code})
+    return response
+
+
 @app.get("/health")
 def health():
     status = get_search_backend_status()
@@ -238,7 +331,8 @@ def ui():
 def get_image(full_path: str):
     """Serve local plant images from the RAG data directory."""
     try:
-        file_path = Path("data") / full_path
+        normalized_path = _normalize_image_path(full_path)
+        file_path = Path("data") / "images" / normalized_path
         file_path = file_path.resolve()
         
         # Security check: ensure the path is within data/images
@@ -262,6 +356,8 @@ def plant_info(
     lang: str = Query(default="it", description="Codice lingua Wikipedia (es. it, en, fr)"),
 ):
     """Recupera informazioni su una pianta dalla RAG con riassunto OpenAI."""
+    _log_api("/plant/{name}", "input", {"name": name, "lang": lang})
+
     api_key = os.getenv("OPENAI_API_KEY", "").strip()
     if not api_key:
         raise HTTPException(
@@ -270,6 +366,7 @@ def plant_info(
         )
 
     try:
+        retrieval_mode = "rag"
         # Query the RAG collection to find documents matching the plant name
         collection = get_rag_collection()
         
@@ -282,11 +379,13 @@ def plant_info(
         if not results or not results.get("documents"):
             # Plant not found in RAG, try fallback to Wikipedia
             try:
+                retrieval_mode = "wikipedia_fallback"
                 wiki_data = fetch_wikipedia_text_context(name, lang)
                 title = wiki_data["title"]
                 extract = wiki_data["summary"]
                 common_name = ""
-                image_paths = []
+                thumbnail = (wiki_data.get("thumbnail") or "").strip()
+                image_paths = [thumbnail] if thumbnail else []
                 rag_used = False
             except Exception:
                 raise HTTPException(
@@ -294,6 +393,7 @@ def plant_info(
                     detail=f"Pianta '{name}' non trovata nella RAG o in Wikipedia."
                 )
         else:
+            retrieval_mode = "rag"
             rag_used = True
             # Extract metadata from the first result
             metadatas = results.get("metadatas", [])
@@ -341,6 +441,16 @@ def plant_info(
                 extract = completion.choices[0].message.content or ""
             except Exception as e:
                 raise HTTPException(status_code=502, detail=f"Errore nella generazione del riassunto: {e}")
+
+        _log_api(
+            "/plant/{name}",
+            "retrieval",
+            {
+                "mode": retrieval_mode,
+                "rag_used": rag_used,
+                "documents_found": len(results.get("documents", [])) if results else 0,
+            },
+        )
     
     except HTTPException:
         raise
@@ -354,13 +464,14 @@ def plant_info(
     
     for img_path in image_paths[:3]:  # Show up to 3 images
         # Try as local file first
-        local_path = data_dir / img_path
+        normalized_img_path = _normalize_image_path(img_path)
+        local_path = data_dir / "images" / normalized_img_path
         if local_path.exists():
             # Convert to URL path for serving
-            images.append(f"/images/{img_path.replace(chr(92), '/')}")
+            images.append(f"/images/{normalized_img_path}")
         else:
             # Could be a URL
-            if img_path.startswith("http"):
+            if str(img_path).startswith("http"):
                 images.append(img_path)
 
     # Build markdown response
@@ -383,20 +494,41 @@ def plant_info(
     
     markdown = "\n".join(md_lines)
 
-    return JSONResponse(
-        content={
-            "title": title,
-            "common_name": common_name,
-            "markdown": markdown,
-            "summary": extract,
-            "images": images,
-            "source": "rag" if rag_used else "wikipedia",
-        }
+    payload = {
+        "title": title,
+        "common_name": common_name,
+        "markdown": markdown,
+        "summary": extract,
+        "images": images,
+        "source": "rag" if rag_used else "wikipedia",
+    }
+
+    _log_api(
+        "/plant/{name}",
+        "output",
+        {
+            "title": payload["title"],
+            "source": payload["source"],
+            "images_count": len(payload["images"]),
+            "summary_preview": _truncate(payload["summary"]),
+        },
     )
+
+    return JSONResponse(content=payload)
 
 
 @app.post("/chat/plant-care")
 def plant_care_chat(payload: PlantChatRequest):
+    _log_api(
+        "/chat/plant-care",
+        "input",
+        {
+            "plant_name": payload.plant_name,
+            "question": _truncate(payload.question, 300),
+            "lang": payload.lang,
+        },
+    )
+
     api_key = os.getenv("OPENAI_API_KEY", "").strip()
     if not api_key:
         raise HTTPException(
@@ -405,6 +537,7 @@ def plant_care_chat(payload: PlantChatRequest):
         )
 
     try:
+        retrieval_mode = "rag"
         # Try to get context from RAG first
         collection = get_rag_collection()
         results = collection.get(
@@ -426,6 +559,7 @@ def plant_care_chat(payload: PlantChatRequest):
             source_url = ""
         else:
             # Fallback to Wikipedia if not found in RAG
+            retrieval_mode = "wikipedia_fallback"
             wiki_data = fetch_wikipedia_text_context(payload.plant_name, payload.lang)
             context_text = (wiki_data.get("summary", "") + "\n\n" + wiki_data.get("extended_text", "")).strip()
             if len(context_text) > 8000:
@@ -434,6 +568,16 @@ def plant_care_chat(payload: PlantChatRequest):
             common_name = ""
             source_info = "Wikipedia"
             source_url = wiki_data.get("wikipedia_url", "")
+
+        _log_api(
+            "/chat/plant-care",
+            "retrieval",
+            {
+                "mode": retrieval_mode,
+                "source": source_info,
+                "context_length": len(context_text),
+            },
+        )
     except Exception as e:
         if isinstance(e, HTTPException):
             raise
@@ -479,17 +623,28 @@ def plant_care_chat(payload: PlantChatRequest):
     except Exception as e:
         raise HTTPException(status_code=502, detail=f"Errore chiamata OpenAI: {e}")
 
-    return JSONResponse(
-        content={
-            "plant": plant_title,
-            "common_name": common_name,
-            "question": payload.question,
-            "answer": answer.strip(),
-            "source": source_info,
-            "source_url": source_url,
-            "model": OPENAI_MODEL,
-        }
+    response_payload = {
+        "plant": plant_title,
+        "common_name": common_name,
+        "question": payload.question,
+        "answer": answer.strip(),
+        "source": source_info,
+        "source_url": source_url,
+        "model": OPENAI_MODEL,
+    }
+
+    _log_api(
+        "/chat/plant-care",
+        "output",
+        {
+            "plant": response_payload["plant"],
+            "source": response_payload["source"],
+            "model": response_payload["model"],
+            "answer_preview": _truncate(response_payload["answer"]),
+        },
     )
+
+    return JSONResponse(content=response_payload)
 
 
 if __name__ == "__main__":

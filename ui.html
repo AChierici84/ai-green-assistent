@@ -521,20 +521,48 @@
   }
 
   function renderPlantInfo(data, container) {
-    // Estrai immagini dal markdown (tag <img src="...">)
-    const imgRegex = /<img src="([^"]+)"/g;
     const imgs = [];
+    const seen = new Set();
+
+    // Priorita al campo immagini esplicito del backend
+    const apiImages = Array.isArray(data.images) ? data.images : [];
+    for (const src of apiImages) {
+      const s = String(src || '').trim();
+      if (s && !seen.has(s)) {
+        seen.add(s);
+        imgs.push(s);
+      }
+    }
+
+    // Fallback: estrai immagini da HTML o markdown dentro data.markdown
+    const markdownRaw = String(data.markdown || '');
+    const htmlImgRegex = /<img[^>]+src=["']([^"']+)["']/gi;
     let m;
-    while ((m = imgRegex.exec(data.markdown)) !== null) imgs.push(m[1]);
+    while ((m = htmlImgRegex.exec(markdownRaw)) !== null) {
+      const s = String(m[1] || '').trim();
+      if (s && !seen.has(s)) {
+        seen.add(s);
+        imgs.push(s);
+      }
+    }
+
+    const mdImgRegex = /!\[[^\]]*\]\(([^)\s]+)(?:\s+"[^"]*")?\)/g;
+    while ((m = mdImgRegex.exec(markdownRaw)) !== null) {
+      const s = String(m[1] || '').trim();
+      if (s && !seen.has(s)) {
+        seen.add(s);
+        imgs.push(s);
+      }
+    }
 
     // Estrai testo puro (rimuovi tag HTML dal markdown)
-    const textOnly = (data.summary || data.markdown
+    const textOnly = (data.summary || markdownRaw
       .replace(/<[^>]+>/g, '')
       .replace(/^#+ .+\n?/m, '')
       .replace(/---[\s\S]*$/, '')
       .trim());
 
-    const markdownMain = (data.markdown || '')
+    const markdownMain = markdownRaw
       .replace(/<img[^>]*>/g, '')
       .replace(/\n---[\s\S]*$/, '')
       .trim();
@@ -542,15 +570,23 @@
     const moreText = (data.extended_text || '').trim();
     const moreId = `more-text-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
 
-    const gallery = imgs.length
-      ? `<div class="gallery">${imgs.map(s => `<img src="${escHtml(s)}" alt="${escHtml(data.title)}" onerror="this.style.display='none'" />`).join('')}</div>`
+    const coverImage = imgs.length
+      ? `<img src="${escHtml(imgs[0])}" alt="${escHtml(data.title)}" onerror="this.style.display='none'" />`
+      : '';
+
+    const galleryImages = imgs.slice(1);
+    const gallery = galleryImages.length
+      ? `<div class="gallery">${galleryImages.map(s => `<img src="${escHtml(s)}" alt="${escHtml(data.title)}" onerror="this.style.display='none'" />`).join('')}</div>`
       : '';
 
     container.innerHTML = `
       <div style="margin-top:1.5rem">
-        <div class="plant-title">${escHtml(data.title)}</div>
-        ${gallery}
+        <div class="plant-header">
+          ${coverImage}
+          <div class="plant-title">${escHtml(data.title)}</div>
+        </div>
         <div class="plant-text markdown-content">${renderMarkdown(markdownMain || textOnly)}</div>
+        ${gallery}
         ${moreText ? `<button type="button" class="more-btn" onclick="toggleMore('${moreId}', this)">More</button>
         <div id="${moreId}" class="more-text markdown-content" style="display:none;">${renderMarkdown(moreText)}</div>` : ''}
         <button type="button" class="chat-link-btn" onclick='openChatFromPlant(${JSON.stringify(data.title)})'>💬 Apri chatbot</button>
