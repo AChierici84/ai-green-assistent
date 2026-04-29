@@ -165,6 +165,58 @@
 
     .plant-text p { line-height: 1.6; color: #333; margin-top: .5rem; }
 
+    .info-section-title {
+      margin-top: 1.4rem;
+      margin-bottom: .7rem;
+      color: #1e5f26;
+      font-size: 1rem;
+      font-weight: 700;
+    }
+
+    .profile-table-wrap {
+      margin-top: 1rem;
+      overflow-x: auto;
+      border: 1px solid #d8ead9;
+      border-radius: 10px;
+      background: #fcfffc;
+    }
+
+    .profile-table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 560px;
+    }
+
+    .profile-table th,
+    .profile-table td {
+      padding: .7rem .85rem;
+      text-align: left;
+      vertical-align: top;
+      border-bottom: 1px solid #e6f1e7;
+    }
+
+    .profile-table th {
+      width: 220px;
+      color: #245f2d;
+      background: #f4faf4;
+      font-weight: 700;
+    }
+
+    .profile-table tr:last-child th,
+    .profile-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .profile-note {
+      margin-top: 1rem;
+      padding: .8rem 1rem;
+      background: #f7fbf7;
+      border: 1px solid #d8ead9;
+      border-radius: 10px;
+      color: #35563a;
+      font-size: .92rem;
+    }
+
     .more-btn {
       margin-top: .8rem;
       padding: .45rem .9rem;
@@ -505,14 +557,29 @@
     out.innerHTML = '<div class="spinner">⏳ Recupero informazioni…</div>';
 
     try {
-      const resp = await fetch(`/plant/${encodeURIComponent(name)}?lang=${lang}`);
+      const encodedName = encodeURIComponent(name);
+      const [resp, profileResp] = await Promise.all([
+        fetch(`/plant/${encodedName}?lang=${lang}`),
+        fetch(`/plant/${encodedName}/profile`)
+      ]);
+
       if (!resp.ok) {
         const err = await resp.json();
         out.innerHTML = `<div class="error-box">${err.detail || 'Errore sconosciuto'}</div>`;
         return;
       }
+
       const data = await resp.json();
-      renderPlantInfo(data, out);
+      let profile = null;
+      if (profileResp.ok) {
+        profile = await profileResp.json();
+      } else if (profileResp.status !== 404) {
+        const err = await profileResp.json().catch(() => ({}));
+        out.innerHTML = `<div class="error-box">${escHtml(err.detail || 'Errore nel recupero profilo dal database.')}</div>`;
+        return;
+      }
+
+      renderPlantInfo(data, profile, out);
     } catch (e) {
       out.innerHTML = `<div class="error-box">Errore di rete: ${e.message}</div>`;
     } finally {
@@ -520,7 +587,7 @@
     }
   }
 
-  function renderPlantInfo(data, container) {
+  function renderPlantInfo(data, profile, container) {
     const imgs = [];
     const seen = new Set();
 
@@ -579,6 +646,8 @@
       ? `<div class="gallery">${galleryImages.map(s => `<img src="${escHtml(s)}" alt="${escHtml(data.title)}" onerror="this.style.display='none'" />`).join('')}</div>`
       : '';
 
+    const profileSection = renderPlantProfile(profile);
+
     container.innerHTML = `
       <div style="margin-top:1.5rem">
         <div class="plant-header">
@@ -586,11 +655,52 @@
           <div class="plant-title">${escHtml(data.title)}</div>
         </div>
         <div class="plant-text markdown-content">${renderMarkdown(markdownMain || textOnly)}</div>
+        ${profileSection}
         ${gallery}
         ${moreText ? `<button type="button" class="more-btn" onclick="toggleMore('${moreId}', this)">More</button>
         <div id="${moreId}" class="more-text markdown-content" style="display:none;">${renderMarkdown(moreText)}</div>` : ''}
         <button type="button" class="chat-link-btn" onclick='openChatFromPlant(${JSON.stringify(data.title)})'>💬 Apri chatbot</button>
       </div>`;
+  }
+
+  function renderPlantProfile(profile) {
+    if (!profile) {
+      return '<div class="profile-note">Nessun dato strutturato disponibile in plants.db per questa specie.</div>';
+    }
+
+    const rows = [
+      ['Specie', profile.species_name],
+      ['Presente in RAG', profile.indexed ? 'Sì' : 'No'],
+      ['Annaffiatura (giorni)', formatProfileValue(profile.annaffiatura_gg)],
+      ['Momento annaffiatura', formatProfileValue(profile.annaffiatura_time)],
+      ['Luce', formatProfileValue(profile.luce)],
+      ['Temperatura', formatProfileValue(profile.temperatura)],
+      ['Umidità', formatProfileValue(profile.umidita)],
+      ['Altezza media', formatProfileValue(profile.altezza_media)],
+      ['Pulizia', formatProfileValue(profile.pulizia)],
+      ['Terriccio', formatProfileValue(profile.terriccio)],
+      ['Concimazione', formatProfileValue(profile.concimazione)],
+      ['Prevenzione', formatProfileValue(profile.prevenzione)],
+      ['Ultimo aggiornamento', formatProfileValue(profile.updated_at)]
+    ];
+
+    return `
+      <div class="info-section-title">Scheda strutturata dal database</div>
+      <div class="profile-table-wrap">
+        <table class="profile-table">
+          <tbody>
+            ${rows.map(([label, value]) => `<tr><th>${escHtml(label)}</th><td>${escHtml(value)}</td></tr>`).join('')}
+          </tbody>
+        </table>
+      </div>`;
+  }
+
+  function formatProfileValue(value) {
+    if (value === null || value === undefined) {
+      return '—';
+    }
+    const text = String(value).trim();
+    return text || '—';
   }
 
   async function askPlantCareChat() {

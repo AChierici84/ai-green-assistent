@@ -1,7 +1,9 @@
 import json
 import logging
 import os
+import sqlite3
 import tempfile
+from datetime import datetime
 from logging.handlers import TimedRotatingFileHandler
 from pathlib import Path
 from typing import Any
@@ -25,6 +27,7 @@ WIKI_USER_AGENT = os.getenv(
     "ai-green-assistant/1.0 (contact: local-dev)",
 )
 OPENAI_MODEL = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
+PLANTS_SQLITE_PATH = os.getenv("PLANTS_SQLITE_PATH", "data/plants.db")
 
 index: Any = None
 rag_collection: Any = None
@@ -89,6 +92,19 @@ def _log_api(endpoint: str, event: str, payload: dict[str, Any]) -> None:
     logger.info("%s | %s | %s", endpoint, event, serialized)
 
 
+def _format_datetime_display(value: Any) -> Any:
+    raw_value = str(value or "").strip()
+    if not raw_value:
+        return value
+
+    try:
+        parsed = datetime.fromisoformat(raw_value.replace("Z", "+00:00"))
+    except ValueError:
+        return value
+
+    return parsed.strftime("%d/%m/%Y %H:%M:%S")
+
+
 def _normalize_image_path(raw_path: str) -> str:
     """Normalize image path to be relative to data/images."""
     normalized = str(raw_path or "").replace("\\", "/").strip().lstrip("/")
@@ -111,6 +127,52 @@ def get_rag_collection():
         except Exception as e:
             raise RuntimeError(f"Impossibile caricare il database RAG delle piante: {e}")
     return rag_collection
+
+
+PLANT_PROFILE_FIELDS = (
+    "species_name",
+    "indexed",
+    "annaffiatura_gg",
+    "annaffiatura_time",
+    "luce",
+    "temperatura",
+    "umidita",
+    "altezza_media",
+    "pulizia",
+    "terriccio",
+    "concimazione",
+    "prevenzione",
+    "updated_at",
+)
+
+
+def get_plants_db_connection() -> sqlite3.Connection:
+    db_path = Path(PLANTS_SQLITE_PATH)
+    if not db_path.exists():
+        raise HTTPException(status_code=503, detail="Database plants.db non disponibile.")
+
+    conn = sqlite3.connect(db_path)
+    conn.row_factory = sqlite3.Row
+    return conn
+
+
+def get_plant_profile_from_db(name: str) -> dict[str, Any] | None:
+    query = (
+        "SELECT species_name, indexed, annaffiatura_gg, annaffiatura_time, luce, temperatura, "
+        "umidita, altezza_media, pulizia, terriccio, concimazione, prevenzione, updated_at "
+        "FROM plants WHERE lower(species_name) = lower(?) LIMIT 1"
+    )
+
+    with get_plants_db_connection() as conn:
+        row = conn.execute(query, (name.strip(),)).fetchone()
+
+    if row is None:
+        return None
+
+    payload = {field: row[field] for field in PLANT_PROFILE_FIELDS}
+    payload["indexed"] = bool(payload["indexed"])
+    payload["updated_at"] = _format_datetime_display(payload["updated_at"])
+    return payload
 
 app = FastAPI(title="PlantCLEF Image Search API")
 
@@ -515,6 +577,33 @@ def plant_info(
     )
 
     return JSONResponse(content=payload)
+
+
+@app.get("/plant/{name}/profile")
+def plant_profile(name: str):
+    _log_api("/plant/{name}/profile", "input", {"name": name})
+
+    try:
+        profile = get_plant_profile_from_db(name)
+    except HTTPException:
+        raise
+    except sqlite3.Error as e:
+        raise HTTPException(status_code=500, detail=f"Errore accesso plants.db: {e}")
+
+    if profile is None:
+        raise HTTPException(status_code=404, detail=f"Profilo DB non trovato per '{name}'.")
+
+    _log_api(
+        "/plant/{name}/profile",
+        "output",
+        {
+            "species_name": profile["species_name"],
+            "indexed": profile["indexed"],
+            "updated_at": profile["updated_at"],
+        },
+    )
+
+    return JSONResponse(content=profile)
 
 
 @app.post("/chat/plant-care")

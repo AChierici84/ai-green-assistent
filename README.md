@@ -195,7 +195,40 @@ Esempio risposta:
 }
 ```
 
-### 5) Chatbot cura pianta
+### 5) Profilo strutturato da plants.db
+
+- Metodo: `GET`
+- Path: `/plant/{name}/profile`
+
+Restituisce i campi salvati nel database SQLite `plants.db` per la specie richiesta.
+
+Esempio:
+
+```bash
+curl "http://localhost:8000/plant/Rosa%20canina/profile"
+```
+
+Esempio risposta:
+
+```json
+{
+  "species_name": "Rosa canina",
+  "indexed": true,
+  "annaffiatura_gg": 4,
+  "annaffiatura_time": "mattino",
+  "luce": "piena luce",
+  "temperatura": "temperata",
+  "umidita": "media",
+  "altezza_media": "2-3 m",
+  "pulizia": "rimuovere foglie secche",
+  "terriccio": "ben drenato",
+  "concimazione": "primavera",
+  "prevenzione": "controllare afidi e oidio",
+  "updated_at": "2026-04-29T10:03:16.214041+00:00"
+}
+```
+
+### 6) Chatbot cura pianta
 
 - Metodo: `POST`
 - Path: `/chat/plant-care`
