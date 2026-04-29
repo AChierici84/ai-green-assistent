@@ -174,6 +174,41 @@ def get_plant_profile_from_db(name: str) -> dict[str, Any] | None:
     payload["updated_at"] = _format_datetime_display(payload["updated_at"])
     return payload
 
+
+def _build_profile_context(profile: dict[str, Any] | None) -> str:
+    if not profile:
+        return ""
+
+    labels = {
+        "species_name": "Specie",
+        "indexed": "Presente in RAG",
+        "annaffiatura_gg": "Annaffiatura ogni giorni",
+        "annaffiatura_time": "Momento annaffiatura",
+        "luce": "Luce",
+        "temperatura": "Temperatura",
+        "umidita": "Umidita",
+        "altezza_media": "Altezza media",
+        "pulizia": "Pulizia",
+        "terriccio": "Terriccio",
+        "concimazione": "Concimazione",
+        "prevenzione": "Prevenzione",
+        "updated_at": "Ultimo aggiornamento",
+    }
+
+    lines = []
+    for field in PLANT_PROFILE_FIELDS:
+        value = profile.get(field)
+        if value is None or value == "":
+            continue
+        if field == "indexed":
+            value = "si" if value else "no"
+        lines.append(f"- {labels[field]}: {value}")
+
+    if not lines:
+        return ""
+
+    return "Dati strutturati estratti da plants.db:\n" + "\n".join(lines)
+
 app = FastAPI(title="PlantCLEF Image Search API")
 
 
@@ -627,6 +662,7 @@ def plant_care_chat(payload: PlantChatRequest):
 
     try:
         retrieval_mode = "rag"
+        profile = get_plant_profile_from_db(payload.plant_name)
         # Try to get context from RAG first
         collection = get_rag_collection()
         results = collection.get(
@@ -665,6 +701,7 @@ def plant_care_chat(payload: PlantChatRequest):
                 "mode": retrieval_mode,
                 "source": source_info,
                 "context_length": len(context_text),
+                "profile_found": bool(profile),
             },
         )
     except Exception as e:
@@ -679,7 +716,10 @@ def plant_care_chat(payload: PlantChatRequest):
         user_message = f"Pianta: {plant_title}"
         if common_name:
             user_message += f" ({common_name})"
+        profile_context = _build_profile_context(profile)
         user_message += f"\nDomanda: {payload.question}\n\n"
+        if profile_context:
+            user_message += f"{profile_context}\n\n"
         user_message += f"Contesto dalla base di dati:\n{context_text}\n\n"
         user_message += (
             "Rispondi con:\n"
