@@ -36,6 +36,28 @@ export async function getPlantProfile(name) {
   return parseResponse(response);
 }
 
+export async function getSpeciesPreviews(speciesNames) {
+  if (!speciesNames?.length) {
+    return { previews: {} };
+  }
+
+  const params = new URLSearchParams();
+  speciesNames.forEach((name) => params.append("names", name));
+  const response = await fetch(buildUrl(`/species/previews?${params.toString()}`));
+  return parseResponse(response);
+}
+
+export async function getSpeciesCommonNames(speciesNames) {
+  if (!speciesNames?.length) {
+    return { common_names: {} };
+  }
+
+  const params = new URLSearchParams();
+  speciesNames.forEach((name) => params.append("names", name));
+  const response = await fetch(buildUrl(`/species/common-names?${params.toString()}`));
+  return parseResponse(response);
+}
+
 export async function askPlantCare(plantName, question) {
   const response = await fetch(buildUrl("/chat/plant-care"), {
     method: "POST",

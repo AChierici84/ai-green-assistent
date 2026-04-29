@@ -1,6 +1,7 @@
 import json
 import logging
 import os
+import re
 import sqlite3
 import tempfile
 from datetime import datetime
@@ -114,6 +115,33 @@ def _normalize_image_path(raw_path: str) -> str:
     if normalized.lower().startswith("images/"):
         normalized = normalized[7:]
     return normalized
+
+
+def _species_to_folder_name(species_name: str) -> str:
+    normalized = re.sub(r"[^a-z0-9]+", "_", str(species_name or "").lower()).strip("_")
+    return normalized
+
+
+def _get_species_preview_image_url(species_name: str) -> str:
+    folder_name = _species_to_folder_name(species_name)
+    if not folder_name:
+        return ""
+
+    image_dir = Path("data") / "images" / folder_name
+    if not image_dir.exists() or not image_dir.is_dir():
+        return ""
+
+    candidates = sorted(
+        [
+            path
+            for path in image_dir.iterdir()
+            if path.is_file() and path.suffix.lower() in {".jpg", ".jpeg", ".png", ".webp"}
+        ]
+    )
+    if not candidates:
+        return ""
+
+    return f"/images/{folder_name}/{candidates[0].name}"
 
 
 def get_rag_collection():
@@ -428,6 +456,45 @@ def health():
 @app.get("/search/status")
 def search_status():
     return get_search_backend_status()
+
+
+@app.get("/species/previews")
+def species_previews(
+    names: list[str] = Query(default=[], description="Nomi specie da risolvere per anteprima immagine"),
+):
+    if not names:
+        return JSONResponse(content={"previews": {}})
+
+    previews = {name: _get_species_preview_image_url(name) for name in names}
+    return JSONResponse(content={"previews": previews})
+
+
+@app.get("/species/common-names")
+def species_common_names(
+    names: list[str] = Query(default=[], description="Nomi specie di cui ottenere il nome comune"),
+):
+    if not names:
+        return JSONResponse(content={"common_names": {}})
+
+    try:
+        collection = get_rag_collection()
+    except Exception:
+        return JSONResponse(content={"common_names": {}})
+
+    result_map: dict[str, str] = {}
+    for name in names:
+        try:
+            res = collection.get(
+                where={"species_name": {"$eq": name}},
+                limit=1,
+            )
+            metadatas = res.get("metadatas", []) if res else []
+            meta = metadatas[0] if metadatas else {}
+            result_map[name] = meta.get("common_name", "") or ""
+        except Exception:
+            result_map[name] = ""
+
+    return JSONResponse(content={"common_names": result_map})
 
 
 @app.get("/", response_class=HTMLResponse)

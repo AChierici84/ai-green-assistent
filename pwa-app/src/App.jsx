@@ -1,10 +1,12 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import {
   askPlantCare,
   getPlantCard,
   getPlantProfile,
+  getSpeciesCommonNames,
+  getSpeciesPreviews,
   searchPlantImage,
   toAbsoluteImage
 } from "./api";
@@ -35,13 +37,47 @@ const PROFILE_ICONS = {
   prevenzione: "\u{1F6E1}\u{FE0F}"
 };
 
+const PROFILE_DESCRIPTIONS = {
+  annaffiatura_gg: "Ogni quanti giorni annaffiare la pianta.",
+  annaffiatura_time: "Il momento migliore della giornata per annaffiare.",
+  luce: "Tipo di esposizione alla luce solare consigliata.",
+  temperatura: "Intervallo di temperatura ideale per la crescita.",
+  umidita: "Livello di umidità ambientale preferito.",
+  altezza_media: "Altezza media raggiunta dalla pianta adulta.",
+  pulizia: "Frequenza e modalità di pulizia delle foglie.",
+  terriccio: "Tipo di substrato o terriccio consigliato.",
+  concimazione: "Frequenza e tipo di concimazione raccomandati.",
+  prevenzione: "Principali parassiti e malattie da prevenire."
+};
+
+function shouldAutoSelectTopResult(results) {
+  if (!results || results.length === 0) {
+    return false;
+  }
+  if (results.length === 1) {
+    return true;
+  }
+
+  const [top, second] = results;
+  const topScore = Number(top?.score ?? 0);
+  const secondScore = Number(second?.score ?? 0);
+
+  return topScore - secondScore >= 0.08;
+}
+
 export default function App() {
   const [file, setFile] = useState(null);
   const [preview, setPreview] = useState("");
+  const [isDragActive, setIsDragActive] = useState(false);
   const [imageIndex, setImageIndex] = useState(0);
+  const fileInputRef = useRef(null);
 
   const [searchResults, setSearchResults] = useState([]);
+  const [speciesPreviews, setSpeciesPreviews] = useState({});
+  const [speciesCommonNames, setSpeciesCommonNames] = useState({});
   const [selectedSpecies, setSelectedSpecies] = useState("");
+  const [showSpeciesGrid, setShowSpeciesGrid] = useState(true);
+  const [expandedProfileKey, setExpandedProfileKey] = useState("");
 
   const [plantCard, setPlantCard] = useState(null);
   const [plantProfile, setPlantProfile] = useState(null);
@@ -55,6 +91,9 @@ export default function App() {
     chat: false
   });
   const [error, setError] = useState("");
+  const [searchStepIndex, setSearchStepIndex] = useState(0);
+
+  const searchSteps = ["Leggo i dettagli della foglia", "Confronto con le specie note", "Preparo i risultati migliori"];
 
   const canAsk = selectedSpecies && question.trim().length > 2;
   const galleryImages = useMemo(() => {
@@ -65,6 +104,23 @@ export default function App() {
   }, [plantCard]);
 
   const activeImage = galleryImages.length ? galleryImages[imageIndex % galleryImages.length] : "";
+
+  useEffect(() => {
+    setExpandedProfileKey("");
+  }, [plantProfile]);
+
+  useEffect(() => {
+    if (!busy.search) {
+      setSearchStepIndex(0);
+      return;
+    }
+
+    const timer = setInterval(() => {
+      setSearchStepIndex((prev) => (prev + 1) % searchSteps.length);
+    }, 1200);
+
+    return () => clearInterval(timer);
+  }, [busy.search, searchSteps.length]);
 
   const profileEntries = useMemo(() => {
     if (!plantProfile) {
@@ -86,18 +142,22 @@ export default function App() {
         key,
         label,
         icon: PROFILE_ICONS[key] || "\u{2139}\u{FE0F}",
+        desc: PROFILE_DESCRIPTIONS[key] || "",
         value: formatProfileValue(key, plantProfile[key])
       }))
       .filter((entry) => entry.value !== null && entry.value !== "");
   }, [plantProfile]);
 
-  function onFileChange(event) {
-    const nextFile = event.target.files?.[0] || null;
+  function applySelectedFile(nextFile) {
     setFile(nextFile);
     setSelectedSpecies("");
     setSearchResults([]);
+    setSpeciesPreviews({});
+    setSpeciesCommonNames({});
+    setShowSpeciesGrid(true);
     setPlantCard(null);
     setPlantProfile(null);
+    setQuestion("");
     setChatAnswer("");
     setImageIndex(0);
     setError("");
@@ -109,6 +169,32 @@ export default function App() {
     }
   }
 
+  function onFileChange(event) {
+    const nextFile = event.target.files?.[0] || null;
+    applySelectedFile(nextFile);
+  }
+
+  function onDropFile(event) {
+    event.preventDefault();
+    setIsDragActive(false);
+    const nextFile = event.dataTransfer?.files?.[0] || null;
+    applySelectedFile(nextFile);
+  }
+
+  function onDragOver(event) {
+    event.preventDefault();
+    setIsDragActive(true);
+  }
+
+  function onDragLeave(event) {
+    event.preventDefault();
+    setIsDragActive(false);
+  }
+
+  function openFileDialog() {
+    fileInputRef.current?.click();
+  }
+
   async function handleSearch(event) {
     event.preventDefault();
     if (!file) {
@@ -117,13 +203,34 @@ export default function App() {
     }
 
     setError("");
+    setSearchResults([]);
+    setSpeciesPreviews({});
+    setSpeciesCommonNames({});
+    setSelectedSpecies("");
+    setShowSpeciesGrid(true);
+    setPlantCard(null);
+    setPlantProfile(null);
+    setChatAnswer("");
     setBusy((prev) => ({ ...prev, search: true }));
 
     try {
       const data = await searchPlantImage(file, 5);
-      setSearchResults(data.results || []);
-      if (!data.results?.length) {
+      const results = [...(data.results || [])].sort((a, b) => b.score - a.score);
+      setSearchResults(results);
+      const speciesNames = results.map((item) => item.species);
+      const [previewData, commonNameData] = await Promise.all([
+        getSpeciesPreviews(speciesNames),
+        getSpeciesCommonNames(speciesNames),
+      ]);
+      setSpeciesPreviews(previewData.previews || {});
+      setSpeciesCommonNames(commonNameData.common_names || {});
+
+      if (!results.length) {
         setError("Nessun risultato trovato. Prova con una foto piu nitida.");
+      } else if (shouldAutoSelectTopResult(results)) {
+        await selectSpecies(results[0].species);
+      } else {
+        setShowSpeciesGrid(true);
       }
     } catch (err) {
       setError(err.message);
@@ -134,6 +241,7 @@ export default function App() {
 
   async function selectSpecies(speciesName) {
     setSelectedSpecies(speciesName);
+    setShowSpeciesGrid(false);
     setPlantCard(null);
     setPlantProfile(null);
     setChatAnswer("");
@@ -192,42 +300,118 @@ export default function App() {
   return (
     <main className="page">
       <section className="hero">
-        <p className="tag">Green Assistent</p>
-        <h1>Riconosci una pianta e chiedi come curarla</h1>
-        <p>
-          Carica una foto, scegli la specie suggerita, apri la scheda descrittiva e fai domande
-          operative sulla cura quotidiana.
-        </p>
+        <div className="hero-inner">
+          <div className="hero-brand">
+            <img src="/icons/icon-512.svg" alt="Icona Green Assistent" className="hero-logo" />
+            <p className="tag">Green Assistent</p>
+          </div>
+
+          <h1>Ti aiuta a <span className="hero-highlight">riconoscere</span> e <span className="hero-highlight">curare</span> le tue piante.</h1>
+        </div>
       </section>
 
       <section className="panel">
         <form onSubmit={handleSearch} className="upload-form">
-          <label htmlFor="imageInput">Immagine pianta</label>
-          <input id="imageInput" type="file" accept="image/*" onChange={onFileChange} />
+          <input
+            ref={fileInputRef}
+            id="imageInput"
+            className="upload-input"
+            type="file"
+            accept="image/*"
+            onChange={onFileChange}
+          />
+
+          <div
+            className={`dropzone ${isDragActive ? "active" : ""} ${busy.search ? "disabled" : ""}`}
+            onClick={() => {
+              if (!busy.search) {
+                openFileDialog();
+              }
+            }}
+            onDrop={onDropFile}
+            onDragOver={onDragOver}
+            onDragLeave={onDragLeave}
+            role="button"
+            tabIndex={0}
+            onKeyDown={(event) => {
+              if (busy.search) {
+                return;
+              }
+              if (event.key === "Enter" || event.key === " ") {
+                event.preventDefault();
+                openFileDialog();
+              }
+            }}
+          >
+            <p className="dropzone-title">Carica immagine pianta</p>
+            <p className="dropzone-subtitle">
+              {file ? `Selezionata: ${file.name}` : "Trascina qui una foto oppure clicca per scegliere"}
+            </p>
+          </div>
+
           <button type="submit" disabled={busy.search}>
             {busy.search ? "Riconoscimento in corso..." : "Riconosci pianta"}
           </button>
+
+          {busy.search && (
+            <div className="upload-progress" role="status" aria-live="polite">
+              <span>{searchSteps[searchStepIndex]}</span>
+            </div>
+          )}
         </form>
-        {preview && <img className="preview" src={preview} alt="Anteprima upload" />}
+        {preview && (
+          <div className={`preview-shell ${busy.search ? "scanning" : ""}`}>
+            <img className="preview" src={preview} alt="Anteprima upload" />
+            {busy.search && (
+              <div className="scan-overlay" aria-hidden="true">
+                <span className="scan-line" />
+                <span className="scan-glow" />
+              </div>
+            )}
+          </div>
+        )}
       </section>
 
       {!!searchResults.length && (
         <section className="panel">
-          <h2>Specie trovate</h2>
-          <div className="result-grid">
-            {searchResults.map((item) => (
-              <button
-                key={item.species}
-                className={`result ${selectedSpecies === item.species ? "active" : ""}`}
-                onClick={() => selectSpecies(item.species)}
-              >
-                <strong>{item.species}</strong>
-                <div className="score-bar" aria-label={`Affinita ${(item.score * 100).toFixed(1)} percento`}>
-                  <div className="score-fill" style={{ width: `${Math.max(0, Math.min(100, item.score * 100))}%` }} />
-                </div>
-              </button>
-            ))}
-          </div>
+          {!showSpeciesGrid ? (
+            <button className="btn-secondary" onClick={() => setShowSpeciesGrid(true)}>
+              ▾ Visualizza altre specie
+            </button>
+          ) : (
+            <>
+              <div className="species-header">
+                <h2>Specie trovate</h2>
+                <button className="btn-secondary btn-small" onClick={() => setShowSpeciesGrid(false)}>
+                  ▴ Nascondi
+                </button>
+              </div>
+              <div className="result-grid">
+                {searchResults.map((item) => (
+                  <button
+                    key={item.species}
+                    className={`result ${selectedSpecies === item.species ? "active" : ""}`}
+                    onClick={() => selectSpecies(item.species)}
+                  >
+                    {!!speciesPreviews[item.species] && (
+                      <img
+                        className="result-preview"
+                        src={toAbsoluteImage(speciesPreviews[item.species])}
+                        alt={`Esempio ${item.species}`}
+                      />
+                    )}
+                    <strong>{item.species}</strong>
+                    {!!speciesCommonNames[item.species] && (
+                      <span className="result-common-name">({speciesCommonNames[item.species]})</span>
+                    )}
+                    <div className="score-bar" aria-label={`Affinita ${(item.score * 100).toFixed(1)} percento`}>
+                      <div className="score-fill" style={{ width: `${Math.max(0, Math.min(100, item.score * 100))}%` }} />
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </>
+          )}
         </section>
       )}
 
@@ -270,14 +454,28 @@ export default function App() {
               <>
                 <div className="profile-grid">
                   {profileEntries.map((entry) => (
-                    <div key={entry.key} className="profile-item">
-                      <div className="profile-item-head">
-                        <span className="profile-icon" aria-hidden="true">
-                          {entry.icon}
-                        </span>
-                        <span>{entry.label}</span>
+                    <div
+                      key={entry.key}
+                      className={`profile-item ${expandedProfileKey === entry.key ? "expanded" : ""}`}
+                      role="button"
+                      tabIndex={0}
+                      aria-expanded={expandedProfileKey === entry.key}
+                      onClick={() =>
+                        setExpandedProfileKey((prev) => (prev === entry.key ? "" : entry.key))
+                      }
+                      onKeyDown={(event) => {
+                        if (event.key === "Enter" || event.key === " ") {
+                          event.preventDefault();
+                          setExpandedProfileKey((prev) => (prev === entry.key ? "" : entry.key));
+                        }
+                      }}
+                    >
+                      <span className="profile-icon" aria-hidden="true">{entry.icon}</span>
+                      <strong className="profile-value">{String(entry.value)}</strong>
+                      <div className="profile-tooltip">
+                        <span className="profile-tooltip-label">{entry.label}</span>
+                        {entry.desc && <p>{entry.desc}</p>}
                       </div>
-                      <strong>{String(entry.value)}</strong>
                     </div>
                   ))}
                 </div>
@@ -306,7 +504,11 @@ export default function App() {
               {busy.chat ? "Sto preparando la risposta..." : "Chiedi consigli"}
             </button>
           </form>
-          {chatAnswer && <article className="answer">{chatAnswer}</article>}
+          {chatAnswer && (
+            <article className="answer">
+              <ReactMarkdown remarkPlugins={[remarkGfm]}>{chatAnswer}</ReactMarkdown>
+            </article>
+          )}
         </section>
       )}
 
