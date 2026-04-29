@@ -1,16 +1,15 @@
 # AI Green Assistant
 
 API FastAPI + UI web per:
-- cercare specie vegetali simili partendo da una foto
-- ottenere un riassunto da Wikipedia (in Markdown) con immagini
-
-Il core di ricerca usa la classe `PlentClefIndex` in `plentclef.py` con embedding OpenCLIP + indice FAISS.
+- ricerca specie vegetali simili da immagine (OpenCLIP + FAISS)
+- schede pianta con riassunto AI basato su knowledge base RAG
+- chatbot di cura botanica con contesto da RAG (fallback Wikipedia)
 
 ## Requisiti
 
 - Python 3.10+
 - Ambiente virtuale consigliato (`.venv`)
-- File dati presenti in `data/`:
+- Dati PlantCLEF in `data/`:
   - `planclef.faiss`
   - `planclef_cache.pt`
 
@@ -31,20 +30,35 @@ python -m uvicorn api:app --reload
 
 Server locale:
 - API base: `http://localhost:8000`
-- UI test: `http://localhost:8000/`
-- Swagger docs: `http://localhost:8000/docs`
+- UI: `http://localhost:8000/`
+- Swagger: `http://localhost:8000/docs`
+
+## Build della knowledge base RAG (opzionale ma consigliato)
+
+Per costruire/aggiornare il database piante locale (ChromaDB + immagini):
+
+```powershell
+python build_plant_rag.py
+```
+
+Output principali:
+- `data/plant_rag/` (database vettoriale persistente)
+- `data/images/<specie>/` (immagini scaricate)
+- `data/rag_progress.json` (resume del processo)
 
 ## Configurazione (variabili ambiente)
 
-Puoi sovrascrivere i percorsi/model senza modificare il codice:
+Puoi impostare le variabili in `.env` (caricato automaticamente) o via shell.
 
 - `PLANCLEF_INDEX_PATH` (default: `data/planclef.faiss`)
 - `PLANCLEF_CACHE_PATH` (default: `data/planclef_cache.pt`)
 - `PLANCLEF_MODEL_NAME` (default: `ViT-B-32`)
-- `OPENAI_API_KEY` (obbligatoria per endpoint chat)
+- `RAG_DB_PATH` (default: `data/plant_rag`)
+- `WIKI_USER_AGENT` (default: `ai-green-assistant/1.0 (contact: local-dev)`)
+- `OPENAI_API_KEY` (obbligatoria per `/plant/{name}` e `/chat/plant-care`)
 - `OPENAI_MODEL` (default: `gpt-4o-mini`)
 
-Puoi impostarle anche in un file `.env` nella root del progetto (caricato automaticamente all'avvio):
+Esempio `.env`:
 
 ```env
 OPENAI_API_KEY=sk-...
@@ -52,15 +66,8 @@ OPENAI_MODEL=gpt-4o-mini
 PLANCLEF_INDEX_PATH=data/planclef.faiss
 PLANCLEF_CACHE_PATH=data/planclef_cache.pt
 PLANCLEF_MODEL_NAME=ViT-B-32
-```
-
-Esempio PowerShell:
-
-```powershell
-$env:PLANCLEF_MODEL_NAME = "ViT-B-32"
-$env:PLANCLEF_INDEX_PATH = "data/planclef.faiss"
-$env:PLANCLEF_CACHE_PATH = "data/planclef_cache.pt"
-python -m uvicorn api:app --reload
+RAG_DB_PATH=data/plant_rag
+WIKI_USER_AGENT=ai-green-assistant/1.0 (contact: local-dev)
 ```
 
 ## Endpoint API
@@ -70,31 +77,38 @@ python -m uvicorn api:app --reload
 - Metodo: `GET`
 - Path: `/health`
 
-Risposta esempio:
+Esempio risposta:
 
 ```json
 {
   "status": "ok",
-  "model": "ViT-B-32"
+  "model": "ViT-B-32",
+  "search_backend_ready": true
 }
 ```
 
-### 2) Ricerca immagini simili
+### 2) Stato backend ricerca immagine
+
+- Metodo: `GET`
+- Path: `/search/status`
+
+Restituisce diagnostica modulo/file (`torch`, `faiss`, `open_clip`, presenza index/cache).
+
+### 3) Ricerca immagini simili
 
 - Metodo: `POST`
 - Path: `/search`
-- Parametri query:
-  - `k` (opzionale, default `5`, min `1`, max `50`)
-- Body: `multipart/form-data` con campo `file` (immagine)
+- Query:
+  - `k` (default `5`, min `1`, max `50`)
+- Body: `multipart/form-data` con `file=<immagine>`
 
-Esempio con curl:
+Esempio:
 
 ```bash
-curl -X POST "http://localhost:8000/search?k=5" \
-  -F "file=@foto_pianta.jpg"
+curl -X POST "http://localhost:8000/search?k=5" -F "file=@foto_pianta.jpg"
 ```
 
-Risposta esempio:
+Esempio risposta:
 
 ```json
 {
@@ -105,12 +119,12 @@ Risposta esempio:
 }
 ```
 
-### 3) Info pianta da Wikipedia
+### 4) Scheda pianta (RAG + OpenAI, fallback Wikipedia)
 
 - Metodo: `GET`
 - Path: `/plant/{name}`
-- Parametri query:
-  - `lang` (opzionale, default `it`; es: `it`, `en`, `fr`)
+- Query:
+  - `lang` (default `it`, usata nel fallback Wikipedia)
 
 Esempio:
 
@@ -118,39 +132,81 @@ Esempio:
 curl "http://localhost:8000/plant/Rosa%20canina?lang=it"
 ```
 
-Risposta esempio:
+Esempio risposta:
 
 ```json
 {
   "title": "Rosa canina",
-  "markdown": "# Rosa canina\n\n<img src=\"...\" .../>\n...",
-  "wikipedia_url": "https://it.wikipedia.org/wiki/Rosa_canina"
+  "common_name": "Rosa canina",
+  "markdown": "# Rosa canina\n...",
+  "summary": "...",
+  "images": ["/images/images/rosa_canina/xxx.jpg"],
+  "source": "rag"
 }
 ```
 
-## UI di test
+### 5) Chatbot cura pianta
 
-La UI e servita da `GET /` e permette:
-- tab Ricerca per immagine: upload + `k` + visualizzazione risultati
-- tab Info pianta: ricerca nome + lingua Wikipedia + immagini + link fonte
+- Metodo: `POST`
+- Path: `/chat/plant-care`
+- Body JSON:
 
-## Note utili
+```json
+{
+  "plant_name": "Rosa canina",
+  "question": "Ogni quanto devo annaffiarla in primavera?",
+  "lang": "it"
+}
+```
 
-- Al primo avvio il caricamento modello puo richiedere tempo.
-- Se usi policy aziendali che bloccano `pip.exe`, usa sempre `python -m pip ...`.
-- L endpoint `/plant/{name}` dipende da Wikipedia: errori rete/rate limit possono causare risposte 4xx/5xx.
-- Se Windows App Control blocca DLL/PYD native (es. `torch`/`faiss`), l endpoint `/search` risponde con errore 503 finche le librerie non vengono consentite da policy.
+Esempio risposta:
 
-## Struttura progetto
+```json
+{
+  "plant": "Rosa canina",
+  "common_name": "",
+  "question": "Ogni quanto devo annaffiarla in primavera?",
+  "answer": "...",
+  "source": "RAG",
+  "source_url": "",
+  "model": "gpt-4o-mini"
+}
+```
+
+### 6) Servizio immagini locali
+
+- Metodo: `GET`
+- Path: `/images/{full_path}`
+
+Serve le immagini presenti sotto `data/images`.
+
+## UI
+
+La UI servita da `/` include tre tab:
+- Ricerca per immagine
+- Info su una pianta
+- Chatbot cura
+
+## Note operative
+
+- Al primo avvio il caricamento del modello puo richiedere tempo.
+- Se policy aziendali bloccano `pip.exe`, usa `python -m pip ...`.
+- Se Windows App Control blocca librerie native (`torch`, `faiss`), `/search` puo rispondere `503`.
+- Gli endpoint che usano OpenAI richiedono `OPENAI_API_KEY` valida.
+
+## Struttura progetto (sintesi)
 
 ```text
 ai-green-assistent/
   api.py
+  build_plant_rag.py
   plentclef.py
   ui.html
   requirements.txt
+  unique_species_labels.csv
   data/
     planclef.faiss
     planclef_cache.pt
-  Riconoscimento_specie.ipynb
+    plant_rag/
+    images/
 ```
