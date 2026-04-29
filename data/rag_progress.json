@@ -1858,5 +1858,5957 @@
     "images": 5,
     "lang": "en",
     "common_name": "Cantabrican morning glory or dwarf morning glory"
+  },
+  "Convolvulus sepium": {
+    "species": "Convolvulus sepium",
+    "status": "ok",
+    "chunks": 2,
+    "images": 3,
+    "lang": "it",
+    "common_name": "vilucchio bianco"
+  },
+  "Convolvulus soldanella": {
+    "species": "Convolvulus soldanella",
+    "status": "ok",
+    "chunks": 2,
+    "images": 2,
+    "lang": "en",
+    "common_name": "Calystegia soldanella"
+  },
+  "Coriaria myrtifolia": {
+    "species": "Coriaria myrtifolia",
+    "status": "ok",
+    "chunks": 6,
+    "images": 3,
+    "lang": "en",
+    "common_name": ""
+  },
+  "Cornus mas": {
+    "species": "Cornus mas",
+    "status": "ok",
+    "chunks": 7,
+    "images": 5,
+    "lang": "it",
+    "common_name": "corniolo"
+  },
+  "Cornus sanguinea": {
+    "species": "Cornus sanguinea",
+    "status": "ok",
+    "chunks": 2,
+    "images": 5,
+    "lang": "it",
+    "common_name": "sanguinella o corniello sanguinello"
+  },
+  "Coronilla glauca": {
+    "species": "Coronilla glauca",
+    "status": "ok",
+    "chunks": 1,
+    "images": 2,
+    "lang": "en",
+    "common_name": ""
+  },
+  "Coronilla juncea": {
+    "species": "Coronilla juncea",
+    "status": "not_found"
+  },
+  "Coronilla valentina": {
+    "species": "Coronilla valentina",
+    "status": "ok",
+    "chunks": 1,
+    "images": 2,
+    "lang": "en",
+    "common_name": ""
+  },
+  "Coronilla varia": {
+    "species": "Coronilla varia",
+    "status": "ok",
+    "chunks": 1,
+    "images": 2,
+    "lang": "it",
+    "common_name": ""
+  },
+  "Corydalis solida": {
+    "species": "Corydalis solida",
+    "status": "ok",
+    "chunks": 2,
+    "images": 3,
+    "lang": "en",
+    "common_name": ""
+  },
+  "Corylus avellana": {
+    "species": "Corylus avellana",
+    "status": "ok",
+    "chunks": 6,
+    "images": 5,
+    "lang": "it",
+    "common_name": "nocciòlo"
+  },
+  "Cotinus coggygria": {
+    "species": "Cotinus coggygria",
+    "status": "ok",
+    "chunks": 2,
+    "images": 1,
+    "lang": "it",
+    "common_name": ""
+  },
+  "Crataegus azarolus": {
+    "species": "Crataegus azarolus",
+    "status": "ok",
+    "chunks": 5,
+    "images": 5,
+    "lang": "it",
+    "common_name": "azzeruolo"
+  },
+  "Crataegus germanica": {
+    "species": "Crataegus germanica",
+    "status": "ok",
+    "chunks": 10,
+    "images": 3,
+    "lang": "it",
+    "common_name": "nespolo europeo"
+  },
+  "Crataegus laevigata": {
+    "species": "Crataegus laevigata",
+    "status": "ok",
+    "chunks": 5,
+    "images": 2,
+    "lang": "en",
+    "common_name": ""
+  },
+  "Crataegus monogyna": {
+    "species": "Crataegus monogyna",
+    "status": "ok",
+    "chunks": 6,
+    "images": 5,
+    "lang": "it",
+    "common_name": "biancospino"
+  },
+  "Crepis bursifolia": {
+    "species": "Crepis bursifolia",
+    "status": "ok",
+    "chunks": 1,
+    "images": 2,
+    "lang": "en",
+    "common_name": "Italian hawksbeard"
+  },
+  "Crepis capillaris": {
+    "species": "Crepis capillaris",
+    "status": "ok",
+    "chunks": 13,
+    "images": 5,
+    "lang": "it",
+    "common_name": "radicchiella capillare"
+  },
+  "Crepis foetida": {
+    "species": "Crepis foetida",
+    "status": "ok",
+    "chunks": 17,
+    "images": 5,
+    "lang": "it",
+    "common_name": "radicchiella selvatica"
+  },
+  "Crepis sancta": {
+    "species": "Crepis sancta",
+    "status": "ok",
+    "chunks": 13,
+    "images": 5,
+    "lang": "it",
+    "common_name": "radicchiella di Terrasanta"
+  },
+  "Crepis setosa": {
+    "species": "Crepis setosa",
+    "status": "ok",
+    "chunks": 15,
+    "images": 5,
+    "lang": "it",
+    "common_name": "radicchiella cotonosa"
+  },
+  "Crithmum maritimum": {
+    "species": "Crithmum maritimum",
+    "status": "ok",
+    "chunks": 5,
+    "images": 5,
+    "lang": "it",
+    "common_name": "finocchio marino"
+  },
+  "Crocus nudiflorus": {
+    "species": "Crocus nudiflorus",
+    "status": "ok",
+    "chunks": 2,
+    "images": 2,
+    "lang": "en",
+    "common_name": ""
+  },
+  "Cruciata laevipes": {
+    "species": "Cruciata laevipes",
+    "status": "ok",
+    "chunks": 2,
+    "images": 2,
+    "lang": "en",
+    "common_name": "crosswort"
+  },
+  "Cucumis sativus": {
+    "species": "Cucumis sativus",
+    "status": "ok",
+    "chunks": 7,
+    "images": 5,
+    "lang": "it",
+    "common_name": "cetriolo"
+  },
+  "Cupressus sempervirens": {
+    "species": "Cupressus sempervirens",
+    "status": "ok",
+    "chunks": 4,
+    "images": 1,
+    "lang": "it",
+    "common_name": "cipresso comune o cipresso mediterraneo"
+  },
+  "Cyanus montanus": {
+    "species": "Cyanus montanus",
+    "status": "ok",
+    "chunks": 13,
+    "images": 5,
+    "lang": "it",
+    "common_name": "fiordaliso montano"
+  },
+  "Cyanus segetum": {
+    "species": "Cyanus segetum",
+    "status": "ok",
+    "chunks": 14,
+    "images": 5,
+    "lang": "it",
+    "common_name": "fiordaliso"
+  },
+  "Cyclamen hederifolium": {
+    "species": "Cyclamen hederifolium",
+    "status": "ok",
+    "chunks": 2,
+    "images": 2,
+    "lang": "it",
+    "common_name": ""
+  },
+  "Cydonia oblonga": {
+    "species": "Cydonia oblonga",
+    "status": "ok",
+    "chunks": 8,
+    "images": 3,
+    "lang": "it",
+    "common_name": "cotogno"
+  },
+  "Cymbalaria muralis": {
+    "species": "Cymbalaria muralis",
+    "status": "ok",
+    "chunks": 12,
+    "images": 5,
+    "lang": "it",
+    "common_name": "ciombolino comune"
+  },
+  "Cynoglossum creticum": {
+    "species": "Cynoglossum creticum",
+    "status": "ok",
+    "chunks": 1,
+    "images": 2,
+    "lang": "en",
+    "common_name": ""
+  },
+  "Cypripedium calceolus": {
+    "species": "Cypripedium calceolus",
+    "status": "ok",
+    "chunks": 3,
+    "images": 3,
+    "lang": "it",
+    "common_name": "scarpetta di Venere"
+  },
+  "Cytisus lanigerus": {
+    "species": "Cytisus lanigerus",
+    "status": "not_found"
+  },
+  "Cytisus oromediterraneus": {
+    "species": "Cytisus oromediterraneus",
+    "status": "ok",
+    "chunks": 3,
+    "images": 4,
+    "lang": "it",
+    "common_name": ""
+  },
+  "Cytisus scoparius": {
+    "species": "Cytisus scoparius",
+    "status": "ok",
+    "chunks": 10,
+    "images": 5,
+    "lang": "it",
+    "common_name": "ginestra dei carbonai"
+  },
+  "Dactylis glomerata": {
+    "species": "Dactylis glomerata",
+    "status": "ok",
+    "chunks": 2,
+    "images": 1,
+    "lang": "it",
+    "common_name": "dattile"
+  },
+  "Dactylorhiza fuchsii": {
+    "species": "Dactylorhiza fuchsii",
+    "status": "ok",
+    "chunks": 14,
+    "images": 5,
+    "lang": "it",
+    "common_name": ""
+  },
+  "Dactylorhiza incarnata": {
+    "species": "Dactylorhiza incarnata",
+    "status": "ok",
+    "chunks": 17,
+    "images": 5,
+    "lang": "it",
+    "common_name": "orchide incarnata"
+  },
+  "Dactylorhiza maculata": {
+    "species": "Dactylorhiza maculata",
+    "status": "ok",
+    "chunks": 17,
+    "images": 5,
+    "lang": "it",
+    "common_name": "concordia"
+  },
+  "Dactylorhiza majalis": {
+    "species": "Dactylorhiza majalis",
+    "status": "ok",
+    "chunks": 15,
+    "images": 5,
+    "lang": "it",
+    "common_name": "orchidea a foglie larghe"
+  },
+  "Dactylorhiza sambucina": {
+    "species": "Dactylorhiza sambucina",
+    "status": "ok",
+    "chunks": 12,
+    "images": 5,
+    "lang": "it",
+    "common_name": "orchide sambucina"
+  },
+  "Daphne cneorum": {
+    "species": "Daphne cneorum",
+    "status": "ok",
+    "chunks": 2,
+    "images": 2,
+    "lang": "it",
+    "common_name": "cneoro"
+  },
+  "Daphne gnidium": {
+    "species": "Daphne gnidium",
+    "status": "ok",
+    "chunks": 2,
+    "images": 2,
+    "lang": "it",
+    "common_name": "gnidio o erba corsa"
+  },
+  "Daphne laureola": {
+    "species": "Daphne laureola",
+    "status": "ok",
+    "chunks": 2,
+    "images": 1,
+    "lang": "it",
+    "common_name": ""
+  },
+  "Daphne mezereum": {
+    "species": "Daphne mezereum",
+    "status": "ok",
+    "chunks": 11,
+    "images": 5,
+    "lang": "it",
+    "common_name": "mezereo"
+  },
+  "Datura stramonium": {
+    "species": "Datura stramonium",
+    "status": "ok",
+    "chunks": 6,
+    "images": 5,
+    "lang": "it",
+    "common_name": "stramonio comune"
+  },
+  "Daucus carota": {
+    "species": "Daucus carota",
+    "status": "ok",
+    "chunks": 11,
+    "images": 4,
+    "lang": "it",
+    "common_name": "carota"
+  },
+  "Dianthus armeria": {
+    "species": "Dianthus armeria",
+    "status": "ok",
+    "chunks": 4,
+    "images": 0,
+    "lang": "en",
+    "common_name": "Dianthus armeria, the Deptford pink or grass pink, is a species of Dianthus"
+  },
+  "Dianthus carthusianorum": {
+    "species": "Dianthus carthusianorum",
+    "status": "ok",
+    "chunks": 2,
+    "images": 0,
+    "lang": "it",
+    "common_name": "garofanino dei Certosini"
+  },
+  "Dianthus gallicus": {
+    "species": "Dianthus gallicus",
+    "status": "ok",
+    "chunks": 1,
+    "images": 3,
+    "lang": "en",
+    "common_name": "Dianthus hyssopifolius, the fringed pink"
+  },
+  "Dianthus hyssopifolius": {
+    "species": "Dianthus hyssopifolius",
+    "status": "ok",
+    "chunks": 1,
+    "images": 3,
+    "lang": "en",
+    "common_name": "Dianthus hyssopifolius, the fringed pink"
+  },
+  "Dicentra spectabilis": {
+    "species": "Dicentra spectabilis",
+    "status": "ok",
+    "chunks": 17,
+    "images": 5,
+    "lang": "en",
+    "common_name": "bleeding heart or Asian bleeding heart"
+  },
+  "Digitalis grandiflora": {
+    "species": "Digitalis grandiflora",
+    "status": "ok",
+    "chunks": 13,
+    "images": 5,
+    "lang": "it",
+    "common_name": "digitale gialla grande"
+  },
+  "Digitalis lutea": {
+    "species": "Digitalis lutea",
+    "status": "ok",
+    "chunks": 13,
+    "images": 5,
+    "lang": "it",
+    "common_name": "digitale gialla piccola"
+  },
+  "Digitalis purpurea": {
+    "species": "Digitalis purpurea",
+    "status": "ok",
+    "chunks": 15,
+    "images": 5,
+    "lang": "it",
+    "common_name": "digitale rossa"
+  },
+  "Dioscorea communis": {
+    "species": "Dioscorea communis",
+    "status": "ok",
+    "chunks": 4,
+    "images": 0,
+    "lang": "it",
+    "common_name": "tàmaro"
+  },
+  "Diospyros kaki": {
+    "species": "Diospyros kaki",
+    "status": "ok",
+    "chunks": 15,
+    "images": 0,
+    "lang": "it",
+    "common_name": "cachi o kaki"
+  },
+  "Dipcadi serotinum": {
+    "species": "Dipcadi serotinum",
+    "status": "not_found"
+  },
+  "Diphasiastrum tristachyum": {
+    "species": "Diphasiastrum tristachyum",
+    "status": "ok",
+    "chunks": 5,
+    "images": 3,
+    "lang": "en",
+    "common_name": "blue clubmoss"
+  },
+  "Diplotaxis erucoides": {
+    "species": "Diplotaxis erucoides",
+    "status": "ok",
+    "chunks": 2,
+    "images": 4,
+    "lang": "it",
+    "common_name": "ruchetta violacea  o marasciuolo o marasciulo"
+  },
+  "Diplotaxis tenuifolia": {
+    "species": "Diplotaxis tenuifolia",
+    "status": "ok",
+    "chunks": 1,
+    "images": 2,
+    "lang": "it",
+    "common_name": "ruchetta selvatica o rughetta selvatica"
+  },
+  "Dipsacus fullonum": {
+    "species": "Dipsacus fullonum",
+    "status": "ok",
+    "chunks": 2,
+    "images": 2,
+    "lang": "it",
+    "common_name": "scardaccione selvatico o cardo dei lanaioli"
+  },
+  "Dittrichia viscosa": {
+    "species": "Dittrichia viscosa",
+    "status": "ok",
+    "chunks": 16,
+    "images": 0,
+    "lang": "it",
+    "common_name": "Inula vischiosa"
+  },
+  "Doronicum grandiflorum": {
+    "species": "Doronicum grandiflorum",
+    "status": "ok",
+    "chunks": 12,
+    "images": 1,
+    "lang": "it",
+    "common_name": "doronico dei macereti"
+  },
+  "Dorycnium hirsutum": {
+    "species": "Dorycnium hirsutum",
+    "status": "ok",
+    "chunks": 2,
+    "images": 0,
+    "lang": "it",
+    "common_name": "trifoglino irsuto"
+  },
+  "Dorycnium pentaphyllum": {
+    "species": "Dorycnium pentaphyllum",
+    "status": "ok",
+    "chunks": 2,
+    "images": 1,
+    "lang": "en",
+    "common_name": ""
+  },
+  "Draba verna": {
+    "species": "Draba verna",
+    "status": "ok",
+    "chunks": 9,
+    "images": 2,
+    "lang": "en",
+    "common_name": ""
+  },
+  "Dracunculus vulgaris": {
+    "species": "Dracunculus vulgaris",
+    "status": "ok",
+    "chunks": 4,
+    "images": 0,
+    "lang": "it",
+    "common_name": "dragontea o erba serpentaria"
+  },
+  "Drosera rotundifolia": {
+    "species": "Drosera rotundifolia",
+    "status": "ok",
+    "chunks": 5,
+    "images": 0,
+    "lang": "it",
+    "common_name": "rosòlida"
+  },
+  "Dryas octopetala": {
+    "species": "Dryas octopetala",
+    "status": "ok",
+    "chunks": 9,
+    "images": 2,
+    "lang": "it",
+    "common_name": "camedrio alpino"
+  },
+  "Dryopteris filix-mas": {
+    "species": "Dryopteris filix-mas",
+    "status": "ok",
+    "chunks": 3,
+    "images": 0,
+    "lang": "it",
+    "common_name": "felce maschio"
+  },
+  "Ecballium elaterium": {
+    "species": "Ecballium elaterium",
+    "status": "ok",
+    "chunks": 2,
+    "images": 1,
+    "lang": "it",
+    "common_name": "cocomero asinino"
+  },
+  "Echinophora spinosa": {
+    "species": "Echinophora spinosa",
+    "status": "ok",
+    "chunks": 4,
+    "images": 5,
+    "lang": "it",
+    "common_name": "finocchio litorale spinoso"
+  },
+  "Echinops ritro": {
+    "species": "Echinops ritro",
+    "status": "ok",
+    "chunks": 13,
+    "images": 5,
+    "lang": "it",
+    "common_name": "cardo-pallottola coccodrillo"
+  },
+  "Echium vulgare": {
+    "species": "Echium vulgare",
+    "status": "ok",
+    "chunks": 3,
+    "images": 3,
+    "lang": "it",
+    "common_name": "viperina azzurra"
+  },
+  "Elaeagnus angustifolia": {
+    "species": "Elaeagnus angustifolia",
+    "status": "ok",
+    "chunks": 2,
+    "images": 2,
+    "lang": "it",
+    "common_name": "olivo di Boemia"
+  },
+  "Ephedra distachya": {
+    "species": "Ephedra distachya",
+    "status": "ok",
+    "chunks": 7,
+    "images": 5,
+    "lang": "it",
+    "common_name": ""
+  },
+  "Epilobium angustifolium": {
+    "species": "Epilobium angustifolium",
+    "status": "ok",
+    "chunks": 4,
+    "images": 3,
+    "lang": "it",
+    "common_name": ""
+  },
+  "Epilobium dodonaei": {
+    "species": "Epilobium dodonaei",
+    "status": "ok",
+    "chunks": 1,
+    "images": 4,
+    "lang": "en",
+    "common_name": ""
+  },
+  "Epilobium hirsutum": {
+    "species": "Epilobium hirsutum",
+    "status": "ok",
+    "chunks": 2,
+    "images": 2,
+    "lang": "it",
+    "common_name": ""
+  },
+  "Epilobium tetragonum": {
+    "species": "Epilobium tetragonum",
+    "status": "ok",
+    "chunks": 2,
+    "images": 5,
+    "lang": "en",
+    "common_name": "the square stalked willow herb"
+  },
+  "Epipactis atrorubens": {
+    "species": "Epipactis atrorubens",
+    "status": "ok",
+    "chunks": 11,
+    "images": 5,
+    "lang": "it",
+    "common_name": "elleborina violacea"
+  },
+  "Epipactis helleborine": {
+    "species": "Epipactis helleborine",
+    "status": "ok",
+    "chunks": 15,
+    "images": 4,
+    "lang": "it",
+    "common_name": "elleborina comune"
+  },
+  "Epipactis palustris": {
+    "species": "Epipactis palustris",
+    "status": "ok",
+    "chunks": 11,
+    "images": 0,
+    "lang": "it",
+    "common_name": "elleborina palustre"
+  },
+  "Equisetum telmateia": {
+    "species": "Equisetum telmateia",
+    "status": "ok",
+    "chunks": 15,
+    "images": 5,
+    "lang": "it",
+    "common_name": "equiseto massimo"
+  },
+  "Eranthis hyemalis": {
+    "species": "Eranthis hyemalis",
+    "status": "ok",
+    "chunks": 11,
+    "images": 2,
+    "lang": "it",
+    "common_name": ""
+  },
+  "Erica arborea": {
+    "species": "Erica arborea",
+    "status": "ok",
+    "chunks": 3,
+    "images": 0,
+    "lang": "it",
+    "common_name": ""
+  },
+  "Erica cinerea": {
+    "species": "Erica cinerea",
+    "status": "ok",
+    "chunks": 3,
+    "images": 0,
+    "lang": "en",
+    "common_name": ""
+  },
+  "Erica tetralix": {
+    "species": "Erica tetralix",
+    "status": "ok",
+    "chunks": 3,
+    "images": 1,
+    "lang": "en",
+    "common_name": ""
+  },
+  "Erica vagans": {
+    "species": "Erica vagans",
+    "status": "ok",
+    "chunks": 3,
+    "images": 4,
+    "lang": "en",
+    "common_name": ""
+  },
+  "Erigeron annuus": {
+    "species": "Erigeron annuus",
+    "status": "ok",
+    "chunks": 18,
+    "images": 4,
+    "lang": "it",
+    "common_name": ""
+  },
+  "Erigeron canadensis": {
+    "species": "Erigeron canadensis",
+    "status": "ok",
+    "chunks": 18,
+    "images": 0,
+    "lang": "it",
+    "common_name": ""
+  },
+  "Erigeron karvinskianus": {
+    "species": "Erigeron karvinskianus",
+    "status": "ok",
+    "chunks": 14,
+    "images": 4,
+    "lang": "it",
+    "common_name": "cespica karvinskiana"
+  },
+  "Erigeron sumatrensis": {
+    "species": "Erigeron sumatrensis",
+    "status": "ok",
+    "chunks": 12,
+    "images": 4,
+    "lang": "it",
+    "common_name": ""
+  },
+  "Erinus alpinus": {
+    "species": "Erinus alpinus",
+    "status": "ok",
+    "chunks": 8,
+    "images": 0,
+    "lang": "it",
+    "common_name": "Erinus alpino"
+  },
+  "Eriobotrya japonica": {
+    "species": "Eriobotrya japonica",
+    "status": "ok",
+    "chunks": 9,
+    "images": 0,
+    "lang": "it",
+    "common_name": "nespolo del Giappone"
+  },
+  "Eriophorum angustifolium": {
+    "species": "Eriophorum angustifolium",
+    "status": "ok",
+    "chunks": 12,
+    "images": 2,
+    "lang": "it",
+    "common_name": ""
+  },
+  "Erodium ciconium": {
+    "species": "Erodium ciconium",
+    "status": "ok",
+    "chunks": 1,
+    "images": 0,
+    "lang": "en",
+    "common_name": ""
+  },
+  "Erodium cicutarium": {
+    "species": "Erodium cicutarium",
+    "status": "ok",
+    "chunks": 3,
+    "images": 0,
+    "lang": "it",
+    "common_name": ""
+  },
+  "Erodium foetidum": {
+    "species": "Erodium foetidum",
+    "status": "not_found"
+  },
+  "Erodium malacoides": {
+    "species": "Erodium malacoides",
+    "status": "ok",
+    "chunks": 2,
+    "images": 3,
+    "lang": "en",
+    "common_name": ""
+  },
+  "Eryngium bourgatii": {
+    "species": "Eryngium bourgatii",
+    "status": "ok",
+    "chunks": 2,
+    "images": 1,
+    "lang": "en",
+    "common_name": "Eryngium bourgatii, the Mediterranean sea holly"
+  },
+  "Eryngium campestre": {
+    "species": "Eryngium campestre",
+    "status": "ok",
+    "chunks": 1,
+    "images": 3,
+    "lang": "it",
+    "common_name": "calcatreppola campestre"
+  },
+  "Eryngium maritimum": {
+    "species": "Eryngium maritimum",
+    "status": "ok",
+    "chunks": 2,
+    "images": 4,
+    "lang": "it",
+    "common_name": "calcatrèppola marina, calcatreppola marittima o eringio marino"
+  },
+  "Eryngium spinalba": {
+    "species": "Eryngium spinalba",
+    "status": "ok",
+    "chunks": 1,
+    "images": 2,
+    "lang": "it",
+    "common_name": "calacatreppola spina-argentata"
+  },
+  "Erysimum cheiri": {
+    "species": "Erysimum cheiri",
+    "status": "ok",
+    "chunks": 5,
+    "images": 3,
+    "lang": "en",
+    "common_name": ""
+  },
+  "Erythronium dens-canis": {
+    "species": "Erythronium dens-canis",
+    "status": "ok",
+    "chunks": 8,
+    "images": 5,
+    "lang": "it",
+    "common_name": "dente di cane"
+  },
+  "Eschscholzia californica": {
+    "species": "Eschscholzia californica",
+    "status": "ok",
+    "chunks": 15,
+    "images": 5,
+    "lang": "en",
+    "common_name": ""
+  },
+  "Euonymus europaeus": {
+    "species": "Euonymus europaeus",
+    "status": "ok",
+    "chunks": 1,
+    "images": 1,
+    "lang": "it",
+    "common_name": "berretta del prete, fusaggine o evonimo"
+  },
+  "Euonymus latifolius": {
+    "species": "Euonymus latifolius",
+    "status": "ok",
+    "chunks": 2,
+    "images": 5,
+    "lang": "en",
+    "common_name": ""
+  },
+  "Eupatorium cannabinum": {
+    "species": "Eupatorium cannabinum",
+    "status": "ok",
+    "chunks": 9,
+    "images": 5,
+    "lang": "it",
+    "common_name": "canapa acquatica"
+  },
+  "Euphorbia amygdaloides": {
+    "species": "Euphorbia amygdaloides",
+    "status": "ok",
+    "chunks": 12,
+    "images": 5,
+    "lang": "it",
+    "common_name": "euforbia delle faggete"
+  },
+  "Euphorbia characias": {
+    "species": "Euphorbia characias",
+    "status": "ok",
+    "chunks": 3,
+    "images": 2,
+    "lang": "it",
+    "common_name": ""
+  },
+  "Euphorbia cyparissias": {
+    "species": "Euphorbia cyparissias",
+    "status": "ok",
+    "chunks": 12,
+    "images": 5,
+    "lang": "it",
+    "common_name": "euforbia cipressina"
+  },
+  "Euphorbia dendroides": {
+    "species": "Euphorbia dendroides",
+    "status": "ok",
+    "chunks": 4,
+    "images": 3,
+    "lang": "it",
+    "common_name": "euforbia arborea"
+  },
+  "Euphorbia flavicoma": {
+    "species": "Euphorbia flavicoma",
+    "status": "not_found"
+  },
+  "Euphorbia helioscopia": {
+    "species": "Euphorbia helioscopia",
+    "status": "ok",
+    "chunks": 12,
+    "images": 5,
+    "lang": "it",
+    "common_name": "euforbia calenzuola"
+  },
+  "Euphorbia lathyris": {
+    "species": "Euphorbia lathyris",
+    "status": "ok",
+    "chunks": 2,
+    "images": 3,
+    "lang": "it",
+    "common_name": "euforbia catapuzia"
+  },
+  "Euphorbia nicaeensis": {
+    "species": "Euphorbia nicaeensis",
+    "status": "ok",
+    "chunks": 1,
+    "images": 2,
+    "lang": "en",
+    "common_name": ""
+  },
+  "Euphorbia paralias": {
+    "species": "Euphorbia paralias",
+    "status": "ok",
+    "chunks": 2,
+    "images": 5,
+    "lang": "it",
+    "common_name": "euforbia marittima"
+  },
+  "Euphorbia peplis": {
+    "species": "Euphorbia peplis",
+    "status": "ok",
+    "chunks": 1,
+    "images": 2,
+    "lang": "en",
+    "common_name": ""
+  },
+  "Euphorbia peplus": {
+    "species": "Euphorbia peplus",
+    "status": "ok",
+    "chunks": 2,
+    "images": 1,
+    "lang": "it",
+    "common_name": "euforbia minore"
+  },
+  "Euphorbia segetalis": {
+    "species": "Euphorbia segetalis",
+    "status": "ok",
+    "chunks": 1,
+    "images": 2,
+    "lang": "en",
+    "common_name": ""
+  },
+  "Euphorbia seguieriana": {
+    "species": "Euphorbia seguieriana",
+    "status": "ok",
+    "chunks": 1,
+    "images": 1,
+    "lang": "en",
+    "common_name": ""
+  },
+  "Euphorbia serrata": {
+    "species": "Euphorbia serrata",
+    "status": "ok",
+    "chunks": 1,
+    "images": 2,
+    "lang": "en",
+    "common_name": ""
+  },
+  "Euphorbia spinosa": {
+    "species": "Euphorbia spinosa",
+    "status": "not_found"
+  },
+  "Fagus sylvatica": {
+    "species": "Fagus sylvatica",
+    "status": "ok",
+    "chunks": 15,
+    "images": 5,
+    "lang": "it",
+    "common_name": "faggio"
+  },
+  "Fatsia japonica": {
+    "species": "Fatsia japonica",
+    "status": "ok",
+    "chunks": 3,
+    "images": 1,
+    "lang": "it",
+    "common_name": ""
+  },
+  "Feijoa sellowiana": {
+    "species": "Feijoa sellowiana",
+    "status": "ok",
+    "chunks": 9,
+    "images": 5,
+    "lang": "it",
+    "common_name": ""
+  },
+  "Ferula communis": {
+    "species": "Ferula communis",
+    "status": "ok",
+    "chunks": 5,
+    "images": 3,
+    "lang": "it",
+    "common_name": "Ferula communis L., volgarmente conosciuta come finocchiaccio, ferla"
+  },
+  "Ficaria verna": {
+    "species": "Ficaria verna",
+    "status": "ok",
+    "chunks": 19,
+    "images": 5,
+    "lang": "it",
+    "common_name": "ranuncolo favagello"
+  },
+  "Ficus carica": {
+    "species": "Ficus carica",
+    "status": "ok",
+    "chunks": 44,
+    "images": 5,
+    "lang": "it",
+    "common_name": "fico comune"
+  },
+  "Filipendula ulmaria": {
+    "species": "Filipendula ulmaria",
+    "status": "ok",
+    "chunks": 1,
+    "images": 3,
+    "lang": "it",
+    "common_name": "olmaria"
+  },
+  "Filipendula vulgaris": {
+    "species": "Filipendula vulgaris",
+    "status": "ok",
+    "chunks": 3,
+    "images": 3,
+    "lang": "en",
+    "common_name": "dropwort or fern-leaf dropwort"
+  },
+  "Foeniculum vulgare": {
+    "species": "Foeniculum vulgare",
+    "status": "ok",
+    "chunks": 8,
+    "images": 5,
+    "lang": "it",
+    "common_name": "finocchio"
+  },
+  "Fragaria vesca": {
+    "species": "Fragaria vesca",
+    "status": "ok",
+    "chunks": 3,
+    "images": 4,
+    "lang": "it",
+    "common_name": "fragola di bosco"
+  },
+  "Frangula dodonei": {
+    "species": "Frangula dodonei",
+    "status": "ok",
+    "chunks": 10,
+    "images": 5,
+    "lang": "en",
+    "common_name": "alder buckthorn"
+  },
+  "Fraxinus angustifolia": {
+    "species": "Fraxinus angustifolia",
+    "status": "ok",
+    "chunks": 2,
+    "images": 2,
+    "lang": "it",
+    "common_name": "frassino meridionale"
+  },
+  "Fraxinus excelsior": {
+    "species": "Fraxinus excelsior",
+    "status": "ok",
+    "chunks": 7,
+    "images": 3,
+    "lang": "it",
+    "common_name": "frassino maggiore o frassino comune"
+  },
+  "Fraxinus ornus": {
+    "species": "Fraxinus ornus",
+    "status": "ok",
+    "chunks": 9,
+    "images": 4,
+    "lang": "it",
+    "common_name": "Fraxinus ornus L., 1753 è una pianta della famiglia delle Oleacee"
+  },
+  "Fritillaria meleagris": {
+    "species": "Fritillaria meleagris",
+    "status": "ok",
+    "chunks": 2,
+    "images": 3,
+    "lang": "it",
+    "common_name": ""
+  },
+  "Fritillaria pyrenaica": {
+    "species": "Fritillaria pyrenaica",
+    "status": "ok",
+    "chunks": 1,
+    "images": 2,
+    "lang": "it",
+    "common_name": "meleagride dei Pirenei"
+  },
+  "Fumaria capreolata": {
+    "species": "Fumaria capreolata",
+    "status": "ok",
+    "chunks": 1,
+    "images": 2,
+    "lang": "en",
+    "common_name": ""
+  },
+  "Fumaria officinalis": {
+    "species": "Fumaria officinalis",
+    "status": "ok",
+    "chunks": 3,
+    "images": 3,
+    "lang": "it",
+    "common_name": ""
+  },
+  "Gagea bohemica": {
+    "species": "Gagea bohemica",
+    "status": "ok",
+    "chunks": 3,
+    "images": 2,
+    "lang": "it",
+    "common_name": "cipollaccio della Boemia"
+  },
+  "Gagea granatelli": {
+    "species": "Gagea granatelli",
+    "status": "not_found"
+  },
+  "Galactites tomentosus": {
+    "species": "Galactites tomentosus",
+    "status": "ok",
+    "chunks": 9,
+    "images": 2,
+    "lang": "it",
+    "common_name": "scarlina"
+  },
+  "Galanthus nivalis": {
+    "species": "Galanthus nivalis",
+    "status": "ok",
+    "chunks": 11,
+    "images": 5,
+    "lang": "it",
+    "common_name": "bucaneve"
+  },
+  "Galeopsis tetrahit": {
+    "species": "Galeopsis tetrahit",
+    "status": "ok",
+    "chunks": 11,
+    "images": 5,
+    "lang": "it",
+    "common_name": "canapetta comune"
+  },
+  "Galinsoga quadriradiata": {
+    "species": "Galinsoga quadriradiata",
+    "status": "ok",
+    "chunks": 9,
+    "images": 5,
+    "lang": "it",
+    "common_name": "galinsoga ispida"
+  },
+  "Galium aparine": {
+    "species": "Galium aparine",
+    "status": "ok",
+    "chunks": 2,
+    "images": 2,
+    "lang": "it",
+    "common_name": ""
+  },
+  "Galium odoratum": {
+    "species": "Galium odoratum",
+    "status": "ok",
+    "chunks": 2,
+    "images": 2,
+    "lang": "it",
+    "common_name": ""
+  },
+  "Galium verum": {
+    "species": "Galium verum",
+    "status": "ok",
+    "chunks": 17,
+    "images": 5,
+    "lang": "it",
+    "common_name": "caglio zolfino"
+  },
+  "Genista hispanica": {
+    "species": "Genista hispanica",
+    "status": "ok",
+    "chunks": 2,
+    "images": 2,
+    "lang": "en",
+    "common_name": ""
+  },
+  "Genista pilosa": {
+    "species": "Genista pilosa",
+    "status": "ok",
+    "chunks": 1,
+    "images": 2,
+    "lang": "en",
+    "common_name": "hairy greenweed"
+  },
+  "Genista sagittalis": {
+    "species": "Genista sagittalis",
+    "status": "ok",
+    "chunks": 1,
+    "images": 5,
+    "lang": "en",
+    "common_name": ""
+  },
+  "Genista scorpius": {
+    "species": "Genista scorpius",
+    "status": "not_found"
+  },
+  "Genista tinctoria": {
+    "species": "Genista tinctoria",
+    "status": "ok",
+    "chunks": 1,
+    "images": 3,
+    "lang": "it",
+    "common_name": "ginestra minore"
+  },
+  "Gentiana acaulis": {
+    "species": "Gentiana acaulis",
+    "status": "ok",
+    "chunks": 2,
+    "images": 2,
+    "lang": "it",
+    "common_name": "genzianella o genziana di Koch"
+  },
+  "Gentiana alpina": {
+    "species": "Gentiana alpina",
+    "status": "ok",
+    "chunks": 2,
+    "images": 2,
+    "lang": "en",
+    "common_name": ""
+  },
+  "Gentiana burseri": {
+    "species": "Gentiana burseri",
+    "status": "not_found"
+  },
+  "Gentiana cruciata": {
+    "species": "Gentiana cruciata",
+    "status": "ok",
+    "chunks": 2,
+    "images": 1,
+    "lang": "it",
+    "common_name": "genziana crociata"
+  },
+  "Gentiana lutea": {
+    "species": "Gentiana lutea",
+    "status": "ok",
+    "chunks": 4,
+    "images": 1,
+    "lang": "it",
+    "common_name": "genziana maggiore"
+  },
+  "Gentiana nivalis": {
+    "species": "Gentiana nivalis",
+    "status": "ok",
+    "chunks": 1,
+    "images": 1,
+    "lang": "it",
+    "common_name": "genziana delle nevi"
+  },
+  "Gentiana pneumonanthe": {
+    "species": "Gentiana pneumonanthe",
+    "status": "ok",
+    "chunks": 3,
+    "images": 3,
+    "lang": "it",
+    "common_name": "genziana mettimborsa"
+  },
+  "Gentiana purpurea": {
+    "species": "Gentiana purpurea",
+    "status": "ok",
+    "chunks": 1,
+    "images": 2,
+    "lang": "en",
+    "common_name": ""
+  },
+  "Gentiana pyrenaica": {
+    "species": "Gentiana pyrenaica",
+    "status": "not_found"
+  },
+  "Gentiana verna": {
+    "species": "Gentiana verna",
+    "status": "ok",
+    "chunks": 2,
+    "images": 2,
+    "lang": "it",
+    "common_name": "genzianella di primavera o genziana primaticcia"
+  },
+  "Gentianella campestris": {
+    "species": "Gentianella campestris",
+    "status": "ok",
+    "chunks": 2,
+    "images": 1,
+    "lang": "it",
+    "common_name": "genzianella campestre"
+  },
+  "Gentianopsis ciliata": {
+    "species": "Gentianopsis ciliata",
+    "status": "ok",
+    "chunks": 3,
+    "images": 4,
+    "lang": "it",
+    "common_name": "genziana sfrangiata"
+  },
+  "Geranium columbinum": {
+    "species": "Geranium columbinum",
+    "status": "ok",
+    "chunks": 2,
+    "images": 5,
+    "lang": "en",
+    "common_name": "long-stalked crane's-bill or longstalk cranesbill"
+  },
+  "Geranium dissectum": {
+    "species": "Geranium dissectum",
+    "status": "ok",
+    "chunks": 2,
+    "images": 5,
+    "lang": "it",
+    "common_name": ""
+  },
+  "Geranium lucidum": {
+    "species": "Geranium lucidum",
+    "status": "ok",
+    "chunks": 4,
+    "images": 3,
+    "lang": "en",
+    "common_name": "Geranium lucidum, commonly known as shining cranesbill or"
+  },
+  "Geranium molle": {
+    "species": "Geranium molle",
+    "status": "ok",
+    "chunks": 3,
+    "images": 5,
+    "lang": "en",
+    "common_name": ""
+  },
+  "Geranium nodosum": {
+    "species": "Geranium nodosum",
+    "status": "ok",
+    "chunks": 12,
+    "images": 4,
+    "lang": "it",
+    "common_name": "geranio nodoso"
+  },
+  "Geranium phaeum": {
+    "species": "Geranium phaeum",
+    "status": "ok",
+    "chunks": 13,
+    "images": 5,
+    "lang": "it",
+    "common_name": "geranio stellato"
+  },
+  "Geranium pratense": {
+    "species": "Geranium pratense",
+    "status": "ok",
+    "chunks": 2,
+    "images": 5,
+    "lang": "en",
+    "common_name": ""
+  },
+  "Geranium pusillum": {
+    "species": "Geranium pusillum",
+    "status": "ok",
+    "chunks": 1,
+    "images": 2,
+    "lang": "en",
+    "common_name": "Geranium pusillum, commonly known as small-flowered crane's-bill or"
+  },
+  "Geranium pyrenaicum": {
+    "species": "Geranium pyrenaicum",
+    "status": "ok",
+    "chunks": 11,
+    "images": 5,
+    "lang": "it",
+    "common_name": "geranio dei Pirenei"
+  },
+  "Geranium robertianum": {
+    "species": "Geranium robertianum",
+    "status": "ok",
+    "chunks": 20,
+    "images": 5,
+    "lang": "it",
+    "common_name": "geranio di san Roberto"
+  },
+  "Geranium rotundifolium": {
+    "species": "Geranium rotundifolium",
+    "status": "ok",
+    "chunks": 3,
+    "images": 5,
+    "lang": "it",
+    "common_name": "geranio malvaccino"
+  },
+  "Geranium sanguineum": {
+    "species": "Geranium sanguineum",
+    "status": "ok",
+    "chunks": 14,
+    "images": 5,
+    "lang": "it",
+    "common_name": "geranio sanguigno"
+  },
+  "Geranium sylvaticum": {
+    "species": "Geranium sylvaticum",
+    "status": "ok",
+    "chunks": 15,
+    "images": 5,
+    "lang": "it",
+    "common_name": "geranio silvano"
+  },
+  "Geum montanum": {
+    "species": "Geum montanum",
+    "status": "ok",
+    "chunks": 2,
+    "images": 2,
+    "lang": "en",
+    "common_name": ""
+  },
+  "Geum reptans": {
+    "species": "Geum reptans",
+    "status": "ok",
+    "chunks": 1,
+    "images": 1,
+    "lang": "it",
+    "common_name": "ambretta strisciante"
+  },
+  "Geum rivale": {
+    "species": "Geum rivale",
+    "status": "ok",
+    "chunks": 5,
+    "images": 5,
+    "lang": "en",
+    "common_name": ""
+  },
+  "Geum urbanum": {
+    "species": "Geum urbanum",
+    "status": "ok",
+    "chunks": 2,
+    "images": 2,
+    "lang": "it",
+    "common_name": ""
+  },
+  "Ginkgo biloba": {
+    "species": "Ginkgo biloba",
+    "status": "ok",
+    "chunks": 16,
+    "images": 5,
+    "lang": "it",
+    "common_name": ""
+  },
+  "Gladiolus italicus": {
+    "species": "Gladiolus italicus",
+    "status": "ok",
+    "chunks": 2,
+    "images": 5,
+    "lang": "it",
+    "common_name": "gladiolo dei campi"
+  },
+  "Glaucium flavum": {
+    "species": "Glaucium flavum",
+    "status": "ok",
+    "chunks": 3,
+    "images": 4,
+    "lang": "it",
+    "common_name": "papavero giallo delle sabbie"
+  },
+  "Glechoma hederacea": {
+    "species": "Glechoma hederacea",
+    "status": "ok",
+    "chunks": 12,
+    "images": 5,
+    "lang": "it",
+    "common_name": "edera terrestre"
+  },
+  "Gleditsia triacanthos": {
+    "species": "Gleditsia triacanthos",
+    "status": "ok",
+    "chunks": 6,
+    "images": 5,
+    "lang": "it",
+    "common_name": "Gleditsia triacanthos L."
+  },
+  "Globularia alypum": {
+    "species": "Globularia alypum",
+    "status": "ok",
+    "chunks": 1,
+    "images": 5,
+    "lang": "en",
+    "common_name": ""
+  },
+  "Globularia bisnagarica": {
+    "species": "Globularia bisnagarica",
+    "status": "ok",
+    "chunks": 1,
+    "images": 2,
+    "lang": "en",
+    "common_name": ""
+  },
+  "Globularia repens": {
+    "species": "Globularia repens",
+    "status": "not_found"
+  },
+  "Gymnadenia conopsea": {
+    "species": "Gymnadenia conopsea",
+    "status": "ok",
+    "chunks": 13,
+    "images": 5,
+    "lang": "it",
+    "common_name": "manina rosea"
+  },
+  "Gymnadenia nigra": {
+    "species": "Gymnadenia nigra",
+    "status": "ok",
+    "chunks": 12,
+    "images": 3,
+    "lang": "it",
+    "common_name": "nigritella nera"
+  },
+  "Hedera helix": {
+    "species": "Hedera helix",
+    "status": "ok",
+    "chunks": 5,
+    "images": 0,
+    "lang": "it",
+    "common_name": "edera comune"
+  },
+  "Helianthemum apenninum": {
+    "species": "Helianthemum apenninum",
+    "status": "ok",
+    "chunks": 1,
+    "images": 1,
+    "lang": "it",
+    "common_name": ""
+  },
+  "Helianthemum nummularium": {
+    "species": "Helianthemum nummularium",
+    "status": "ok",
+    "chunks": 26,
+    "images": 2,
+    "lang": "it",
+    "common_name": "eliantemo maggiore"
+  },
+  "Helianthus annuus": {
+    "species": "Helianthus annuus",
+    "status": "ok",
+    "chunks": 23,
+    "images": 3,
+    "lang": "it",
+    "common_name": "girasole comune"
+  },
+  "Helichrysum stoechas": {
+    "species": "Helichrysum stoechas",
+    "status": "ok",
+    "chunks": 19,
+    "images": 4,
+    "lang": "it",
+    "common_name": ""
+  },
+  "Heliotropium europaeum": {
+    "species": "Heliotropium europaeum",
+    "status": "ok",
+    "chunks": 1,
+    "images": 0,
+    "lang": "it",
+    "common_name": "eliotropio"
+  },
+  "Helleborus foetidus": {
+    "species": "Helleborus foetidus",
+    "status": "ok",
+    "chunks": 11,
+    "images": 0,
+    "lang": "it",
+    "common_name": ""
+  },
+  "Helleborus viridis": {
+    "species": "Helleborus viridis",
+    "status": "ok",
+    "chunks": 12,
+    "images": 2,
+    "lang": "it",
+    "common_name": ""
+  },
+  "Helminthotheca echioides": {
+    "species": "Helminthotheca echioides",
+    "status": "ok",
+    "chunks": 12,
+    "images": 0,
+    "lang": "it",
+    "common_name": "aspraggine"
+  },
+  "Hemerocallis fulva": {
+    "species": "Hemerocallis fulva",
+    "status": "ok",
+    "chunks": 3,
+    "images": 0,
+    "lang": "it",
+    "common_name": "giglio turco"
+  },
+  "Heracleum pyrenaicum": {
+    "species": "Heracleum pyrenaicum",
+    "status": "not_found"
+  },
+  "Heracleum sphondylium": {
+    "species": "Heracleum sphondylium",
+    "status": "ok",
+    "chunks": 2,
+    "images": 1,
+    "lang": "it",
+    "common_name": "panace o spondilio"
+  },
+  "Hesperis matronalis": {
+    "species": "Hesperis matronalis",
+    "status": "ok",
+    "chunks": 11,
+    "images": 5,
+    "lang": "en",
+    "common_name": ""
+  },
+  "Hibiscus rosa-sinensis": {
+    "species": "Hibiscus rosa-sinensis",
+    "status": "ok",
+    "chunks": 3,
+    "images": 5,
+    "lang": "it",
+    "common_name": ""
+  },
+  "Hibiscus syriacus": {
+    "species": "Hibiscus syriacus",
+    "status": "ok",
+    "chunks": 5,
+    "images": 4,
+    "lang": "it",
+    "common_name": "ibisco cinese"
+  },
+  "Himantoglossum hircinum": {
+    "species": "Himantoglossum hircinum",
+    "status": "ok",
+    "chunks": 2,
+    "images": 2,
+    "lang": "it",
+    "common_name": ""
+  },
+  "Himantoglossum robertianum": {
+    "species": "Himantoglossum robertianum",
+    "status": "ok",
+    "chunks": 2,
+    "images": 1,
+    "lang": "it",
+    "common_name": "orchidea di Robert"
+  },
+  "Hippocrepis comosa": {
+    "species": "Hippocrepis comosa",
+    "status": "ok",
+    "chunks": 3,
+    "images": 1,
+    "lang": "en",
+    "common_name": ""
+  },
+  "Hippocrepis emerus": {
+    "species": "Hippocrepis emerus",
+    "status": "ok",
+    "chunks": 2,
+    "images": 5,
+    "lang": "en",
+    "common_name": ""
+  },
+  "Holcus lanatus": {
+    "species": "Holcus lanatus",
+    "status": "ok",
+    "chunks": 5,
+    "images": 3,
+    "lang": "en",
+    "common_name": ""
+  },
+  "Homogyne alpina": {
+    "species": "Homogyne alpina",
+    "status": "ok",
+    "chunks": 15,
+    "images": 5,
+    "lang": "it",
+    "common_name": "tossilaggine alpina"
+  },
+  "Honckenya peploides": {
+    "species": "Honckenya peploides",
+    "status": "ok",
+    "chunks": 4,
+    "images": 2,
+    "lang": "en",
+    "common_name": "Honckenya peploides, the sea sandwort"
+  },
+  "Hormathophylla spinosa": {
+    "species": "Hormathophylla spinosa",
+    "status": "ok",
+    "chunks": 1,
+    "images": 4,
+    "lang": "en",
+    "common_name": ""
+  },
+  "Humulus lupulus": {
+    "species": "Humulus lupulus",
+    "status": "ok",
+    "chunks": 10,
+    "images": 5,
+    "lang": "it",
+    "common_name": "luppolo"
+  },
+  "Hyacinthoides non-scripta": {
+    "species": "Hyacinthoides non-scripta",
+    "status": "ok",
+    "chunks": 13,
+    "images": 5,
+    "lang": "en",
+    "common_name": ""
+  },
+  "Hydrangea macrophylla": {
+    "species": "Hydrangea macrophylla",
+    "status": "ok",
+    "chunks": 3,
+    "images": 5,
+    "lang": "it",
+    "common_name": "ortensia"
+  },
+  "Hylotelephium telephium": {
+    "species": "Hylotelephium telephium",
+    "status": "ok",
+    "chunks": 4,
+    "images": 3,
+    "lang": "it",
+    "common_name": "borracina maggiore"
+  },
+  "Hyoscyamus albus": {
+    "species": "Hyoscyamus albus",
+    "status": "ok",
+    "chunks": 2,
+    "images": 2,
+    "lang": "en",
+    "common_name": ""
+  },
+  "Hyoseris radiata": {
+    "species": "Hyoseris radiata",
+    "status": "ok",
+    "chunks": 12,
+    "images": 3,
+    "lang": "it",
+    "common_name": ""
+  },
+  "Hyparrhenia hirta": {
+    "species": "Hyparrhenia hirta",
+    "status": "ok",
+    "chunks": 2,
+    "images": 2,
+    "lang": "it",
+    "common_name": "barboncino mediterraneo"
+  },
+  "Hypericum androsaemum": {
+    "species": "Hypericum androsaemum",
+    "status": "ok",
+    "chunks": 21,
+    "images": 5,
+    "lang": "en",
+    "common_name": ""
+  },
+  "Hypericum hirsutum": {
+    "species": "Hypericum hirsutum",
+    "status": "ok",
+    "chunks": 3,
+    "images": 2,
+    "lang": "en",
+    "common_name": "hairy St John's-wort"
+  },
+  "Hypericum perforatum": {
+    "species": "Hypericum perforatum",
+    "status": "ok",
+    "chunks": 16,
+    "images": 2,
+    "lang": "it",
+    "common_name": "iperico"
+  },
+  "Hypericum richeri": {
+    "species": "Hypericum richeri",
+    "status": "not_found"
+  },
+  "Hypochaeris radicata": {
+    "species": "Hypochaeris radicata",
+    "status": "ok",
+    "chunks": 14,
+    "images": 5,
+    "lang": "it",
+    "common_name": "costolina giuncolina"
+  },
+  "Ilex aquifolium": {
+    "species": "Ilex aquifolium",
+    "status": "ok",
+    "chunks": 6,
+    "images": 5,
+    "lang": "it",
+    "common_name": "agrifoglio"
+  },
+  "Impatiens balfouri": {
+    "species": "Impatiens balfouri",
+    "status": "not_found"
+  },
+  "Impatiens glandulifera": {
+    "species": "Impatiens glandulifera",
+    "status": "ok",
+    "chunks": 4,
+    "images": 3,
+    "lang": "it",
+    "common_name": "balsamina ghiandolosa"
+  },
+  "Imperatoria ostruthium": {
+    "species": "Imperatoria ostruthium",
+    "status": "ok",
+    "chunks": 3,
+    "images": 2,
+    "lang": "it",
+    "common_name": "imperatoria"
+  },
+  "Inula conyza": {
+    "species": "Inula conyza",
+    "status": "ok",
+    "chunks": 7,
+    "images": 4,
+    "lang": "en",
+    "common_name": "Pentanema squarrosum"
+  },
+  "Iris foetidissima": {
+    "species": "Iris foetidissima",
+    "status": "ok",
+    "chunks": 2,
+    "images": 1,
+    "lang": "it",
+    "common_name": "giaggiolo puzzolente"
+  },
+  "Iris lutescens": {
+    "species": "Iris lutescens",
+    "status": "ok",
+    "chunks": 1,
+    "images": 2,
+    "lang": "en",
+    "common_name": ""
+  },
+  "Iris pseudacorus": {
+    "species": "Iris pseudacorus",
+    "status": "ok",
+    "chunks": 3,
+    "images": 2,
+    "lang": "it",
+    "common_name": "giaggiolo acquatico o iris delle paludi"
+  },
+  "Isatis tinctoria": {
+    "species": "Isatis tinctoria",
+    "status": "ok",
+    "chunks": 5,
+    "images": 5,
+    "lang": "it",
+    "common_name": "Isatis tinctoria L."
+  },
+  "Jacobaea adonidifolia": {
+    "species": "Jacobaea adonidifolia",
+    "status": "ok",
+    "chunks": 1,
+    "images": 2,
+    "lang": "en",
+    "common_name": "Jacobaea adonidifolia is a species"
+  },
+  "Jacobaea erucifolia": {
+    "species": "Jacobaea erucifolia",
+    "status": "ok",
+    "chunks": 16,
+    "images": 5,
+    "lang": "it",
+    "common_name": "senecione serpeggiante"
+  },
+  "Jacobaea maritima": {
+    "species": "Jacobaea maritima",
+    "status": "ok",
+    "chunks": 16,
+    "images": 5,
+    "lang": "it",
+    "common_name": "cineraria"
+  },
+  "Jacobaea vulgaris": {
+    "species": "Jacobaea vulgaris",
+    "status": "ok",
+    "chunks": 17,
+    "images": 5,
+    "lang": "it",
+    "common_name": "senecione di San Giacomo"
+  },
+  "Jasione montana": {
+    "species": "Jasione montana",
+    "status": "ok",
+    "chunks": 10,
+    "images": 5,
+    "lang": "it",
+    "common_name": "Vedovella annuale"
+  },
+  "Jasminum fruticans": {
+    "species": "Jasminum fruticans",
+    "status": "ok",
+    "chunks": 1,
+    "images": 1,
+    "lang": "it",
+    "common_name": "gelsomino giallo"
+  },
+  "Juglans nigra": {
+    "species": "Juglans nigra",
+    "status": "ok",
+    "chunks": 4,
+    "images": 5,
+    "lang": "it",
+    "common_name": "noce nero"
+  },
+  "Juglans regia": {
+    "species": "Juglans regia",
+    "status": "ok",
+    "chunks": 10,
+    "images": 4,
+    "lang": "it",
+    "common_name": "noce da frutto o noce bianco"
+  },
+  "Juncus bulbosus": {
+    "species": "Juncus bulbosus",
+    "status": "ok",
+    "chunks": 1,
+    "images": 3,
+    "lang": "en",
+    "common_name": ""
+  },
+  "Juncus effusus": {
+    "species": "Juncus effusus",
+    "status": "ok",
+    "chunks": 2,
+    "images": 2,
+    "lang": "it",
+    "common_name": ""
+  },
+  "Juncus gerardi": {
+    "species": "Juncus gerardi",
+    "status": "ok",
+    "chunks": 3,
+    "images": 2,
+    "lang": "en",
+    "common_name": "blackgrass"
+  },
+  "Juniperus communis": {
+    "species": "Juniperus communis",
+    "status": "ok",
+    "chunks": 6,
+    "images": 2,
+    "lang": "it",
+    "common_name": "ginepro comune"
+  },
+  "Juniperus oxycedrus": {
+    "species": "Juniperus oxycedrus",
+    "status": "ok",
+    "chunks": 2,
+    "images": 3,
+    "lang": "it",
+    "common_name": "ginepro rosso"
+  },
+  "Juniperus phoenicea": {
+    "species": "Juniperus phoenicea",
+    "status": "ok",
+    "chunks": 4,
+    "images": 1,
+    "lang": "it",
+    "common_name": ""
+  },
+  "Juniperus sabina": {
+    "species": "Juniperus sabina",
+    "status": "ok",
+    "chunks": 13,
+    "images": 1,
+    "lang": "it",
+    "common_name": "Ginepro sabina"
+  },
+  "Kerria japonica": {
+    "species": "Kerria japonica",
+    "status": "ok",
+    "chunks": 3,
+    "images": 1,
+    "lang": "it",
+    "common_name": "rosa del Giappone"
+  },
+  "Kickxia spuria": {
+    "species": "Kickxia spuria",
+    "status": "ok",
+    "chunks": 11,
+    "images": 5,
+    "lang": "it",
+    "common_name": "cencio molle"
+  },
+  "Knautia arvensis": {
+    "species": "Knautia arvensis",
+    "status": "ok",
+    "chunks": 6,
+    "images": 5,
+    "lang": "it",
+    "common_name": "ambretta"
+  },
+  "Knautia maxima": {
+    "species": "Knautia maxima",
+    "status": "not_found"
+  },
+  "Koelreuteria paniculata": {
+    "species": "Koelreuteria paniculata",
+    "status": "ok",
+    "chunks": 1,
+    "images": 3,
+    "lang": "it",
+    "common_name": ""
+  },
+  "Laburnum anagyroides": {
+    "species": "Laburnum anagyroides",
+    "status": "ok",
+    "chunks": 4,
+    "images": 4,
+    "lang": "it",
+    "common_name": "maggiociondolo"
+  },
+  "Lactuca alpina": {
+    "species": "Lactuca alpina",
+    "status": "ok",
+    "chunks": 14,
+    "images": 5,
+    "lang": "it",
+    "common_name": "cicerbita violetta"
+  },
+  "Lactuca muralis": {
+    "species": "Lactuca muralis",
+    "status": "ok",
+    "chunks": 3,
+    "images": 2,
+    "lang": "en",
+    "common_name": ""
+  },
+  "Lactuca perennis": {
+    "species": "Lactuca perennis",
+    "status": "ok",
+    "chunks": 15,
+    "images": 5,
+    "lang": "it",
+    "common_name": "lattuga rupestre"
+  },
+  "Lactuca plumieri": {
+    "species": "Lactuca plumieri",
+    "status": "not_found"
+  },
+  "Lactuca serriola": {
+    "species": "Lactuca serriola",
+    "status": "ok",
+    "chunks": 16,
+    "images": 5,
+    "lang": "it",
+    "common_name": "lattuga selvatica o scarola"
+  },
+  "Lactuca viminea": {
+    "species": "Lactuca viminea",
+    "status": "ok",
+    "chunks": 17,
+    "images": 5,
+    "lang": "it",
+    "common_name": "lattuga alata"
+  },
+  "Lagurus ovatus": {
+    "species": "Lagurus ovatus",
+    "status": "ok",
+    "chunks": 2,
+    "images": 2,
+    "lang": "en",
+    "common_name": ""
+  },
+  "Lamium album": {
+    "species": "Lamium album",
+    "status": "ok",
+    "chunks": 17,
+    "images": 5,
+    "lang": "it",
+    "common_name": "falsa ortica bianca"
+  },
+  "Lamium amplexicaule": {
+    "species": "Lamium amplexicaule",
+    "status": "ok",
+    "chunks": 15,
+    "images": 5,
+    "lang": "it",
+    "common_name": "falsa ortica reniforme"
+  },
+  "Lamium galeobdolon": {
+    "species": "Lamium galeobdolon",
+    "status": "ok",
+    "chunks": 20,
+    "images": 5,
+    "lang": "it",
+    "common_name": "falsa ortica gialla"
+  },
+  "Lamium maculatum": {
+    "species": "Lamium maculatum",
+    "status": "ok",
+    "chunks": 14,
+    "images": 5,
+    "lang": "it",
+    "common_name": "falsa ortica macchiata"
+  },
+  "Lamium purpureum": {
+    "species": "Lamium purpureum",
+    "status": "ok",
+    "chunks": 17,
+    "images": 5,
+    "lang": "it",
+    "common_name": "falsa ortica purpurea"
+  },
+  "Lantana camara": {
+    "species": "Lantana camara",
+    "status": "ok",
+    "chunks": 2,
+    "images": 1,
+    "lang": "it",
+    "common_name": ""
+  },
+  "Lapsana communis": {
+    "species": "Lapsana communis",
+    "status": "ok",
+    "chunks": 18,
+    "images": 5,
+    "lang": "it",
+    "common_name": "lassana grespignolo"
+  },
+  "Larix decidua": {
+    "species": "Larix decidua",
+    "status": "ok",
+    "chunks": 57,
+    "images": 5,
+    "lang": "it",
+    "common_name": "larice comune"
+  },
+  "Lathraea clandestina": {
+    "species": "Lathraea clandestina",
+    "status": "ok",
+    "chunks": 4,
+    "images": 2,
+    "lang": "en",
+    "common_name": ""
+  },
+  "Lathyrus cicera": {
+    "species": "Lathyrus cicera",
+    "status": "ok",
+    "chunks": 2,
+    "images": 2,
+    "lang": "en",
+    "common_name": ""
+  },
+  "Lathyrus latifolius": {
+    "species": "Lathyrus latifolius",
+    "status": "ok",
+    "chunks": 4,
+    "images": 1,
+    "lang": "en",
+    "common_name": ""
+  },
+  "Lathyrus pratensis": {
+    "species": "Lathyrus pratensis",
+    "status": "ok",
+    "chunks": 8,
+    "images": 5,
+    "lang": "it",
+    "common_name": "cicerchia dei prati"
+  },
+  "Lathyrus sylvestris": {
+    "species": "Lathyrus sylvestris",
+    "status": "ok",
+    "chunks": 3,
+    "images": 3,
+    "lang": "en",
+    "common_name": ""
+  },
+  "Laurus nobilis": {
+    "species": "Laurus nobilis",
+    "status": "ok",
+    "chunks": 8,
+    "images": 5,
+    "lang": "it",
+    "common_name": "alloro"
+  },
+  "Lavandula stoechas": {
+    "species": "Lavandula stoechas",
+    "status": "ok",
+    "chunks": 5,
+    "images": 3,
+    "lang": "it",
+    "common_name": "lavanda selvatica o stecade"
+  },
+  "Legousia speculum-veneris": {
+    "species": "Legousia speculum-veneris",
+    "status": "ok",
+    "chunks": 12,
+    "images": 5,
+    "lang": "it",
+    "common_name": "Specchio di Venere comune"
+  },
+  "Leontodon hispidus": {
+    "species": "Leontodon hispidus",
+    "status": "ok",
+    "chunks": 16,
+    "images": 5,
+    "lang": "it",
+    "common_name": "dente di leone comune"
+  },
+  "Leontopodium nivale": {
+    "species": "Leontopodium nivale",
+    "status": "ok",
+    "chunks": 12,
+    "images": 5,
+    "lang": "it",
+    "common_name": "stella alpina dell'Appennino"
+  },
+  "Lepidium draba": {
+    "species": "Lepidium draba",
+    "status": "ok",
+    "chunks": 11,
+    "images": 5,
+    "lang": "en",
+    "common_name": "hoary cress"
+  },
+  "Leucanthemopsis alpina": {
+    "species": "Leucanthemopsis alpina",
+    "status": "ok",
+    "chunks": 14,
+    "images": 5,
+    "lang": "it",
+    "common_name": "margherita alpina"
+  },
+  "Leucanthemum vulgare": {
+    "species": "Leucanthemum vulgare",
+    "status": "ok",
+    "chunks": 19,
+    "images": 5,
+    "lang": "it",
+    "common_name": "margherita diploide"
+  },
+  "Ligustrum vulgare": {
+    "species": "Ligustrum vulgare",
+    "status": "ok",
+    "chunks": 9,
+    "images": 5,
+    "lang": "it",
+    "common_name": "ligustro comune"
+  },
+  "Lilium martagon": {
+    "species": "Lilium martagon",
+    "status": "ok",
+    "chunks": 2,
+    "images": 4,
+    "lang": "it",
+    "common_name": "giglio martagone"
+  },
+  "Lilium pyrenaicum": {
+    "species": "Lilium pyrenaicum",
+    "status": "ok",
+    "chunks": 1,
+    "images": 4,
+    "lang": "it",
+    "common_name": "giglio dei Pirenei"
+  },
+  "Limodorum abortivum": {
+    "species": "Limodorum abortivum",
+    "status": "ok",
+    "chunks": 3,
+    "images": 0,
+    "lang": "it",
+    "common_name": "fior di legna"
+  },
+  "Limoniastrum monopetalum": {
+    "species": "Limoniastrum monopetalum",
+    "status": "ok",
+    "chunks": 1,
+    "images": 0,
+    "lang": "it",
+    "common_name": "limoniastro cespuglioso"
+  },
+  "Limonium narbonense": {
+    "species": "Limonium narbonense",
+    "status": "ok",
+    "chunks": 2,
+    "images": 0,
+    "lang": "en",
+    "common_name": ""
+  },
+  "Limonium vulgare": {
+    "species": "Limonium vulgare",
+    "status": "ok",
+    "chunks": 1,
+    "images": 1,
+    "lang": "en",
+    "common_name": ""
+  },
+  "Linaria alpina": {
+    "species": "Linaria alpina",
+    "status": "ok",
+    "chunks": 11,
+    "images": 5,
+    "lang": "it",
+    "common_name": "linajola alpina"
+  },
+  "Linaria repens": {
+    "species": "Linaria repens",
+    "status": "ok",
+    "chunks": 9,
+    "images": 5,
+    "lang": "it",
+    "common_name": "linajola striata"
+  },
+  "Linaria supina": {
+    "species": "Linaria supina",
+    "status": "ok",
+    "chunks": 10,
+    "images": 3,
+    "lang": "it",
+    "common_name": "linajola dei serpentini"
+  },
+  "Linaria vulgaris": {
+    "species": "Linaria vulgaris",
+    "status": "ok",
+    "chunks": 11,
+    "images": 0,
+    "lang": "it",
+    "common_name": "linajola comune"
+  },
+  "Linum campanulatum": {
+    "species": "Linum campanulatum",
+    "status": "ok",
+    "chunks": 2,
+    "images": 2,
+    "lang": "en",
+    "common_name": ""
+  },
+  "Linum narbonense": {
+    "species": "Linum narbonense",
+    "status": "ok",
+    "chunks": 1,
+    "images": 3,
+    "lang": "en",
+    "common_name": ""
+  },
+  "Linum suffruticosum": {
+    "species": "Linum suffruticosum",
+    "status": "ok",
+    "chunks": 1,
+    "images": 3,
+    "lang": "en",
+    "common_name": ""
+  },
+  "Linum usitatissimum": {
+    "species": "Linum usitatissimum",
+    "status": "ok",
+    "chunks": 25,
+    "images": 5,
+    "lang": "it",
+    "common_name": "lino comune"
+  },
+  "Lippia triphylla": {
+    "species": "Lippia triphylla",
+    "status": "ok",
+    "chunks": 3,
+    "images": 2,
+    "lang": "it",
+    "common_name": "erba cedrina"
+  },
+  "Liquidambar styraciflua": {
+    "species": "Liquidambar styraciflua",
+    "status": "ok",
+    "chunks": 3,
+    "images": 5,
+    "lang": "it",
+    "common_name": "storace americano"
+  },
+  "Liriodendron tulipifera": {
+    "species": "Liriodendron tulipifera",
+    "status": "ok",
+    "chunks": 4,
+    "images": 4,
+    "lang": "it",
+    "common_name": ""
+  },
+  "Lithodora fruticosa": {
+    "species": "Lithodora fruticosa",
+    "status": "ok",
+    "chunks": 2,
+    "images": 4,
+    "lang": "en",
+    "common_name": ""
+  },
+  "Lithospermum officinale": {
+    "species": "Lithospermum officinale",
+    "status": "ok",
+    "chunks": 4,
+    "images": 2,
+    "lang": "en",
+    "common_name": ""
+  },
+  "Lobularia maritima": {
+    "species": "Lobularia maritima",
+    "status": "ok",
+    "chunks": 2,
+    "images": 5,
+    "lang": "it",
+    "common_name": ""
+  },
+  "Loncomelos pyrenaicus": {
+    "species": "Loncomelos pyrenaicus",
+    "status": "not_found"
+  },
+  "Lonicera alpigena": {
+    "species": "Lonicera alpigena",
+    "status": "ok",
+    "chunks": 1,
+    "images": 1,
+    "lang": "it",
+    "common_name": "camecèraso o caprifoglio alpino"
+  },
+  "Lonicera etrusca": {
+    "species": "Lonicera etrusca",
+    "status": "ok",
+    "chunks": 2,
+    "images": 2,
+    "lang": "en",
+    "common_name": "Etruscan honeysuckle"
+  },
+  "Lonicera implexa": {
+    "species": "Lonicera implexa",
+    "status": "ok",
+    "chunks": 2,
+    "images": 2,
+    "lang": "it",
+    "common_name": "caprifoglio mediterraneo"
+  },
+  "Lonicera periclymenum": {
+    "species": "Lonicera periclymenum",
+    "status": "ok",
+    "chunks": 4,
+    "images": 2,
+    "lang": "en",
+    "common_name": ""
+  },
+  "Lonicera xylosteum": {
+    "species": "Lonicera xylosteum",
+    "status": "ok",
+    "chunks": 1,
+    "images": 3,
+    "lang": "it",
+    "common_name": "gisilòstio o caprifoglio peloso"
+  },
+  "Lotus corniculatus": {
+    "species": "Lotus corniculatus",
+    "status": "ok",
+    "chunks": 2,
+    "images": 2,
+    "lang": "it",
+    "common_name": "ginestrino"
+  },
+  "Lotus edulis": {
+    "species": "Lotus edulis",
+    "status": "ok",
+    "chunks": 1,
+    "images": 1,
+    "lang": "en",
+    "common_name": ""
+  },
+  "Lotus maritimus": {
+    "species": "Lotus maritimus",
+    "status": "ok",
+    "chunks": 4,
+    "images": 5,
+    "lang": "en",
+    "common_name": ""
+  },
+  "Lunaria annua": {
+    "species": "Lunaria annua",
+    "status": "ok",
+    "chunks": 4,
+    "images": 4,
+    "lang": "it",
+    "common_name": ""
+  },
+  "Lupinus angustifolius": {
+    "species": "Lupinus angustifolius",
+    "status": "ok",
+    "chunks": 15,
+    "images": 4,
+    "lang": "en",
+    "common_name": ""
+  },
+  "Luzula campestris": {
+    "species": "Luzula campestris",
+    "status": "ok",
+    "chunks": 3,
+    "images": 4,
+    "lang": "en",
+    "common_name": "field wood-rush or Good Friday grass  is a flowering plant i"
+  },
+  "Lychnis coronaria": {
+    "species": "Lychnis coronaria",
+    "status": "ok",
+    "chunks": 1,
+    "images": 5,
+    "lang": "en",
+    "common_name": ""
+  },
+  "Lychnis flos-cuculi": {
+    "species": "Lychnis flos-cuculi",
+    "status": "ok",
+    "chunks": 3,
+    "images": 1,
+    "lang": "it",
+    "common_name": "fior di cuculo"
+  },
+  "Lycopsis arvensis": {
+    "species": "Lycopsis arvensis",
+    "status": "ok",
+    "chunks": 3,
+    "images": 5,
+    "lang": "en",
+    "common_name": ""
+  },
+  "Lycopus europaeus": {
+    "species": "Lycopus europaeus",
+    "status": "ok",
+    "chunks": 11,
+    "images": 5,
+    "lang": "it",
+    "common_name": "piede di lupo"
+  },
+  "Lysimachia arvensis": {
+    "species": "Lysimachia arvensis",
+    "status": "ok",
+    "chunks": 2,
+    "images": 1,
+    "lang": "it",
+    "common_name": "mordigallina"
+  },
+  "Lysimachia nemorum": {
+    "species": "Lysimachia nemorum",
+    "status": "ok",
+    "chunks": 1,
+    "images": 2,
+    "lang": "en",
+    "common_name": ""
+  },
+  "Lysimachia vulgaris": {
+    "species": "Lysimachia vulgaris",
+    "status": "ok",
+    "chunks": 4,
+    "images": 2,
+    "lang": "en",
+    "common_name": ""
+  },
+  "Lythrum salicaria": {
+    "species": "Lythrum salicaria",
+    "status": "ok",
+    "chunks": 3,
+    "images": 3,
+    "lang": "it",
+    "common_name": ""
+  },
+  "Magnolia grandiflora": {
+    "species": "Magnolia grandiflora",
+    "status": "ok",
+    "chunks": 4,
+    "images": 4,
+    "lang": "it",
+    "common_name": "magnolia sempreverde"
+  },
+  "Malus domestica": {
+    "species": "Malus domestica",
+    "status": "ok",
+    "chunks": 5,
+    "images": 5,
+    "lang": "it",
+    "common_name": "melo domestico"
+  },
+  "Malus sylvestris": {
+    "species": "Malus sylvestris",
+    "status": "ok",
+    "chunks": 1,
+    "images": 2,
+    "lang": "it",
+    "common_name": "melo selvatico"
+  },
+  "Malva arborea": {
+    "species": "Malva arborea",
+    "status": "ok",
+    "chunks": 1,
+    "images": 1,
+    "lang": "it",
+    "common_name": ""
+  },
+  "Malva moschata": {
+    "species": "Malva moschata",
+    "status": "ok",
+    "chunks": 1,
+    "images": 1,
+    "lang": "it",
+    "common_name": "malva muschiata"
+  },
+  "Malva neglecta": {
+    "species": "Malva neglecta",
+    "status": "ok",
+    "chunks": 6,
+    "images": 5,
+    "lang": "en",
+    "common_name": ""
+  },
+  "Malva setigera": {
+    "species": "Malva setigera",
+    "status": "ok",
+    "chunks": 1,
+    "images": 5,
+    "lang": "en",
+    "common_name": ""
+  },
+  "Malva sylvestris": {
+    "species": "Malva sylvestris",
+    "status": "ok",
+    "chunks": 3,
+    "images": 2,
+    "lang": "it",
+    "common_name": "malva selvatica"
+  },
+  "Matricaria chamomilla": {
+    "species": "Matricaria chamomilla",
+    "status": "ok",
+    "chunks": 15,
+    "images": 5,
+    "lang": "it",
+    "common_name": "camomilla comune"
+  },
+  "Matthiola incana": {
+    "species": "Matthiola incana",
+    "status": "ok",
+    "chunks": 4,
+    "images": 1,
+    "lang": "it",
+    "common_name": "violacciocca rossa"
+  },
+  "Matthiola sinuata": {
+    "species": "Matthiola sinuata",
+    "status": "ok",
+    "chunks": 1,
+    "images": 2,
+    "lang": "en",
+    "common_name": "sea stock"
+  },
+  "Maytenus canariensis": {
+    "species": "Maytenus canariensis",
+    "status": "ok",
+    "chunks": 1,
+    "images": 2,
+    "lang": "en",
+    "common_name": ""
+  },
+  "Meconopsis cambrica": {
+    "species": "Meconopsis cambrica",
+    "status": "ok",
+    "chunks": 4,
+    "images": 5,
+    "lang": "it",
+    "common_name": "Papaver cambricum"
+  },
+  "Medicago arborea": {
+    "species": "Medicago arborea",
+    "status": "ok",
+    "chunks": 1,
+    "images": 3,
+    "lang": "it",
+    "common_name": "Medicago arborea L. è una specie arbustiva della famiglia delle Fabacee"
+  },
+  "Medicago lupulina": {
+    "species": "Medicago lupulina",
+    "status": "ok",
+    "chunks": 6,
+    "images": 5,
+    "lang": "en",
+    "common_name": "black medick"
+  },
+  "Medicago sativa": {
+    "species": "Medicago sativa",
+    "status": "ok",
+    "chunks": 9,
+    "images": 5,
+    "lang": "it",
+    "common_name": "erba medica"
+  },
+  "Melampyrum pratense": {
+    "species": "Melampyrum pratense",
+    "status": "ok",
+    "chunks": 11,
+    "images": 5,
+    "lang": "it",
+    "common_name": "spigarola bianca"
+  },
+  "Melia azedarach": {
+    "species": "Melia azedarach",
+    "status": "ok",
+    "chunks": 7,
+    "images": 5,
+    "lang": "it",
+    "common_name": "albero dei rosari o albero dei paternostri"
+  },
+  "Melilotus albus": {
+    "species": "Melilotus albus",
+    "status": "ok",
+    "chunks": 1,
+    "images": 3,
+    "lang": "it",
+    "common_name": "meliloto bianco"
+  },
+  "Melissa officinalis": {
+    "species": "Melissa officinalis",
+    "status": "ok",
+    "chunks": 14,
+    "images": 5,
+    "lang": "it",
+    "common_name": "melissa officinale"
+  },
+  "Melittis melissophyllum": {
+    "species": "Melittis melissophyllum",
+    "status": "ok",
+    "chunks": 10,
+    "images": 5,
+    "lang": "it",
+    "common_name": "erba limona comune"
+  },
+  "Mentha aquatica": {
+    "species": "Mentha aquatica",
+    "status": "ok",
+    "chunks": 13,
+    "images": 5,
+    "lang": "it",
+    "common_name": "menta d'acqua"
+  },
+  "Mentha arvensis": {
+    "species": "Mentha arvensis",
+    "status": "ok",
+    "chunks": 12,
+    "images": 5,
+    "lang": "it",
+    "common_name": "menta campestre"
+  },
+  "Mentha longifolia": {
+    "species": "Mentha longifolia",
+    "status": "ok",
+    "chunks": 21,
+    "images": 5,
+    "lang": "it",
+    "common_name": "menta selvatica"
+  },
+  "Mentha spicata": {
+    "species": "Mentha spicata",
+    "status": "ok",
+    "chunks": 18,
+    "images": 5,
+    "lang": "it",
+    "common_name": "mentastro verde"
+  },
+  "Mentha suaveolens": {
+    "species": "Mentha suaveolens",
+    "status": "ok",
+    "chunks": 1,
+    "images": 1,
+    "lang": "it",
+    "common_name": "menta a foglie rotonde"
+  },
+  "Mercurialis annua": {
+    "species": "Mercurialis annua",
+    "status": "ok",
+    "chunks": 2,
+    "images": 2,
+    "lang": "it",
+    "common_name": "mercorella comune"
+  },
+  "Mercurialis perennis": {
+    "species": "Mercurialis perennis",
+    "status": "ok",
+    "chunks": 10,
+    "images": 1,
+    "lang": "en",
+    "common_name": "dog's mercury"
+  },
+  "Microthlaspi perfoliatum": {
+    "species": "Microthlaspi perfoliatum",
+    "status": "not_found"
+  },
+  "Mirabilis jalapa": {
+    "species": "Mirabilis jalapa",
+    "status": "ok",
+    "chunks": 4,
+    "images": 3,
+    "lang": "it",
+    "common_name": "bella di notte"
+  },
+  "Misopates orontium": {
+    "species": "Misopates orontium",
+    "status": "ok",
+    "chunks": 8,
+    "images": 5,
+    "lang": "it",
+    "common_name": "gallinetta comune"
+  },
+  "Monotropa hypopitys": {
+    "species": "Monotropa hypopitys",
+    "status": "ok",
+    "chunks": 5,
+    "images": 3,
+    "lang": "en",
+    "common_name": ""
+  },
+  "Morus alba": {
+    "species": "Morus alba",
+    "status": "ok",
+    "chunks": 21,
+    "images": 5,
+    "lang": "it",
+    "common_name": "gelso bianco o moro bianco"
+  },
+  "Morus kagayamae": {
+    "species": "Morus kagayamae",
+    "status": "not_found"
+  },
+  "Muscari comosum": {
+    "species": "Muscari comosum",
+    "status": "ok",
+    "chunks": 5,
+    "images": 4,
+    "lang": "it",
+    "common_name": ""
+  },
+  "Muscari neglectum": {
+    "species": "Muscari neglectum",
+    "status": "ok",
+    "chunks": 1,
+    "images": 1,
+    "lang": "it",
+    "common_name": ""
+  },
+  "Myosotis alpestris": {
+    "species": "Myosotis alpestris",
+    "status": "ok",
+    "chunks": 1,
+    "images": 5,
+    "lang": "it",
+    "common_name": "nontiscordardimé alpino"
+  },
+  "Myosotis arvensis": {
+    "species": "Myosotis arvensis",
+    "status": "ok",
+    "chunks": 1,
+    "images": 5,
+    "lang": "it",
+    "common_name": "non ti scordar di me minore"
+  },
+  "Myosotis scorpioides": {
+    "species": "Myosotis scorpioides",
+    "status": "ok",
+    "chunks": 3,
+    "images": 5,
+    "lang": "en",
+    "common_name": ""
+  },
+  "Myosoton aquaticum": {
+    "species": "Myosoton aquaticum",
+    "status": "ok",
+    "chunks": 1,
+    "images": 4,
+    "lang": "en",
+    "common_name": ""
+  },
+  "Myrtus communis": {
+    "species": "Myrtus communis",
+    "status": "ok",
+    "chunks": 18,
+    "images": 5,
+    "lang": "it",
+    "common_name": "mirto"
+  },
+  "Narcissus assoanus": {
+    "species": "Narcissus assoanus",
+    "status": "ok",
+    "chunks": 1,
+    "images": 1,
+    "lang": "it",
+    "common_name": ""
+  },
+  "Narcissus dubius": {
+    "species": "Narcissus dubius",
+    "status": "ok",
+    "chunks": 2,
+    "images": 3,
+    "lang": "en",
+    "common_name": ""
+  },
+  "Narcissus pseudonarcissus": {
+    "species": "Narcissus pseudonarcissus",
+    "status": "ok",
+    "chunks": 5,
+    "images": 5,
+    "lang": "it",
+    "common_name": "narciso trombone, o giunchiglia"
+  },
+  "Narcissus tazetta": {
+    "species": "Narcissus tazetta",
+    "status": "ok",
+    "chunks": 3,
+    "images": 2,
+    "lang": "it",
+    "common_name": ""
+  },
+  "Nasturtium officinale": {
+    "species": "Nasturtium officinale",
+    "status": "ok",
+    "chunks": 1,
+    "images": 2,
+    "lang": "it",
+    "common_name": "crescione d'acqua"
+  },
+  "Neotinea ustulata": {
+    "species": "Neotinea ustulata",
+    "status": "ok",
+    "chunks": 3,
+    "images": 2,
+    "lang": "it",
+    "common_name": "orchide bruciacchiata"
+  },
+  "Neottia nidus-avis": {
+    "species": "Neottia nidus-avis",
+    "status": "ok",
+    "chunks": 11,
+    "images": 5,
+    "lang": "it",
+    "common_name": "nido d'uccello"
+  },
+  "Neottia ovata": {
+    "species": "Neottia ovata",
+    "status": "ok",
+    "chunks": 14,
+    "images": 5,
+    "lang": "it",
+    "common_name": "listera maggiore"
+  },
+  "Nerium oleander": {
+    "species": "Nerium oleander",
+    "status": "ok",
+    "chunks": 8,
+    "images": 5,
+    "lang": "it",
+    "common_name": "oleandro"
+  },
+  "Nigella damascena": {
+    "species": "Nigella damascena",
+    "status": "ok",
+    "chunks": 2,
+    "images": 5,
+    "lang": "it",
+    "common_name": ""
+  },
+  "Odontites luteus": {
+    "species": "Odontites luteus",
+    "status": "ok",
+    "chunks": 10,
+    "images": 3,
+    "lang": "it",
+    "common_name": "perlina gialla"
+  },
+  "Odontites vernus": {
+    "species": "Odontites vernus",
+    "status": "ok",
+    "chunks": 9,
+    "images": 2,
+    "lang": "it",
+    "common_name": "odontite primaverile"
+  },
+  "Oenanthe crocata": {
+    "species": "Oenanthe crocata",
+    "status": "ok",
+    "chunks": 2,
+    "images": 2,
+    "lang": "it",
+    "common_name": "finocchio d'acqua"
+  },
+  "Oenothera biennis": {
+    "species": "Oenothera biennis",
+    "status": "ok",
+    "chunks": 18,
+    "images": 5,
+    "lang": "it",
+    "common_name": "Enagra comune"
+  },
+  "Oenothera glazioviana": {
+    "species": "Oenothera glazioviana",
+    "status": "ok",
+    "chunks": 4,
+    "images": 3,
+    "lang": "it",
+    "common_name": "enagra di Glaziou o enagra di Lamarck"
+  },
+  "Olea europaea": {
+    "species": "Olea europaea",
+    "status": "ok",
+    "chunks": 35,
+    "images": 5,
+    "lang": "it",
+    "common_name": "olivo o ulivo"
+  },
+  "Onobrychis viciifolia": {
+    "species": "Onobrychis viciifolia",
+    "status": "ok",
+    "chunks": 5,
+    "images": 4,
+    "lang": "en",
+    "common_name": "Onobrychis viciifolia, also known as O. sativa or common sainfoin"
+  },
+  "Ononis minutissima": {
+    "species": "Ononis minutissima",
+    "status": "not_found"
+  },
+  "Ononis natrix": {
+    "species": "Ononis natrix",
+    "status": "ok",
+    "chunks": 2,
+    "images": 1,
+    "lang": "en",
+    "common_name": ""
+  },
+  "Ononis reclinata": {
+    "species": "Ononis reclinata",
+    "status": "ok",
+    "chunks": 1,
+    "images": 1,
+    "lang": "en",
+    "common_name": ""
+  },
+  "Ononis spinosa": {
+    "species": "Ononis spinosa",
+    "status": "ok",
+    "chunks": 7,
+    "images": 5,
+    "lang": "it",
+    "common_name": "ononide spinosa"
+  },
+  "Onopordum acanthium": {
+    "species": "Onopordum acanthium",
+    "status": "ok",
+    "chunks": 16,
+    "images": 5,
+    "lang": "it",
+    "common_name": "onopordo tomentoso"
+  },
+  "Ophrys apifera": {
+    "species": "Ophrys apifera",
+    "status": "ok",
+    "chunks": 5,
+    "images": 4,
+    "lang": "it",
+    "common_name": "vesparia o fior di vespa"
+  },
+  "Ophrys arachnitiformis": {
+    "species": "Ophrys arachnitiformis",
+    "status": "ok",
+    "chunks": 12,
+    "images": 2,
+    "lang": "it",
+    "common_name": ""
+  },
+  "Ophrys aranifera": {
+    "species": "Ophrys aranifera",
+    "status": "ok",
+    "chunks": 14,
+    "images": 5,
+    "lang": "it",
+    "common_name": "ofride verde-bruna"
+  },
+  "Ophrys bertolonii": {
+    "species": "Ophrys bertolonii",
+    "status": "ok",
+    "chunks": 5,
+    "images": 3,
+    "lang": "it",
+    "common_name": "ofride di Bertoloni"
+  },
+  "Ophrys fuciflora": {
+    "species": "Ophrys fuciflora",
+    "status": "ok",
+    "chunks": 3,
+    "images": 3,
+    "lang": "it",
+    "common_name": "fior bombo"
+  },
+  "Ophrys insectifera": {
+    "species": "Ophrys insectifera",
+    "status": "ok",
+    "chunks": 2,
+    "images": 3,
+    "lang": "it",
+    "common_name": "moscaria"
+  },
+  "Ophrys lupercalis": {
+    "species": "Ophrys lupercalis",
+    "status": "ok",
+    "chunks": 2,
+    "images": 1,
+    "lang": "it",
+    "common_name": ""
+  },
+  "Ophrys lutea": {
+    "species": "Ophrys lutea",
+    "status": "ok",
+    "chunks": 3,
+    "images": 3,
+    "lang": "it",
+    "common_name": "ofride gialla"
+  },
+  "Ophrys passionis": {
+    "species": "Ophrys passionis",
+    "status": "ok",
+    "chunks": 10,
+    "images": 4,
+    "lang": "it",
+    "common_name": "Ophrys sphegodes subsp. passionis"
+  },
+  "Ophrys scolopax": {
+    "species": "Ophrys scolopax",
+    "status": "ok",
+    "chunks": 12,
+    "images": 5,
+    "lang": "it",
+    "common_name": "ofride cornuta"
+  },
+  "Ophrys speculum": {
+    "species": "Ophrys speculum",
+    "status": "ok",
+    "chunks": 6,
+    "images": 4,
+    "lang": "it",
+    "common_name": "ofride specchio"
+  },
+  "Ophrys virescens": {
+    "species": "Ophrys virescens",
+    "status": "ok",
+    "chunks": 14,
+    "images": 3,
+    "lang": "it",
+    "common_name": "ofride verde-bruna"
+  },
+  "Opuntia ficus-indica": {
+    "species": "Opuntia ficus-indica",
+    "status": "ok",
+    "chunks": 32,
+    "images": 3,
+    "lang": "it",
+    "common_name": "fico d'India o ficodindia"
+  },
+  "Orchis anthropophora": {
+    "species": "Orchis anthropophora",
+    "status": "ok",
+    "chunks": 2,
+    "images": 0,
+    "lang": "it",
+    "common_name": "ballerina"
+  },
+  "Orchis mascula": {
+    "species": "Orchis mascula",
+    "status": "ok",
+    "chunks": 4,
+    "images": 3,
+    "lang": "it",
+    "common_name": "orchide maschia"
+  },
+  "Orchis provincialis": {
+    "species": "Orchis provincialis",
+    "status": "ok",
+    "chunks": 2,
+    "images": 2,
+    "lang": "it",
+    "common_name": "orchide di Provenza"
+  },
+  "Orchis purpurea": {
+    "species": "Orchis purpurea",
+    "status": "ok",
+    "chunks": 3,
+    "images": 2,
+    "lang": "it",
+    "common_name": "orchide purpurea o orchide maggiore"
+  },
+  "Orchis simia": {
+    "species": "Orchis simia",
+    "status": "ok",
+    "chunks": 2,
+    "images": 2,
+    "lang": "it",
+    "common_name": "orchidea scimmia"
+  },
+  "Origanum vulgare": {
+    "species": "Origanum vulgare",
+    "status": "ok",
+    "chunks": 13,
+    "images": 5,
+    "lang": "it",
+    "common_name": "origano comune o origano mediterraneo"
+  },
+  "Ornithogalum umbellatum": {
+    "species": "Ornithogalum umbellatum",
+    "status": "ok",
+    "chunks": 2,
+    "images": 1,
+    "lang": "it",
+    "common_name": ""
+  },
+  "Orobanche amethystea": {
+    "species": "Orobanche amethystea",
+    "status": "not_found"
+  },
+  "Orobanche caryophyllacea": {
+    "species": "Orobanche caryophyllacea",
+    "status": "ok",
+    "chunks": 12,
+    "images": 5,
+    "lang": "it",
+    "common_name": "succiamele garofanato"
+  },
+  "Orobanche gracilis": {
+    "species": "Orobanche gracilis",
+    "status": "ok",
+    "chunks": 12,
+    "images": 5,
+    "lang": "it",
+    "common_name": "succiamele rossastro"
+  },
+  "Orobanche hederae": {
+    "species": "Orobanche hederae",
+    "status": "ok",
+    "chunks": 12,
+    "images": 2,
+    "lang": "it",
+    "common_name": "succiamele dell'edera"
+  },
+  "Orobanche minor": {
+    "species": "Orobanche minor",
+    "status": "ok",
+    "chunks": 12,
+    "images": 3,
+    "lang": "it",
+    "common_name": "succiamele minore"
+  },
+  "Orobanche rapum-genistae": {
+    "species": "Orobanche rapum-genistae",
+    "status": "ok",
+    "chunks": 11,
+    "images": 4,
+    "lang": "it",
+    "common_name": "succiamele maggiore"
+  },
+  "Osmunda regalis": {
+    "species": "Osmunda regalis",
+    "status": "ok",
+    "chunks": 5,
+    "images": 1,
+    "lang": "it",
+    "common_name": ""
+  },
+  "Ostrya carpinifolia": {
+    "species": "Ostrya carpinifolia",
+    "status": "ok",
+    "chunks": 4,
+    "images": 5,
+    "lang": "it",
+    "common_name": "carpino nero, carpinella, ostria o, meno frequentemente, carpinello"
+  },
+  "Oxalis articulata": {
+    "species": "Oxalis articulata",
+    "status": "ok",
+    "chunks": 1,
+    "images": 2,
+    "lang": "it",
+    "common_name": "acetosella articolata"
+  },
+  "Oxalis corniculata": {
+    "species": "Oxalis corniculata",
+    "status": "ok",
+    "chunks": 2,
+    "images": 5,
+    "lang": "it",
+    "common_name": "acetosella dei campi"
+  },
+  "Paliurus spina-christi": {
+    "species": "Paliurus spina-christi",
+    "status": "ok",
+    "chunks": 5,
+    "images": 5,
+    "lang": "it",
+    "common_name": "marruca"
+  },
+  "Pallenis spinosa": {
+    "species": "Pallenis spinosa",
+    "status": "ok",
+    "chunks": 12,
+    "images": 5,
+    "lang": "it",
+    "common_name": "asterisco spinoso"
+  },
+  "Pancratium maritimum": {
+    "species": "Pancratium maritimum",
+    "status": "ok",
+    "chunks": 6,
+    "images": 5,
+    "lang": "it",
+    "common_name": "giglio di mare"
+  },
+  "Papaver alpinum": {
+    "species": "Papaver alpinum",
+    "status": "ok",
+    "chunks": 3,
+    "images": 2,
+    "lang": "it",
+    "common_name": "Oreomecon alpina"
+  },
+  "Papaver rhoeas": {
+    "species": "Papaver rhoeas",
+    "status": "ok",
+    "chunks": 7,
+    "images": 4,
+    "lang": "it",
+    "common_name": ""
+  },
+  "Papaver somniferum": {
+    "species": "Papaver somniferum",
+    "status": "ok",
+    "chunks": 10,
+    "images": 4,
+    "lang": "it",
+    "common_name": ""
+  },
+  "Pardoglossum cheirifolium": {
+    "species": "Pardoglossum cheirifolium",
+    "status": "ok",
+    "chunks": 1,
+    "images": 1,
+    "lang": "en",
+    "common_name": ""
+  },
+  "Parietaria judaica": {
+    "species": "Parietaria judaica",
+    "status": "ok",
+    "chunks": 2,
+    "images": 3,
+    "lang": "it",
+    "common_name": "vetriola minore, vetriola dei muri o parietaria giudaica"
+  },
+  "Paris quadrifolia": {
+    "species": "Paris quadrifolia",
+    "status": "ok",
+    "chunks": 4,
+    "images": 5,
+    "lang": "en",
+    "common_name": ""
+  },
+  "Parnassia palustris": {
+    "species": "Parnassia palustris",
+    "status": "ok",
+    "chunks": 3,
+    "images": 3,
+    "lang": "it",
+    "common_name": ""
+  },
+  "Parthenocissus quinquefolia": {
+    "species": "Parthenocissus quinquefolia",
+    "status": "ok",
+    "chunks": 3,
+    "images": 5,
+    "lang": "it",
+    "common_name": "vite americana  [Parthenocissus quinquefolia"
+  },
+  "Parthenocissus tricuspidata": {
+    "species": "Parthenocissus tricuspidata",
+    "status": "ok",
+    "chunks": 6,
+    "images": 5,
+    "lang": "en",
+    "common_name": "Parthenocissus tricuspidata is a species of flowering plant in the grape family"
+  },
+  "Passiflora caerulea": {
+    "species": "Passiflora caerulea",
+    "status": "ok",
+    "chunks": 2,
+    "images": 4,
+    "lang": "it",
+    "common_name": "fiore della passione"
+  },
+  "Pastinaca sativa": {
+    "species": "Pastinaca sativa",
+    "status": "ok",
+    "chunks": 8,
+    "images": 3,
+    "lang": "it",
+    "common_name": "pastinaca"
+  },
+  "Paulownia tomentosa": {
+    "species": "Paulownia tomentosa",
+    "status": "ok",
+    "chunks": 8,
+    "images": 3,
+    "lang": "it",
+    "common_name": ""
+  },
+  "Perovskia atriplicifolia": {
+    "species": "Perovskia atriplicifolia",
+    "status": "ok",
+    "chunks": 19,
+    "images": 5,
+    "lang": "en",
+    "common_name": "Salvia yangii, previously known as Perovskia atriplicifolia"
+  },
+  "Persicaria maculosa": {
+    "species": "Persicaria maculosa",
+    "status": "ok",
+    "chunks": 20,
+    "images": 5,
+    "lang": "it",
+    "common_name": "poligono persicaria"
+  },
+  "Petasites pyrenaicus": {
+    "species": "Petasites pyrenaicus",
+    "status": "ok",
+    "chunks": 12,
+    "images": 5,
+    "lang": "it",
+    "common_name": "farfaraccio vaniglione"
+  },
+  "Phacelia tanacetifolia": {
+    "species": "Phacelia tanacetifolia",
+    "status": "ok",
+    "chunks": 4,
+    "images": 3,
+    "lang": "it",
+    "common_name": "facelia"
+  },
+  "Philadelphus coronarius": {
+    "species": "Philadelphus coronarius",
+    "status": "ok",
+    "chunks": 5,
+    "images": 5,
+    "lang": "en",
+    "common_name": ""
+  },
+  "Phillyrea angustifolia": {
+    "species": "Phillyrea angustifolia",
+    "status": "ok",
+    "chunks": 1,
+    "images": 1,
+    "lang": "it",
+    "common_name": "ilatro sottile"
+  },
+  "Phillyrea media": {
+    "species": "Phillyrea media",
+    "status": "ok",
+    "chunks": 1,
+    "images": 1,
+    "lang": "en",
+    "common_name": "green olive tree or mock privet"
+  },
+  "Phleum pratense": {
+    "species": "Phleum pratense",
+    "status": "ok",
+    "chunks": 1,
+    "images": 2,
+    "lang": "it",
+    "common_name": "fleo"
+  },
+  "Phlomis fruticosa": {
+    "species": "Phlomis fruticosa",
+    "status": "ok",
+    "chunks": 2,
+    "images": 2,
+    "lang": "it",
+    "common_name": "salvione giallo"
+  },
+  "Photinia serrulata": {
+    "species": "Photinia serrulata",
+    "status": "ok",
+    "chunks": 2,
+    "images": 1,
+    "lang": "it",
+    "common_name": "Photinia glabra"
+  },
+  "Phyteuma hemisphaericum": {
+    "species": "Phyteuma hemisphaericum",
+    "status": "ok",
+    "chunks": 11,
+    "images": 3,
+    "lang": "it",
+    "common_name": "ll raponzolo alpino"
+  },
+  "Phyteuma spicatum": {
+    "species": "Phyteuma spicatum",
+    "status": "ok",
+    "chunks": 12,
+    "images": 5,
+    "lang": "it",
+    "common_name": "ll raponzolo giallo o ajucca"
+  },
+  "Phytolacca americana": {
+    "species": "Phytolacca americana",
+    "status": "ok",
+    "chunks": 2,
+    "images": 1,
+    "lang": "it",
+    "common_name": ""
+  },
+  "Picris hieracioides": {
+    "species": "Picris hieracioides",
+    "status": "ok",
+    "chunks": 21,
+    "images": 5,
+    "lang": "it",
+    "common_name": "aspraggine comune"
+  },
+  "Pilosella aurantiaca": {
+    "species": "Pilosella aurantiaca",
+    "status": "ok",
+    "chunks": 15,
+    "images": 5,
+    "lang": "it",
+    "common_name": "pelosella aranciata"
+  },
+  "Pilosella lactucella": {
+    "species": "Pilosella lactucella",
+    "status": "ok",
+    "chunks": 15,
+    "images": 5,
+    "lang": "it",
+    "common_name": "pelosella orecchia"
+  },
+  "Pilosella officinarum": {
+    "species": "Pilosella officinarum",
+    "status": "ok",
+    "chunks": 17,
+    "images": 5,
+    "lang": "it",
+    "common_name": "sparviere pelosetto"
+  },
+  "Pinguicula grandiflora": {
+    "species": "Pinguicula grandiflora",
+    "status": "ok",
+    "chunks": 1,
+    "images": 1,
+    "lang": "it",
+    "common_name": ""
+  },
+  "Pinus brutia": {
+    "species": "Pinus brutia",
+    "status": "ok",
+    "chunks": 4,
+    "images": 2,
+    "lang": "it",
+    "common_name": "pino calabro"
+  },
+  "Pinus cembra": {
+    "species": "Pinus cembra",
+    "status": "ok",
+    "chunks": 6,
+    "images": 5,
+    "lang": "it",
+    "common_name": "pino cembro"
+  },
+  "Pinus halepensis": {
+    "species": "Pinus halepensis",
+    "status": "ok",
+    "chunks": 5,
+    "images": 5,
+    "lang": "it",
+    "common_name": "pino d'Aleppo"
+  },
+  "Pinus mugo": {
+    "species": "Pinus mugo",
+    "status": "ok",
+    "chunks": 8,
+    "images": 5,
+    "lang": "it",
+    "common_name": "pino mugo"
+  },
+  "Pinus nigra": {
+    "species": "Pinus nigra",
+    "status": "ok",
+    "chunks": 7,
+    "images": 4,
+    "lang": "it",
+    "common_name": "pino nero"
+  },
+  "Pinus pinaster": {
+    "species": "Pinus pinaster",
+    "status": "ok",
+    "chunks": 6,
+    "images": 5,
+    "lang": "it",
+    "common_name": "pino marittimo"
+  },
+  "Pinus pinea": {
+    "species": "Pinus pinea",
+    "status": "ok",
+    "chunks": 9,
+    "images": 5,
+    "lang": "it",
+    "common_name": "pino domestico"
+  },
+  "Pinus sylvestris": {
+    "species": "Pinus sylvestris",
+    "status": "ok",
+    "chunks": 7,
+    "images": 5,
+    "lang": "it",
+    "common_name": "pino silvestre"
+  },
+  "Pistacia lentiscus": {
+    "species": "Pistacia lentiscus",
+    "status": "ok",
+    "chunks": 10,
+    "images": 5,
+    "lang": "it",
+    "common_name": "lentisco"
+  },
+  "Pistacia terebinthus": {
+    "species": "Pistacia terebinthus",
+    "status": "ok",
+    "chunks": 5,
+    "images": 2,
+    "lang": "it",
+    "common_name": "terebinto"
+  },
+  "Pittosporum tenuifolium": {
+    "species": "Pittosporum tenuifolium",
+    "status": "ok",
+    "chunks": 2,
+    "images": 1,
+    "lang": "it",
+    "common_name": ""
+  },
+  "Pittosporum tobira": {
+    "species": "Pittosporum tobira",
+    "status": "ok",
+    "chunks": 6,
+    "images": 5,
+    "lang": "it",
+    "common_name": "pittosporo o pitosforo"
+  },
+  "Plantago coronopus": {
+    "species": "Plantago coronopus",
+    "status": "ok",
+    "chunks": 16,
+    "images": 5,
+    "lang": "it",
+    "common_name": "piantaggine barbatella"
+  },
+  "Plantago lagopus": {
+    "species": "Plantago lagopus",
+    "status": "ok",
+    "chunks": 11,
+    "images": 5,
+    "lang": "it",
+    "common_name": "piantaggine piede di lepre"
+  },
+  "Plantago lanceolata": {
+    "species": "Plantago lanceolata",
+    "status": "ok",
+    "chunks": 14,
+    "images": 5,
+    "lang": "it",
+    "common_name": "piantaggine lanciuola"
+  },
+  "Plantago major": {
+    "species": "Plantago major",
+    "status": "ok",
+    "chunks": 18,
+    "images": 5,
+    "lang": "it",
+    "common_name": "piantaggine maggiore"
+  },
+  "Plantago maritima": {
+    "species": "Plantago maritima",
+    "status": "ok",
+    "chunks": 12,
+    "images": 3,
+    "lang": "it",
+    "common_name": "piantaggine delle argille"
+  },
+  "Plantago media": {
+    "species": "Plantago media",
+    "status": "ok",
+    "chunks": 14,
+    "images": 0,
+    "lang": "it",
+    "common_name": "piantaggine pelosa"
+  },
+  "Platanthera bifolia": {
+    "species": "Platanthera bifolia",
+    "status": "ok",
+    "chunks": 12,
+    "images": 0,
+    "lang": "it",
+    "common_name": "platantera comune"
+  },
+  "Platanthera chlorantha": {
+    "species": "Platanthera chlorantha",
+    "status": "ok",
+    "chunks": 12,
+    "images": 0,
+    "lang": "it",
+    "common_name": "platantera verdastra"
+  },
+  "Platanus orientalis": {
+    "species": "Platanus orientalis",
+    "status": "ok",
+    "chunks": 2,
+    "images": 2,
+    "lang": "it",
+    "common_name": ""
+  },
+  "Platanus x": {
+    "species": "Platanus x",
+    "status": "not_found"
+  },
+  "Poa annua": {
+    "species": "Poa annua",
+    "status": "ok",
+    "chunks": 3,
+    "images": 0,
+    "lang": "it",
+    "common_name": "fienarola annuale"
+  },
+  "Polygala vulgaris": {
+    "species": "Polygala vulgaris",
+    "status": "ok",
+    "chunks": 7,
+    "images": 0,
+    "lang": "it",
+    "common_name": "poligala comune"
+  },
+  "Polygonatum multiflorum": {
+    "species": "Polygonatum multiflorum",
+    "status": "ok",
+    "chunks": 3,
+    "images": 1,
+    "lang": "en",
+    "common_name": ""
+  },
+  "Polygonatum odoratum": {
+    "species": "Polygonatum odoratum",
+    "status": "ok",
+    "chunks": 1,
+    "images": 1,
+    "lang": "it",
+    "common_name": "sigillo di Salomone"
+  },
+  "Polypodium vulgare": {
+    "species": "Polypodium vulgare",
+    "status": "ok",
+    "chunks": 3,
+    "images": 0,
+    "lang": "it",
+    "common_name": "Polypodium vulgare L."
+  },
+  "Polystichum setiferum": {
+    "species": "Polystichum setiferum",
+    "status": "ok",
+    "chunks": 3,
+    "images": 3,
+    "lang": "en",
+    "common_name": ""
+  },
+  "Populus alba": {
+    "species": "Populus alba",
+    "status": "ok",
+    "chunks": 4,
+    "images": 4,
+    "lang": "it",
+    "common_name": "pioppo bianco"
+  },
+  "Populus nigra": {
+    "species": "Populus nigra",
+    "status": "ok",
+    "chunks": 2,
+    "images": 2,
+    "lang": "it",
+    "common_name": "pioppo nero"
+  },
+  "Populus tremula": {
+    "species": "Populus tremula",
+    "status": "ok",
+    "chunks": 4,
+    "images": 3,
+    "lang": "it",
+    "common_name": "pioppo tremolo"
+  },
+  "Populus trichocarpa": {
+    "species": "Populus trichocarpa",
+    "status": "ok",
+    "chunks": 16,
+    "images": 5,
+    "lang": "en",
+    "common_name": ""
+  },
+  "Portulaca oleracea": {
+    "species": "Portulaca oleracea",
+    "status": "ok",
+    "chunks": 6,
+    "images": 2,
+    "lang": "it",
+    "common_name": "portulaca"
+  },
+  "Potentilla erecta": {
+    "species": "Potentilla erecta",
+    "status": "ok",
+    "chunks": 15,
+    "images": 5,
+    "lang": "it",
+    "common_name": "cinquefoglia eretta, cinquefoglia tormentilla o semplicemente tormentilla"
+  },
+  "Potentilla indica": {
+    "species": "Potentilla indica",
+    "status": "ok",
+    "chunks": 2,
+    "images": 4,
+    "lang": "it",
+    "common_name": "falsa fragola o fragola matta"
+  },
+  "Potentilla recta": {
+    "species": "Potentilla recta",
+    "status": "ok",
+    "chunks": 3,
+    "images": 5,
+    "lang": "en",
+    "common_name": ""
+  },
+  "Potentilla reptans": {
+    "species": "Potentilla reptans",
+    "status": "ok",
+    "chunks": 13,
+    "images": 4,
+    "lang": "it",
+    "common_name": "cinquefoglia comune"
+  },
+  "Potentilla sterilis": {
+    "species": "Potentilla sterilis",
+    "status": "ok",
+    "chunks": 1,
+    "images": 0,
+    "lang": "en",
+    "common_name": ""
+  },
+  "Potentilla tabernaemontani": {
+    "species": "Potentilla tabernaemontani",
+    "status": "ok",
+    "chunks": 11,
+    "images": 2,
+    "lang": "en",
+    "common_name": ""
+  },
+  "Poterium sanguisorba": {
+    "species": "Poterium sanguisorba",
+    "status": "ok",
+    "chunks": 10,
+    "images": 0,
+    "lang": "en",
+    "common_name": "Sanguisorba minor, the salad burnet, garden burnet, small burnet, burnet"
+  },
+  "Prenanthes purpurea": {
+    "species": "Prenanthes purpurea",
+    "status": "ok",
+    "chunks": 12,
+    "images": 0,
+    "lang": "it",
+    "common_name": "lattuga montana"
+  },
+  "Primula elatior": {
+    "species": "Primula elatior",
+    "status": "ok",
+    "chunks": 12,
+    "images": 0,
+    "lang": "it",
+    "common_name": "primula maggiore"
+  },
+  "Primula veris": {
+    "species": "Primula veris",
+    "status": "ok",
+    "chunks": 18,
+    "images": 2,
+    "lang": "it",
+    "common_name": "primula odorosa"
+  },
+  "Primula vulgaris": {
+    "species": "Primula vulgaris",
+    "status": "ok",
+    "chunks": 13,
+    "images": 0,
+    "lang": "it",
+    "common_name": "primula comune"
+  },
+  "Prospero autumnale": {
+    "species": "Prospero autumnale",
+    "status": "ok",
+    "chunks": 1,
+    "images": 1,
+    "lang": "it",
+    "common_name": "scilla autunnale"
+  },
+  "Prunella grandiflora": {
+    "species": "Prunella grandiflora",
+    "status": "ok",
+    "chunks": 11,
+    "images": 2,
+    "lang": "it",
+    "common_name": "prunella delle Alpi"
+  },
+  "Prunella hastifolia": {
+    "species": "Prunella hastifolia",
+    "status": "not_found"
+  },
+  "Prunella laciniata": {
+    "species": "Prunella laciniata",
+    "status": "ok",
+    "chunks": 11,
+    "images": 0,
+    "lang": "it",
+    "common_name": "brunella gialla"
+  },
+  "Prunella vulgaris": {
+    "species": "Prunella vulgaris",
+    "status": "ok",
+    "chunks": 14,
+    "images": 2,
+    "lang": "it",
+    "common_name": "brunella"
+  },
+  "Prunus armeniaca": {
+    "species": "Prunus armeniaca",
+    "status": "ok",
+    "chunks": 6,
+    "images": 1,
+    "lang": "it",
+    "common_name": "albicocco"
+  },
+  "Prunus avium": {
+    "species": "Prunus avium",
+    "status": "ok",
+    "chunks": 14,
+    "images": 1,
+    "lang": "it",
+    "common_name": "ciliegio"
+  },
+  "Prunus cerasifera": {
+    "species": "Prunus cerasifera",
+    "status": "ok",
+    "chunks": 3,
+    "images": 0,
+    "lang": "it",
+    "common_name": "àmolo"
+  },
+  "Prunus dulcis": {
+    "species": "Prunus dulcis",
+    "status": "ok",
+    "chunks": 7,
+    "images": 0,
+    "lang": "it",
+    "common_name": "mandorlo"
+  },
+  "Prunus laurocerasus": {
+    "species": "Prunus laurocerasus",
+    "status": "ok",
+    "chunks": 3,
+    "images": 5,
+    "lang": "it",
+    "common_name": "lauroceraso"
+  },
+  "Prunus mahaleb": {
+    "species": "Prunus mahaleb",
+    "status": "ok",
+    "chunks": 2,
+    "images": 1,
+    "lang": "it",
+    "common_name": "ciliegio canino"
+  },
+  "Prunus padus": {
+    "species": "Prunus padus",
+    "status": "ok",
+    "chunks": 3,
+    "images": 3,
+    "lang": "it",
+    "common_name": "pado"
+  },
+  "Prunus serotina": {
+    "species": "Prunus serotina",
+    "status": "ok",
+    "chunks": 8,
+    "images": 4,
+    "lang": "en",
+    "common_name": ""
+  },
+  "Prunus serrulata": {
+    "species": "Prunus serrulata",
+    "status": "ok",
+    "chunks": 4,
+    "images": 1,
+    "lang": "it",
+    "common_name": ""
+  },
+  "Prunus spinosa": {
+    "species": "Prunus spinosa",
+    "status": "ok",
+    "chunks": 4,
+    "images": 0,
+    "lang": "it",
+    "common_name": "prugnolo spinoso"
+  },
+  "Pseudorchis albida": {
+    "species": "Pseudorchis albida",
+    "status": "ok",
+    "chunks": 2,
+    "images": 2,
+    "lang": "it",
+    "common_name": ""
+  },
+  "Pseudoturritis turrita": {
+    "species": "Pseudoturritis turrita",
+    "status": "ok",
+    "chunks": 1,
+    "images": 1,
+    "lang": "en",
+    "common_name": ""
+  },
+  "Pteridium aquilinum": {
+    "species": "Pteridium aquilinum",
+    "status": "ok",
+    "chunks": 4,
+    "images": 4,
+    "lang": "it",
+    "common_name": "felce aquilina"
+  },
+  "Pterocarya fraxinifolia": {
+    "species": "Pterocarya fraxinifolia",
+    "status": "ok",
+    "chunks": 1,
+    "images": 2,
+    "lang": "it",
+    "common_name": "noce del Caucaso"
+  },
+  "Pulicaria dysenterica": {
+    "species": "Pulicaria dysenterica",
+    "status": "ok",
+    "chunks": 12,
+    "images": 3,
+    "lang": "it",
+    "common_name": "Incensaria comune"
+  },
+  "Punica granatum": {
+    "species": "Punica granatum",
+    "status": "ok",
+    "chunks": 11,
+    "images": 0,
+    "lang": "it",
+    "common_name": "melograno"
+  },
+  "Pyracantha coccinea": {
+    "species": "Pyracantha coccinea",
+    "status": "ok",
+    "chunks": 1,
+    "images": 0,
+    "lang": "it",
+    "common_name": "agazzino"
+  },
+  "Pyrus communis": {
+    "species": "Pyrus communis",
+    "status": "ok",
+    "chunks": 2,
+    "images": 2,
+    "lang": "it",
+    "common_name": "pero comune"
+  },
+  "Quercus cerris": {
+    "species": "Quercus cerris",
+    "status": "ok",
+    "chunks": 3,
+    "images": 0,
+    "lang": "it",
+    "common_name": "cerro"
+  },
+  "Quercus coccifera": {
+    "species": "Quercus coccifera",
+    "status": "ok",
+    "chunks": 4,
+    "images": 1,
+    "lang": "it",
+    "common_name": "quercia spinosa"
+  },
+  "Quercus ilex": {
+    "species": "Quercus ilex",
+    "status": "ok",
+    "chunks": 15,
+    "images": 5,
+    "lang": "it",
+    "common_name": "leccio"
+  },
+  "Quercus palustris": {
+    "species": "Quercus palustris",
+    "status": "ok",
+    "chunks": 3,
+    "images": 4,
+    "lang": "it",
+    "common_name": "quercia palustre"
+  },
+  "Quercus petraea": {
+    "species": "Quercus petraea",
+    "status": "ok",
+    "chunks": 5,
+    "images": 2,
+    "lang": "it",
+    "common_name": "rovere"
+  },
+  "Quercus pubescens": {
+    "species": "Quercus pubescens",
+    "status": "ok",
+    "chunks": 8,
+    "images": 5,
+    "lang": "it",
+    "common_name": "roverella"
+  },
+  "Quercus robur": {
+    "species": "Quercus robur",
+    "status": "ok",
+    "chunks": 10,
+    "images": 5,
+    "lang": "it",
+    "common_name": "farnia"
+  },
+  "Quercus rubra": {
+    "species": "Quercus rubra",
+    "status": "ok",
+    "chunks": 5,
+    "images": 4,
+    "lang": "it",
+    "common_name": "quercia rossa"
+  },
+  "Quercus suber": {
+    "species": "Quercus suber",
+    "status": "ok",
+    "chunks": 11,
+    "images": 3,
+    "lang": "it",
+    "common_name": "quercia da sughero"
+  },
+  "Ranunculus aconitifolius": {
+    "species": "Ranunculus aconitifolius",
+    "status": "ok",
+    "chunks": 12,
+    "images": 0,
+    "lang": "it",
+    "common_name": ""
+  },
+  "Ranunculus acris": {
+    "species": "Ranunculus acris",
+    "status": "ok",
+    "chunks": 13,
+    "images": 0,
+    "lang": "it",
+    "common_name": ""
+  },
+  "Ranunculus bulbosus": {
+    "species": "Ranunculus bulbosus",
+    "status": "ok",
+    "chunks": 18,
+    "images": 4,
+    "lang": "it",
+    "common_name": "ranuncolo bulboso"
+  },
+  "Ranunculus flammula": {
+    "species": "Ranunculus flammula",
+    "status": "ok",
+    "chunks": 14,
+    "images": 0,
+    "lang": "it",
+    "common_name": "ranuncolo delle passere"
+  },
+  "Ranunculus gramineus": {
+    "species": "Ranunculus gramineus",
+    "status": "ok",
+    "chunks": 11,
+    "images": 0,
+    "lang": "it",
+    "common_name": "ranuncolo gramineo"
+  },
+  "Ranunculus paludosus": {
+    "species": "Ranunculus paludosus",
+    "status": "ok",
+    "chunks": 1,
+    "images": 1,
+    "lang": "en",
+    "common_name": ""
+  },
+  "Ranunculus parviflorus": {
+    "species": "Ranunculus parviflorus",
+    "status": "ok",
+    "chunks": 2,
+    "images": 2,
+    "lang": "en",
+    "common_name": "smallflower buttercup"
+  },
+  "Ranunculus peltatus": {
+    "species": "Ranunculus peltatus",
+    "status": "ok",
+    "chunks": 16,
+    "images": 5,
+    "lang": "it",
+    "common_name": "ranuncolo peltato"
+  },
+  "Ranunculus platanifolius": {
+    "species": "Ranunculus platanifolius",
+    "status": "ok",
+    "chunks": 12,
+    "images": 3,
+    "lang": "it",
+    "common_name": "ranuncolo a foglie di platano"
+  },
+  "Ranunculus repens": {
+    "species": "Ranunculus repens",
+    "status": "ok",
+    "chunks": 14,
+    "images": 2,
+    "lang": "it",
+    "common_name": "ranuncolo strisciante"
+  },
+  "Ranunculus sceleratus": {
+    "species": "Ranunculus sceleratus",
+    "status": "ok",
+    "chunks": 12,
+    "images": 0,
+    "lang": "it",
+    "common_name": "ranuncolo di palude"
+  },
+  "Ranunculus trichophyllus": {
+    "species": "Ranunculus trichophyllus",
+    "status": "ok",
+    "chunks": 4,
+    "images": 1,
+    "lang": "en",
+    "common_name": ""
+  },
+  "Raphanus raphanistrum": {
+    "species": "Raphanus raphanistrum",
+    "status": "ok",
+    "chunks": 18,
+    "images": 5,
+    "lang": "it",
+    "common_name": "ravanello selvatico"
+  },
+  "Reseda lutea": {
+    "species": "Reseda lutea",
+    "status": "ok",
+    "chunks": 1,
+    "images": 3,
+    "lang": "en",
+    "common_name": ""
+  },
+  "Reseda luteola": {
+    "species": "Reseda luteola",
+    "status": "ok",
+    "chunks": 2,
+    "images": 2,
+    "lang": "it",
+    "common_name": "guaderella"
+  },
+  "Reseda phyteuma": {
+    "species": "Reseda phyteuma",
+    "status": "ok",
+    "chunks": 1,
+    "images": 4,
+    "lang": "en",
+    "common_name": "rampion mignonette or corn mignonette"
+  },
+  "Reynoutria japonica": {
+    "species": "Reynoutria japonica",
+    "status": "ok",
+    "chunks": 7,
+    "images": 3,
+    "lang": "it",
+    "common_name": "poligono del Giappone"
+  },
+  "Rhamnus alaternus": {
+    "species": "Rhamnus alaternus",
+    "status": "ok",
+    "chunks": 3,
+    "images": 3,
+    "lang": "it",
+    "common_name": "alaterno"
+  },
+  "Rhamnus alpina": {
+    "species": "Rhamnus alpina",
+    "status": "not_found"
+  },
+  "Rhamnus cathartica": {
+    "species": "Rhamnus cathartica",
+    "status": "ok",
+    "chunks": 4,
+    "images": 2,
+    "lang": "it",
+    "common_name": "spino cervino"
+  },
+  "Rhamnus pumila": {
+    "species": "Rhamnus pumila",
+    "status": "not_found"
+  },
+  "Rhaponticum coniferum": {
+    "species": "Rhaponticum coniferum",
+    "status": "ok",
+    "chunks": 10,
+    "images": 5,
+    "lang": "it",
+    "common_name": "fiordaliso ovoide"
+  },
+  "Rhinanthus alectorolophus": {
+    "species": "Rhinanthus alectorolophus",
+    "status": "ok",
+    "chunks": 13,
+    "images": 5,
+    "lang": "it",
+    "common_name": "cresta di gallo comune"
+  },
+  "Rhinanthus minor": {
+    "species": "Rhinanthus minor",
+    "status": "ok",
+    "chunks": 10,
+    "images": 5,
+    "lang": "it",
+    "common_name": "cresta di gallo minore"
+  },
+  "Rhododendron ferrugineum": {
+    "species": "Rhododendron ferrugineum",
+    "status": "ok",
+    "chunks": 3,
+    "images": 1,
+    "lang": "it",
+    "common_name": "rosa delle Alpi o rododendro rosso"
+  },
+  "Rhus coriaria": {
+    "species": "Rhus coriaria",
+    "status": "ok",
+    "chunks": 3,
+    "images": 2,
+    "lang": "it",
+    "common_name": "sommacco siciliano"
+  },
+  "Rhus typhina": {
+    "species": "Rhus typhina",
+    "status": "ok",
+    "chunks": 3,
+    "images": 1,
+    "lang": "it",
+    "common_name": "sommacco cinese o sommacco americano"
+  },
+  "Ribes rubrum": {
+    "species": "Ribes rubrum",
+    "status": "ok",
+    "chunks": 1,
+    "images": 5,
+    "lang": "it",
+    "common_name": ""
+  },
+  "Robinia pseudoacacia": {
+    "species": "Robinia pseudoacacia",
+    "status": "ok",
+    "chunks": 24,
+    "images": 4,
+    "lang": "it",
+    "common_name": ""
+  },
+  "Rosa agrestis": {
+    "species": "Rosa agrestis",
+    "status": "ok",
+    "chunks": 1,
+    "images": 0,
+    "lang": "en",
+    "common_name": ""
+  },
+  "Rosa canina": {
+    "species": "Rosa canina",
+    "status": "ok",
+    "chunks": 6,
+    "images": 2,
+    "lang": "it",
+    "common_name": ""
+  },
+  "Rosa pendulina": {
+    "species": "Rosa pendulina",
+    "status": "ok",
+    "chunks": 5,
+    "images": 0,
+    "lang": "en",
+    "common_name": ""
+  },
+  "Rosa spinosissima": {
+    "species": "Rosa spinosissima",
+    "status": "ok",
+    "chunks": 2,
+    "images": 0,
+    "lang": "it",
+    "common_name": ""
+  },
+  "Rosmarinus officinalis": {
+    "species": "Rosmarinus officinalis",
+    "status": "ok",
+    "chunks": 9,
+    "images": 5,
+    "lang": "it",
+    "common_name": "rosmarino"
+  },
+  "Rubia tinctorum": {
+    "species": "Rubia tinctorum",
+    "status": "ok",
+    "chunks": 2,
+    "images": 1,
+    "lang": "it",
+    "common_name": "robbia comune o garanza"
+  },
+  "Rubus fruticosus": {
+    "species": "Rubus fruticosus",
+    "status": "ok",
+    "chunks": 3,
+    "images": 5,
+    "lang": "it",
+    "common_name": "rovo comune"
+  },
+  "Rubus idaeus": {
+    "species": "Rubus idaeus",
+    "status": "ok",
+    "chunks": 4,
+    "images": 5,
+    "lang": "it",
+    "common_name": "lampone"
+  },
+  "Rubus pedatifolius": {
+    "species": "Rubus pedatifolius",
+    "status": "not_found"
+  },
+  "Rubus ulmifolius": {
+    "species": "Rubus ulmifolius",
+    "status": "ok",
+    "chunks": 6,
+    "images": 5,
+    "lang": "it",
+    "common_name": ""
+  },
+  "Rumex acetosella": {
+    "species": "Rumex acetosella",
+    "status": "ok",
+    "chunks": 5,
+    "images": 1,
+    "lang": "en",
+    "common_name": "red sorrel"
+  },
+  "Rumex crispus": {
+    "species": "Rumex crispus",
+    "status": "ok",
+    "chunks": 2,
+    "images": 1,
+    "lang": "it",
+    "common_name": ""
+  },
+  "Rumex obtusifolius": {
+    "species": "Rumex obtusifolius",
+    "status": "ok",
+    "chunks": 4,
+    "images": 2,
+    "lang": "it",
+    "common_name": ""
+  },
+  "Ruscus aculeatus": {
+    "species": "Ruscus aculeatus",
+    "status": "ok",
+    "chunks": 3,
+    "images": 2,
+    "lang": "it",
+    "common_name": "pungitopo"
+  },
+  "Ruta montana": {
+    "species": "Ruta montana",
+    "status": "not_found"
+  },
+  "Salix alba": {
+    "species": "Salix alba",
+    "status": "ok",
+    "chunks": 3,
+    "images": 1,
+    "lang": "it",
+    "common_name": "salice bianco"
+  },
+  "Salix babylonica": {
+    "species": "Salix babylonica",
+    "status": "ok",
+    "chunks": 3,
+    "images": 2,
+    "lang": "it",
+    "common_name": "salice piangente"
+  },
+  "Salix caprea": {
+    "species": "Salix caprea",
+    "status": "ok",
+    "chunks": 2,
+    "images": 1,
+    "lang": "it",
+    "common_name": "salicone o salice delle capre"
+  },
+  "Salix cinerea": {
+    "species": "Salix cinerea",
+    "status": "ok",
+    "chunks": 2,
+    "images": 2,
+    "lang": "it",
+    "common_name": "salice grigio"
+  },
+  "Salix fragilis": {
+    "species": "Salix fragilis",
+    "status": "ok",
+    "chunks": 3,
+    "images": 3,
+    "lang": "it",
+    "common_name": "salice fragile"
+  },
+  "Salix herbacea": {
+    "species": "Salix herbacea",
+    "status": "ok",
+    "chunks": 3,
+    "images": 2,
+    "lang": "en",
+    "common_name": ""
+  },
+  "Salvia officinalis": {
+    "species": "Salvia officinalis",
+    "status": "ok",
+    "chunks": 15,
+    "images": 5,
+    "lang": "it",
+    "common_name": "salvia comune"
+  },
+  "Salvia pratensis": {
+    "species": "Salvia pratensis",
+    "status": "ok",
+    "chunks": 12,
+    "images": 5,
+    "lang": "it",
+    "common_name": "salvia comune o salvia dei prati"
+  },
+  "Salvia verbenaca": {
+    "species": "Salvia verbenaca",
+    "status": "ok",
+    "chunks": 12,
+    "images": 5,
+    "lang": "it",
+    "common_name": "salvia minore"
+  },
+  "Sambucus ebulus": {
+    "species": "Sambucus ebulus",
+    "status": "ok",
+    "chunks": 2,
+    "images": 1,
+    "lang": "it",
+    "common_name": "sambuco lebbio"
+  },
+  "Sambucus nigra": {
+    "species": "Sambucus nigra",
+    "status": "ok",
+    "chunks": 7,
+    "images": 3,
+    "lang": "it",
+    "common_name": "sambuco nero"
+  },
+  "Sambucus racemosa": {
+    "species": "Sambucus racemosa",
+    "status": "ok",
+    "chunks": 1,
+    "images": 1,
+    "lang": "it",
+    "common_name": "sambuco rosso o sambuco racemoso"
+  },
+  "Saponaria ocymoides": {
+    "species": "Saponaria ocymoides",
+    "status": "ok",
+    "chunks": 3,
+    "images": 5,
+    "lang": "en",
+    "common_name": ""
+  },
+  "Saponaria officinalis": {
+    "species": "Saponaria officinalis",
+    "status": "ok",
+    "chunks": 3,
+    "images": 5,
+    "lang": "it",
+    "common_name": "saponaria"
+  },
+  "Satureja montana": {
+    "species": "Satureja montana",
+    "status": "ok",
+    "chunks": 13,
+    "images": 5,
+    "lang": "it",
+    "common_name": "santoreggia montana"
+  },
+  "Saxifraga aizoides": {
+    "species": "Saxifraga aizoides",
+    "status": "ok",
+    "chunks": 1,
+    "images": 3,
+    "lang": "en",
+    "common_name": ""
+  },
+  "Saxifraga granulata": {
+    "species": "Saxifraga granulata",
+    "status": "ok",
+    "chunks": 1,
+    "images": 2,
+    "lang": "en",
+    "common_name": ""
+  },
+  "Saxifraga media": {
+    "species": "Saxifraga media",
+    "status": "not_found"
+  },
+  "Saxifraga moschata": {
+    "species": "Saxifraga moschata",
+    "status": "not_found"
+  },
+  "Saxifraga paniculata": {
+    "species": "Saxifraga paniculata",
+    "status": "ok",
+    "chunks": 6,
+    "images": 2,
+    "lang": "en",
+    "common_name": ""
+  },
+  "Saxifraga tridactylites": {
+    "species": "Saxifraga tridactylites",
+    "status": "ok",
+    "chunks": 3,
+    "images": 2,
+    "lang": "it",
+    "common_name": ""
+  },
+  "Scabiosa atropurpurea": {
+    "species": "Scabiosa atropurpurea",
+    "status": "ok",
+    "chunks": 2,
+    "images": 4,
+    "lang": "en",
+    "common_name": ""
+  },
+  "Scabiosa columbaria": {
+    "species": "Scabiosa columbaria",
+    "status": "ok",
+    "chunks": 1,
+    "images": 2,
+    "lang": "en",
+    "common_name": ""
+  },
+  "Scilla luciliae": {
+    "species": "Scilla luciliae",
+    "status": "ok",
+    "chunks": 6,
+    "images": 3,
+    "lang": "en",
+    "common_name": ""
+  },
+  "Scolymus hispanicus": {
+    "species": "Scolymus hispanicus",
+    "status": "ok",
+    "chunks": 12,
+    "images": 5,
+    "lang": "it",
+    "common_name": ""
+  },
+  "Scorzoneroides pyrenaica": {
+    "species": "Scorzoneroides pyrenaica",
+    "status": "ok",
+    "chunks": 2,
+    "images": 1,
+    "lang": "en",
+    "common_name": ""
+  },
+  "Scrophularia auriculata": {
+    "species": "Scrophularia auriculata",
+    "status": "ok",
+    "chunks": 2,
+    "images": 2,
+    "lang": "en",
+    "common_name": ""
+  },
+  "Scrophularia nodosa": {
+    "species": "Scrophularia nodosa",
+    "status": "ok",
+    "chunks": 2,
+    "images": 2,
+    "lang": "it",
+    "common_name": "scrofularia nodosa o castagnola"
+  },
+  "Scutellaria galericulata": {
+    "species": "Scutellaria galericulata",
+    "status": "ok",
+    "chunks": 10,
+    "images": 5,
+    "lang": "it",
+    "common_name": "scutellaria palustre"
+  },
+  "Sedum acre": {
+    "species": "Sedum acre",
+    "status": "ok",
+    "chunks": 7,
+    "images": 5,
+    "lang": "it",
+    "common_name": "borracina acre"
+  },
+  "Sedum album": {
+    "species": "Sedum album",
+    "status": "ok",
+    "chunks": 5,
+    "images": 5,
+    "lang": "it",
+    "common_name": "borracina bianca"
+  },
+  "Sedum dasyphyllum": {
+    "species": "Sedum dasyphyllum",
+    "status": "ok",
+    "chunks": 2,
+    "images": 3,
+    "lang": "it",
+    "common_name": "borracina cinerea"
+  },
+  "Sedum rupestre": {
+    "species": "Sedum rupestre",
+    "status": "ok",
+    "chunks": 2,
+    "images": 0,
+    "lang": "en",
+    "common_name": ""
+  },
+  "Sedum sediforme": {
+    "species": "Sedum sediforme",
+    "status": "ok",
+    "chunks": 5,
+    "images": 0,
+    "lang": "en",
+    "common_name": ""
+  },
+  "Sempervivum arachnoideum": {
+    "species": "Sempervivum arachnoideum",
+    "status": "ok",
+    "chunks": 2,
+    "images": 2,
+    "lang": "it",
+    "common_name": ""
+  },
+  "Sempervivum montanum": {
+    "species": "Sempervivum montanum",
+    "status": "ok",
+    "chunks": 9,
+    "images": 5,
+    "lang": "en",
+    "common_name": "Sempervivum"
+  },
+  "Sempervivum tectorum": {
+    "species": "Sempervivum tectorum",
+    "status": "ok",
+    "chunks": 2,
+    "images": 1,
+    "lang": "it",
+    "common_name": ""
+  },
+  "Senecio doronicum": {
+    "species": "Senecio doronicum",
+    "status": "ok",
+    "chunks": 14,
+    "images": 5,
+    "lang": "it",
+    "common_name": "senecione mezzano"
+  },
+  "Senecio inaequidens": {
+    "species": "Senecio inaequidens",
+    "status": "ok",
+    "chunks": 13,
+    "images": 5,
+    "lang": "it",
+    "common_name": "senecione sudafricano"
+  },
+  "Senecio ovatus": {
+    "species": "Senecio ovatus",
+    "status": "ok",
+    "chunks": 18,
+    "images": 5,
+    "lang": "it",
+    "common_name": "senecione di Fuchs"
+  },
+  "Senecio vulgaris": {
+    "species": "Senecio vulgaris",
+    "status": "ok",
+    "chunks": 14,
+    "images": 5,
+    "lang": "it",
+    "common_name": "senecione comune"
+  },
+  "Serapias lingua": {
+    "species": "Serapias lingua",
+    "status": "ok",
+    "chunks": 4,
+    "images": 3,
+    "lang": "it",
+    "common_name": "serapide lingua"
+  },
+  "Serapias vomeracea": {
+    "species": "Serapias vomeracea",
+    "status": "ok",
+    "chunks": 4,
+    "images": 3,
+    "lang": "it",
+    "common_name": "serapide maggiore"
+  },
+  "Sherardia arvensis": {
+    "species": "Sherardia arvensis",
+    "status": "ok",
+    "chunks": 3,
+    "images": 4,
+    "lang": "en",
+    "common_name": ""
+  },
+  "Sideritis romana": {
+    "species": "Sideritis romana",
+    "status": "ok",
+    "chunks": 2,
+    "images": 1,
+    "lang": "it",
+    "common_name": "stregonia comune"
+  },
+  "Silene acaulis": {
+    "species": "Silene acaulis",
+    "status": "ok",
+    "chunks": 1,
+    "images": 1,
+    "lang": "it",
+    "common_name": ""
+  },
+  "Silene baccifera": {
+    "species": "Silene baccifera",
+    "status": "ok",
+    "chunks": 1,
+    "images": 3,
+    "lang": "en",
+    "common_name": ""
+  },
+  "Silene conica": {
+    "species": "Silene conica",
+    "status": "ok",
+    "chunks": 1,
+    "images": 1,
+    "lang": "en",
+    "common_name": ""
+  },
+  "Silene dioica": {
+    "species": "Silene dioica",
+    "status": "ok",
+    "chunks": 6,
+    "images": 5,
+    "lang": "it",
+    "common_name": ""
+  },
+  "Silene gallica": {
+    "species": "Silene gallica",
+    "status": "ok",
+    "chunks": 3,
+    "images": 1,
+    "lang": "en",
+    "common_name": ""
+  },
+  "Silene italica": {
+    "species": "Silene italica",
+    "status": "ok",
+    "chunks": 2,
+    "images": 1,
+    "lang": "it",
+    "common_name": "silene italiana"
+  },
+  "Silene latifolia": {
+    "species": "Silene latifolia",
+    "status": "ok",
+    "chunks": 5,
+    "images": 5,
+    "lang": "en",
+    "common_name": "white campion"
+  },
+  "Silene nutans": {
+    "species": "Silene nutans",
+    "status": "ok",
+    "chunks": 3,
+    "images": 1,
+    "lang": "it",
+    "common_name": "silene ciondola"
+  },
+  "Silene uniflora": {
+    "species": "Silene uniflora",
+    "status": "ok",
+    "chunks": 5,
+    "images": 1,
+    "lang": "en",
+    "common_name": "sea campion"
+  },
+  "Silene vulgaris": {
+    "species": "Silene vulgaris",
+    "status": "ok",
+    "chunks": 13,
+    "images": 5,
+    "lang": "it",
+    "common_name": "silene rigonfia"
+  },
+  "Silybum marianum": {
+    "species": "Silybum marianum",
+    "status": "ok",
+    "chunks": 14,
+    "images": 4,
+    "lang": "it",
+    "common_name": "cardo mariano"
+  },
+  "Sinapis arvensis": {
+    "species": "Sinapis arvensis",
+    "status": "ok",
+    "chunks": 4,
+    "images": 1,
+    "lang": "it",
+    "common_name": "senape selvatica"
+  },
+  "Sisymbrium irio": {
+    "species": "Sisymbrium irio",
+    "status": "ok",
+    "chunks": 10,
+    "images": 3,
+    "lang": "en",
+    "common_name": "originated when it flourished after the Great Fire of London"
+  },
+  "Sisymbrium officinale": {
+    "species": "Sisymbrium officinale",
+    "status": "ok",
+    "chunks": 2,
+    "images": 2,
+    "lang": "it",
+    "common_name": "erisimo"
+  },
+  "Smilax aspera": {
+    "species": "Smilax aspera",
+    "status": "ok",
+    "chunks": 4,
+    "images": 3,
+    "lang": "it",
+    "common_name": "salsapariglia nostrana"
+  },
+  "Smyrnium olusatrum": {
+    "species": "Smyrnium olusatrum",
+    "status": "ok",
+    "chunks": 4,
+    "images": 5,
+    "lang": "it",
+    "common_name": "corinoli comune o macerone"
+  },
+  "Solanum dulcamara": {
+    "species": "Solanum dulcamara",
+    "status": "ok",
+    "chunks": 12,
+    "images": 5,
+    "lang": "it",
+    "common_name": "morella rampicante o dulcamara"
+  },
+  "Solanum nigrum": {
+    "species": "Solanum nigrum",
+    "status": "ok",
+    "chunks": 21,
+    "images": 5,
+    "lang": "it",
+    "common_name": "morella comune"
+  },
+  "Soldanella alpina": {
+    "species": "Soldanella alpina",
+    "status": "ok",
+    "chunks": 1,
+    "images": 1,
+    "lang": "it",
+    "common_name": ""
+  },
+  "Solidago virgaurea": {
+    "species": "Solidago virgaurea",
+    "status": "ok",
+    "chunks": 21,
+    "images": 5,
+    "lang": "it",
+    "common_name": "verga d'oro comune"
+  },
+  "Sonchus asper": {
+    "species": "Sonchus asper",
+    "status": "ok",
+    "chunks": 16,
+    "images": 5,
+    "lang": "it",
+    "common_name": "grespino spinoso"
+  },
+  "Sonchus tenerrimus": {
+    "species": "Sonchus tenerrimus",
+    "status": "ok",
+    "chunks": 2,
+    "images": 2,
+    "lang": "en",
+    "common_name": "slender sowthistle"
+  },
+  "Sophora japonica": {
+    "species": "Sophora japonica",
+    "status": "ok",
+    "chunks": 2,
+    "images": 2,
+    "lang": "it",
+    "common_name": "sofora del Giappone o acacia del Giappone"
+  },
+  "Sorbus aria": {
+    "species": "Sorbus aria",
+    "status": "ok",
+    "chunks": 3,
+    "images": 2,
+    "lang": "it",
+    "common_name": "sorbo montano o farinaccio"
+  },
+  "Sorbus aucuparia": {
+    "species": "Sorbus aucuparia",
+    "status": "ok",
+    "chunks": 3,
+    "images": 4,
+    "lang": "it",
+    "common_name": "sorbo degli uccellatori"
+  },
+  "Sorbus domestica": {
+    "species": "Sorbus domestica",
+    "status": "ok",
+    "chunks": 4,
+    "images": 1,
+    "lang": "it",
+    "common_name": "sorbo domestico"
+  },
+  "Sorbus intermedia": {
+    "species": "Sorbus intermedia",
+    "status": "ok",
+    "chunks": 4,
+    "images": 4,
+    "lang": "en",
+    "common_name": ""
+  },
+  "Sorbus torminalis": {
+    "species": "Sorbus torminalis",
+    "status": "ok",
+    "chunks": 1,
+    "images": 5,
+    "lang": "it",
+    "common_name": "ciavardello"
+  },
+  "Spartium junceum": {
+    "species": "Spartium junceum",
+    "status": "ok",
+    "chunks": 4,
+    "images": 1,
+    "lang": "it",
+    "common_name": "ginestra odorosa"
+  },
+  "Spergula arvensis": {
+    "species": "Spergula arvensis",
+    "status": "ok",
+    "chunks": 5,
+    "images": 1,
+    "lang": "en",
+    "common_name": ""
+  },
+  "Spergula media": {
+    "species": "Spergula media",
+    "status": "not_found"
+  },
+  "Spiranthes spiralis": {
+    "species": "Spiranthes spiralis",
+    "status": "ok",
+    "chunks": 10,
+    "images": 5,
+    "lang": "it",
+    "common_name": "viticcino autunnale"
+  },
+  "Stachys recta": {
+    "species": "Stachys recta",
+    "status": "ok",
+    "chunks": 2,
+    "images": 1,
+    "lang": "it",
+    "common_name": ""
+  },
+  "Stachys sylvatica": {
+    "species": "Stachys sylvatica",
+    "status": "ok",
+    "chunks": 11,
+    "images": 5,
+    "lang": "it",
+    "common_name": "stregona dei boschi"
+  },
+  "Staehelina dubia": {
+    "species": "Staehelina dubia",
+    "status": "ok",
+    "chunks": 10,
+    "images": 5,
+    "lang": "it",
+    "common_name": ""
+  },
+  "Stellaria holostea": {
+    "species": "Stellaria holostea",
+    "status": "ok",
+    "chunks": 2,
+    "images": 4,
+    "lang": "en",
+    "common_name": ""
+  },
+  "Stellaria media": {
+    "species": "Stellaria media",
+    "status": "ok",
+    "chunks": 9,
+    "images": 5,
+    "lang": "it",
+    "common_name": "centocchio comune"
+  },
+  "Succisa pratensis": {
+    "species": "Succisa pratensis",
+    "status": "ok",
+    "chunks": 2,
+    "images": 5,
+    "lang": "it",
+    "common_name": ""
+  },
+  "Symphytum officinale": {
+    "species": "Symphytum officinale",
+    "status": "ok",
+    "chunks": 19,
+    "images": 5,
+    "lang": "it",
+    "common_name": "consolida maggiore"
+  },
+  "Symphytum tuberosum": {
+    "species": "Symphytum tuberosum",
+    "status": "ok",
+    "chunks": 1,
+    "images": 1,
+    "lang": "it",
+    "common_name": ""
+  },
+  "Syringa vulgaris": {
+    "species": "Syringa vulgaris",
+    "status": "ok",
+    "chunks": 3,
+    "images": 4,
+    "lang": "it",
+    "common_name": "lillà comune"
+  },
+  "Tanacetum vulgare": {
+    "species": "Tanacetum vulgare",
+    "status": "ok",
+    "chunks": 17,
+    "images": 5,
+    "lang": "it",
+    "common_name": "tanaceto"
+  },
+  "Taraxacum campylodes": {
+    "species": "Taraxacum campylodes",
+    "status": "ok",
+    "chunks": 20,
+    "images": 5,
+    "lang": "en",
+    "common_name": ""
+  },
+  "Taraxacum officinale": {
+    "species": "Taraxacum officinale",
+    "status": "ok",
+    "chunks": 6,
+    "images": 5,
+    "lang": "it",
+    "common_name": "taràssaco comune"
+  },
+  "Taxus baccata": {
+    "species": "Taxus baccata",
+    "status": "ok",
+    "chunks": 15,
+    "images": 5,
+    "lang": "it",
+    "common_name": "tasso"
+  },
+  "Teucrium chamaedrys": {
+    "species": "Teucrium chamaedrys",
+    "status": "ok",
+    "chunks": 15,
+    "images": 5,
+    "lang": "it",
+    "common_name": "camedrio comune"
+  },
+  "Teucrium flavum": {
+    "species": "Teucrium flavum",
+    "status": "ok",
+    "chunks": 9,
+    "images": 2,
+    "lang": "it",
+    "common_name": "camedrio doppio"
+  },
+  "Teucrium fruticans": {
+    "species": "Teucrium fruticans",
+    "status": "ok",
+    "chunks": 9,
+    "images": 5,
+    "lang": "it",
+    "common_name": "camedrio femmina"
+  },
+  "Teucrium montanum": {
+    "species": "Teucrium montanum",
+    "status": "ok",
+    "chunks": 8,
+    "images": 5,
+    "lang": "it",
+    "common_name": "camedrio montano"
+  },
+  "Teucrium scorodonia": {
+    "species": "Teucrium scorodonia",
+    "status": "ok",
+    "chunks": 11,
+    "images": 5,
+    "lang": "it",
+    "common_name": "camedrio scorodonia"
+  },
+  "Thalictrum aquilegiifolium": {
+    "species": "Thalictrum aquilegiifolium",
+    "status": "ok",
+    "chunks": 12,
+    "images": 5,
+    "lang": "it",
+    "common_name": "pigamo colombino"
+  },
+  "Thymus serpyllum": {
+    "species": "Thymus serpyllum",
+    "status": "ok",
+    "chunks": 4,
+    "images": 2,
+    "lang": "it",
+    "common_name": "serpillo"
+  },
+  "Thymus vulgaris": {
+    "species": "Thymus vulgaris",
+    "status": "ok",
+    "chunks": 12,
+    "images": 5,
+    "lang": "it",
+    "common_name": "timo maggiore"
+  },
+  "Tilia cordata": {
+    "species": "Tilia cordata",
+    "status": "ok",
+    "chunks": 9,
+    "images": 3,
+    "lang": "it",
+    "common_name": "tiglio selvatico"
+  },
+  "Tilia dasystyla": {
+    "species": "Tilia dasystyla",
+    "status": "ok",
+    "chunks": 1,
+    "images": 2,
+    "lang": "en",
+    "common_name": ""
+  },
+  "Tilia platyphyllos": {
+    "species": "Tilia platyphyllos",
+    "status": "ok",
+    "chunks": 3,
+    "images": 1,
+    "lang": "it",
+    "common_name": "tiglio nostrano"
+  },
+  "Tordylium apulum": {
+    "species": "Tordylium apulum",
+    "status": "ok",
+    "chunks": 4,
+    "images": 2,
+    "lang": "it",
+    "common_name": ""
+  },
+  "Tordylium maximum": {
+    "species": "Tordylium maximum",
+    "status": "ok",
+    "chunks": 2,
+    "images": 1,
+    "lang": "en",
+    "common_name": ""
+  },
+  "Torilis arvensis": {
+    "species": "Torilis arvensis",
+    "status": "ok",
+    "chunks": 2,
+    "images": 3,
+    "lang": "en",
+    "common_name": ""
+  },
+  "Tozzia alpina": {
+    "species": "Tozzia alpina",
+    "status": "ok",
+    "chunks": 9,
+    "images": 5,
+    "lang": "it",
+    "common_name": "tozzia"
+  },
+  "Tractema lilio-hyacinthus": {
+    "species": "Tractema lilio-hyacinthus",
+    "status": "not_found"
+  },
+  "Tractema verna": {
+    "species": "Tractema verna",
+    "status": "ok",
+    "chunks": 3,
+    "images": 2,
+    "lang": "en",
+    "common_name": "spring squill"
+  },
+  "Tragopogon porrifolius": {
+    "species": "Tragopogon porrifolius",
+    "status": "ok",
+    "chunks": 16,
+    "images": 5,
+    "lang": "it",
+    "common_name": "scorzonera bianca o scorzobianca"
+  },
+  "Tragopogon pratensis": {
+    "species": "Tragopogon pratensis",
+    "status": "ok",
+    "chunks": 14,
+    "images": 5,
+    "lang": "it",
+    "common_name": "barba di becco"
+  },
+  "Tribulus terrestris": {
+    "species": "Tribulus terrestris",
+    "status": "ok",
+    "chunks": 3,
+    "images": 5,
+    "lang": "it",
+    "common_name": "tribolo"
+  },
+  "Trifolium alpinum": {
+    "species": "Trifolium alpinum",
+    "status": "ok",
+    "chunks": 6,
+    "images": 1,
+    "lang": "it",
+    "common_name": "trifoglio alpino"
+  },
+  "Trifolium campestre": {
+    "species": "Trifolium campestre",
+    "status": "ok",
+    "chunks": 2,
+    "images": 3,
+    "lang": "en",
+    "common_name": "hop trefoil"
+  },
+  "Trifolium cherleri": {
+    "species": "Trifolium cherleri",
+    "status": "ok",
+    "chunks": 1,
+    "images": 2,
+    "lang": "en",
+    "common_name": ""
+  },
+  "Trifolium incarnatum": {
+    "species": "Trifolium incarnatum",
+    "status": "ok",
+    "chunks": 2,
+    "images": 2,
+    "lang": "it",
+    "common_name": "trifoglio incarnato"
+  },
+  "Trifolium pratense": {
+    "species": "Trifolium pratense",
+    "status": "ok",
+    "chunks": 4,
+    "images": 2,
+    "lang": "it",
+    "common_name": "trifoglio dei prati"
+  },
+  "Trifolium repens": {
+    "species": "Trifolium repens",
+    "status": "ok",
+    "chunks": 7,
+    "images": 3,
+    "lang": "it",
+    "common_name": "trifoglio bianco"
+  },
+  "Trifolium resupinatum": {
+    "species": "Trifolium resupinatum",
+    "status": "ok",
+    "chunks": 1,
+    "images": 1,
+    "lang": "en",
+    "common_name": ""
+  },
+  "Trifolium scabrum": {
+    "species": "Trifolium scabrum",
+    "status": "ok",
+    "chunks": 1,
+    "images": 3,
+    "lang": "it",
+    "common_name": "trifoglio scabro"
+  },
+  "Trifolium stellatum": {
+    "species": "Trifolium stellatum",
+    "status": "ok",
+    "chunks": 1,
+    "images": 3,
+    "lang": "it",
+    "common_name": "trifoglio stellato"
+  },
+  "Trifolium subterraneum": {
+    "species": "Trifolium subterraneum",
+    "status": "ok",
+    "chunks": 4,
+    "images": 3,
+    "lang": "it",
+    "common_name": "trifoglio sotterraneo"
+  },
+  "Tripleurospermum inodorum": {
+    "species": "Tripleurospermum inodorum",
+    "status": "ok",
+    "chunks": 12,
+    "images": 5,
+    "lang": "it",
+    "common_name": "camomilla senza odore"
+  },
+  "Tripodion tetraphyllum": {
+    "species": "Tripodion tetraphyllum",
+    "status": "ok",
+    "chunks": 1,
+    "images": 2,
+    "lang": "en",
+    "common_name": "annual kidney vetch"
+  },
+  "Tripolium pannonicum": {
+    "species": "Tripolium pannonicum",
+    "status": "ok",
+    "chunks": 2,
+    "images": 2,
+    "lang": "en",
+    "common_name": ""
+  },
+  "Trollius europaeus": {
+    "species": "Trollius europaeus",
+    "status": "ok",
+    "chunks": 6,
+    "images": 5,
+    "lang": "it",
+    "common_name": ""
+  },
+  "Tuberaria guttata": {
+    "species": "Tuberaria guttata",
+    "status": "ok",
+    "chunks": 4,
+    "images": 1,
+    "lang": "en",
+    "common_name": ""
+  },
+  "Tulipa sylvestris": {
+    "species": "Tulipa sylvestris",
+    "status": "ok",
+    "chunks": 1,
+    "images": 3,
+    "lang": "it",
+    "common_name": "tulipano selvatico"
+  },
+  "Tussilago farfara": {
+    "species": "Tussilago farfara",
+    "status": "ok",
+    "chunks": 17,
+    "images": 5,
+    "lang": "it",
+    "common_name": ""
+  },
+  "Ulex europaeus": {
+    "species": "Ulex europaeus",
+    "status": "ok",
+    "chunks": 2,
+    "images": 1,
+    "lang": "it",
+    "common_name": ""
+  },
+  "Ulex gallii": {
+    "species": "Ulex gallii",
+    "status": "ok",
+    "chunks": 3,
+    "images": 2,
+    "lang": "en",
+    "common_name": ""
+  },
+  "Ulmus minor": {
+    "species": "Ulmus minor",
+    "status": "ok",
+    "chunks": 4,
+    "images": 3,
+    "lang": "it",
+    "common_name": "olmo campestre"
+  },
+  "Umbilicus rupestris": {
+    "species": "Umbilicus rupestris",
+    "status": "ok",
+    "chunks": 3,
+    "images": 3,
+    "lang": "it",
+    "common_name": ""
+  },
+  "Urospermum dalechampii": {
+    "species": "Urospermum dalechampii",
+    "status": "ok",
+    "chunks": 12,
+    "images": 5,
+    "lang": "it",
+    "common_name": ""
+  },
+  "Urtica dioica": {
+    "species": "Urtica dioica",
+    "status": "ok",
+    "chunks": 9,
+    "images": 5,
+    "lang": "it",
+    "common_name": "ortica comune"
+  },
+  "Vaccinium myrtillus": {
+    "species": "Vaccinium myrtillus",
+    "status": "ok",
+    "chunks": 4,
+    "images": 5,
+    "lang": "it",
+    "common_name": "mirtillo nero"
+  },
+  "Vaccinium vitis-idaea": {
+    "species": "Vaccinium vitis-idaea",
+    "status": "ok",
+    "chunks": 3,
+    "images": 1,
+    "lang": "it",
+    "common_name": "mirtillo rosso"
+  },
+  "Valeriana celtica": {
+    "species": "Valeriana celtica",
+    "status": "ok",
+    "chunks": 1,
+    "images": 1,
+    "lang": "it",
+    "common_name": ""
+  },
+  "Valeriana officinalis": {
+    "species": "Valeriana officinalis",
+    "status": "ok",
+    "chunks": 6,
+    "images": 4,
+    "lang": "it",
+    "common_name": "valeriana officinale"
+  },
+  "Veratrum album": {
+    "species": "Veratrum album",
+    "status": "ok",
+    "chunks": 1,
+    "images": 1,
+    "lang": "it",
+    "common_name": "veratro bianco"
+  },
+  "Verbascum blattaria": {
+    "species": "Verbascum blattaria",
+    "status": "ok",
+    "chunks": 2,
+    "images": 2,
+    "lang": "it",
+    "common_name": ""
+  },
+  "Verbascum boerhavii": {
+    "species": "Verbascum boerhavii",
+    "status": "ok",
+    "chunks": 1,
+    "images": 2,
+    "lang": "en",
+    "common_name": ""
+  },
+  "Verbascum lychnitis": {
+    "species": "Verbascum lychnitis",
+    "status": "ok",
+    "chunks": 3,
+    "images": 3,
+    "lang": "en",
+    "common_name": ""
+  },
+  "Verbascum nigrum": {
+    "species": "Verbascum nigrum",
+    "status": "ok",
+    "chunks": 2,
+    "images": 1,
+    "lang": "it",
+    "common_name": "verbasco nero"
+  },
+  "Verbascum pulverulentum": {
+    "species": "Verbascum pulverulentum",
+    "status": "ok",
+    "chunks": 2,
+    "images": 2,
+    "lang": "en",
+    "common_name": ""
+  },
+  "Verbascum sinuatum": {
+    "species": "Verbascum sinuatum",
+    "status": "ok",
+    "chunks": 2,
+    "images": 4,
+    "lang": "it",
+    "common_name": "verbasco sinuoso"
+  },
+  "Verbascum thapsus": {
+    "species": "Verbascum thapsus",
+    "status": "ok",
+    "chunks": 1,
+    "images": 1,
+    "lang": "it",
+    "common_name": "tasso barbasso"
+  },
+  "Verbena officinalis": {
+    "species": "Verbena officinalis",
+    "status": "ok",
+    "chunks": 2,
+    "images": 2,
+    "lang": "it",
+    "common_name": ""
+  },
+  "Veronica anagallis-aquatica": {
+    "species": "Veronica anagallis-aquatica",
+    "status": "ok",
+    "chunks": 3,
+    "images": 2,
+    "lang": "en",
+    "common_name": ""
+  },
+  "Veronica arvensis": {
+    "species": "Veronica arvensis",
+    "status": "ok",
+    "chunks": 11,
+    "images": 5,
+    "lang": "it",
+    "common_name": "veronica dei campi"
+  },
+  "Veronica beccabunga": {
+    "species": "Veronica beccabunga",
+    "status": "ok",
+    "chunks": 2,
+    "images": 2,
+    "lang": "en",
+    "common_name": ""
+  },
+  "Veronica chamaedrys": {
+    "species": "Veronica chamaedrys",
+    "status": "ok",
+    "chunks": 2,
+    "images": 1,
+    "lang": "it",
+    "common_name": ""
+  },
+  "Veronica cymbalaria": {
+    "species": "Veronica cymbalaria",
+    "status": "ok",
+    "chunks": 13,
+    "images": 5,
+    "lang": "it",
+    "common_name": "veronica a foglie di cimbalaria"
+  },
+  "Veronica hederifolia": {
+    "species": "Veronica hederifolia",
+    "status": "ok",
+    "chunks": 9,
+    "images": 5,
+    "lang": "it",
+    "common_name": "veronica con foglie d'edera"
+  },
+  "Veronica officinalis": {
+    "species": "Veronica officinalis",
+    "status": "ok",
+    "chunks": 2,
+    "images": 3,
+    "lang": "en",
+    "common_name": ""
+  },
+  "Veronica persica": {
+    "species": "Veronica persica",
+    "status": "ok",
+    "chunks": 14,
+    "images": 5,
+    "lang": "it",
+    "common_name": "veronica comune"
+  },
+  "Veronica serpyllifolia": {
+    "species": "Veronica serpyllifolia",
+    "status": "ok",
+    "chunks": 11,
+    "images": 5,
+    "lang": "it",
+    "common_name": "veronica a foglie di serpillo"
+  },
+  "Viburnum lantana": {
+    "species": "Viburnum lantana",
+    "status": "ok",
+    "chunks": 2,
+    "images": 2,
+    "lang": "it",
+    "common_name": "lantana"
+  },
+  "Viburnum opulus": {
+    "species": "Viburnum opulus",
+    "status": "ok",
+    "chunks": 1,
+    "images": 2,
+    "lang": "it",
+    "common_name": ""
+  },
+  "Viburnum rhytidophyllum": {
+    "species": "Viburnum rhytidophyllum",
+    "status": "ok",
+    "chunks": 2,
+    "images": 1,
+    "lang": "en",
+    "common_name": ""
+  },
+  "Viburnum tinus": {
+    "species": "Viburnum tinus",
+    "status": "ok",
+    "chunks": 1,
+    "images": 2,
+    "lang": "it",
+    "common_name": "viburno tino"
+  },
+  "Vicia cracca": {
+    "species": "Vicia cracca",
+    "status": "ok",
+    "chunks": 4,
+    "images": 3,
+    "lang": "it",
+    "common_name": ""
+  },
+  "Vicia hirsuta": {
+    "species": "Vicia hirsuta",
+    "status": "ok",
+    "chunks": 2,
+    "images": 1,
+    "lang": "en",
+    "common_name": ""
+  },
+  "Vicia hybrida": {
+    "species": "Vicia hybrida",
+    "status": "not_found"
+  },
+  "Vicia pannonica": {
+    "species": "Vicia pannonica",
+    "status": "ok",
+    "chunks": 2,
+    "images": 2,
+    "lang": "en",
+    "common_name": "Hungarian vetch"
+  },
+  "Vicia sativa": {
+    "species": "Vicia sativa",
+    "status": "ok",
+    "chunks": 1,
+    "images": 5,
+    "lang": "it",
+    "common_name": "veccia comune"
+  },
+  "Vicia sepium": {
+    "species": "Vicia sepium",
+    "status": "ok",
+    "chunks": 3,
+    "images": 3,
+    "lang": "en",
+    "common_name": ""
+  },
+  "Vinca major": {
+    "species": "Vinca major",
+    "status": "ok",
+    "chunks": 1,
+    "images": 2,
+    "lang": "it",
+    "common_name": "pervinca maggiore"
+  },
+  "Vinca minor": {
+    "species": "Vinca minor",
+    "status": "ok",
+    "chunks": 2,
+    "images": 3,
+    "lang": "it",
+    "common_name": "pervinca minore"
+  },
+  "Vincetoxicum hirundinaria": {
+    "species": "Vincetoxicum hirundinaria",
+    "status": "ok",
+    "chunks": 1,
+    "images": 3,
+    "lang": "it",
+    "common_name": "vincetossico"
+  },
+  "Vincetoxicum nigrum": {
+    "species": "Vincetoxicum nigrum",
+    "status": "ok",
+    "chunks": 9,
+    "images": 4,
+    "lang": "en",
+    "common_name": ""
+  },
+  "Viola alba": {
+    "species": "Viola alba",
+    "status": "ok",
+    "chunks": 1,
+    "images": 3,
+    "lang": "en",
+    "common_name": "white violet"
+  },
+  "Viola arvensis": {
+    "species": "Viola arvensis",
+    "status": "ok",
+    "chunks": 2,
+    "images": 1,
+    "lang": "it",
+    "common_name": ""
+  },
+  "Viola biflora": {
+    "species": "Viola biflora",
+    "status": "ok",
+    "chunks": 1,
+    "images": 2,
+    "lang": "it",
+    "common_name": "viola gialla"
+  },
+  "Viola calcarata": {
+    "species": "Viola calcarata",
+    "status": "ok",
+    "chunks": 4,
+    "images": 1,
+    "lang": "it",
+    "common_name": "viola con sperone o viola di monte"
+  },
+  "Viola cornuta": {
+    "species": "Viola cornuta",
+    "status": "ok",
+    "chunks": 1,
+    "images": 1,
+    "lang": "it",
+    "common_name": ""
+  },
+  "Viola lutea": {
+    "species": "Viola lutea",
+    "status": "ok",
+    "chunks": 1,
+    "images": 1,
+    "lang": "it",
+    "common_name": ""
+  },
+  "Viola odorata": {
+    "species": "Viola odorata",
+    "status": "ok",
+    "chunks": 2,
+    "images": 4,
+    "lang": "it",
+    "common_name": "viola mammola"
+  },
+  "Viola riviniana": {
+    "species": "Viola riviniana",
+    "status": "ok",
+    "chunks": 1,
+    "images": 1,
+    "lang": "it",
+    "common_name": ""
+  },
+  "Viola tricolor": {
+    "species": "Viola tricolor",
+    "status": "ok",
+    "chunks": 2,
+    "images": 1,
+    "lang": "it",
+    "common_name": "viola del pensiero"
+  },
+  "Viscum album": {
+    "species": "Viscum album",
+    "status": "ok",
+    "chunks": 10,
+    "images": 4,
+    "lang": "it",
+    "common_name": "vischio"
+  },
+  "Vitex agnus-castus": {
+    "species": "Vitex agnus-castus",
+    "status": "ok",
+    "chunks": 3,
+    "images": 2,
+    "lang": "it",
+    "common_name": "agnocasto"
+  },
+  "Vitis vinifera": {
+    "species": "Vitis vinifera",
+    "status": "ok",
+    "chunks": 44,
+    "images": 5,
+    "lang": "it",
+    "common_name": "vite comune o vite euroasiatica"
+  },
+  "Wisteria sinensis": {
+    "species": "Wisteria sinensis",
+    "status": "ok",
+    "chunks": 4,
+    "images": 4,
+    "lang": "it",
+    "common_name": "glicine comune"
   }
 }
