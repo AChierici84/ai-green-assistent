@@ -12,6 +12,7 @@ import chromadb
 import httpx
 from dotenv import load_dotenv
 from fastapi import FastAPI, File, UploadFile, HTTPException, Query
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse, JSONResponse, FileResponse
 from openai import OpenAI
 from pydantic import BaseModel, Field
@@ -210,6 +211,17 @@ def _build_profile_context(profile: dict[str, Any] | None) -> str:
     return "Dati strutturati estratti da plants.db:\n" + "\n".join(lines)
 
 app = FastAPI(title="PlantCLEF Image Search API")
+
+cors_origins_raw = os.getenv("CORS_ALLOW_ORIGINS", "http://localhost:5173,http://127.0.0.1:5173")
+cors_origins = [origin.strip() for origin in cors_origins_raw.split(",") if origin.strip()]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=cors_origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 def get_search_backend_status():

@@ -33,6 +33,35 @@ Server locale:
 - UI: `http://localhost:8000/`
 - Swagger: `http://localhost:8000/docs`
 
+## Frontend React PWA
+
+E disponibile una PWA React in `pwa-app/` con flusso completo:
+- upload immagine e riconoscimento specie (`/search`)
+- apertura scheda pianta con estrazioni (`/plant/{name}` + `/plant/{name}/profile`)
+- domanda sulla cura (`/chat/plant-care`)
+
+Avvio in sviluppo:
+
+```powershell
+cd pwa-app
+npm install
+npm run dev
+```
+
+App locale:
+- PWA: `http://localhost:5173`
+
+Configurazione endpoint API (opzionale):
+- variabile `VITE_API_BASE` (default `http://localhost:8000`)
+
+Per produzione:
+
+```powershell
+cd pwa-app
+npm run build
+npm run preview
+```
+
 ## Build della knowledge base RAG (opzionale ma consigliato)
 
 Per costruire/aggiornare il database piante locale (ChromaDB + immagini):
