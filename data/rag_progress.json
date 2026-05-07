@@ -409,7 +409,12 @@
   },
   "Anacamptis champagneuxii": {
     "species": "Anacamptis champagneuxii",
-    "status": "not_found"
+    "status": "ok",
+    "chunks": 2,
+    "images": 2,
+    "lang": "fr",
+    "translated_it": true,
+    "common_name": ""
   },
   "Anacamptis laxiflora": {
     "species": "Anacamptis laxiflora",
@@ -525,7 +530,12 @@
   },
   "Anemone rubra": {
     "species": "Anemone rubra",
-    "status": "not_found"
+    "status": "ok",
+    "chunks": 3,
+    "images": 1,
+    "lang": "fr",
+    "translated_it": true,
+    "common_name": "pulsatille rouge ou anémone rouge"
   },
   "Anemone vernalis": {
     "species": "Anemone vernalis",
@@ -537,7 +547,12 @@
   },
   "Angelica heterocarpa": {
     "species": "Angelica heterocarpa",
-    "status": "not_found"
+    "status": "ok",
+    "chunks": 13,
+    "images": 3,
+    "lang": "fr",
+    "translated_it": true,
+    "common_name": ""
   },
   "Angelica sylvestris": {
     "species": "Angelica sylvestris",
@@ -709,7 +724,12 @@
   },
   "Armeria arenaria": {
     "species": "Armeria arenaria",
-    "status": "not_found"
+    "status": "ok",
+    "chunks": 3,
+    "images": 1,
+    "lang": "fr",
+    "translated_it": true,
+    "common_name": "Armérie des sables"
   },
   "Armeria maritima": {
     "species": "Armeria maritima",
@@ -785,7 +805,12 @@
   },
   "Asphodelus cerasiferus": {
     "species": "Asphodelus cerasiferus",
-    "status": "not_found"
+    "status": "ok",
+    "chunks": 2,
+    "images": 4,
+    "lang": "fr",
+    "translated_it": true,
+    "common_name": "L’Asphodèle porte-cerise"
   },
   "Asphodelus ramosus": {
     "species": "Asphodelus ramosus",
@@ -1061,7 +1086,12 @@
   },
   "Blackstonia imperfoliata": {
     "species": "Blackstonia imperfoliata",
-    "status": "not_found"
+    "status": "ok",
+    "chunks": 2,
+    "images": 3,
+    "lang": "pt",
+    "translated_it": true,
+    "common_name": ""
   },
   "Blackstonia perfoliata": {
     "species": "Blackstonia perfoliata",
@@ -1137,7 +1167,12 @@
   },
   "Bupleurum ranunculoides": {
     "species": "Bupleurum ranunculoides",
-    "status": "not_found"
+    "status": "ok",
+    "chunks": 2,
+    "images": 4,
+    "lang": "fr",
+    "translated_it": true,
+    "common_name": "Buplèvre fausse renoncule"
   },
   "Buxus sempervirens": {
     "species": "Buxus sempervirens",
@@ -1333,7 +1368,12 @@
   },
   "Carduus carlinoides": {
     "species": "Carduus carlinoides",
-    "status": "not_found"
+    "status": "ok",
+    "chunks": 2,
+    "images": 3,
+    "lang": "fr",
+    "translated_it": true,
+    "common_name": "chardon fausse carline"
   },
   "Carduus defloratus": {
     "species": "Carduus defloratus",
@@ -1345,7 +1385,12 @@
   },
   "Carduus nigrescens": {
     "species": "Carduus nigrescens",
-    "status": "not_found"
+    "status": "ok",
+    "chunks": 2,
+    "images": 1,
+    "lang": "fr",
+    "translated_it": true,
+    "common_name": ""
   },
   "Carduus nutans": {
     "species": "Carduus nutans",
@@ -1509,11 +1554,21 @@
   },
   "Centaurea corymbosa": {
     "species": "Centaurea corymbosa",
-    "status": "not_found"
+    "status": "ok",
+    "chunks": 4,
+    "images": 1,
+    "lang": "fr",
+    "translated_it": true,
+    "common_name": ""
   },
   "Centaurea decipiens": {
     "species": "Centaurea decipiens",
-    "status": "not_found"
+    "status": "ok",
+    "chunks": 3,
+    "images": 1,
+    "lang": "fr",
+    "translated_it": true,
+    "common_name": ""
   },
   "Centaurea jacea": {
     "species": "Centaurea jacea",
@@ -1541,7 +1596,12 @@
   },
   "Centaurea pectinata": {
     "species": "Centaurea pectinata",
-    "status": "not_found"
+    "status": "ok",
+    "chunks": 2,
+    "images": 1,
+    "lang": "fr",
+    "translated_it": true,
+    "common_name": ""
   },
   "Centaurea scabiosa": {
     "species": "Centaurea scabiosa",
@@ -1561,7 +1621,12 @@
   },
   "Centaurium maritimum": {
     "species": "Centaurium maritimum",
-    "status": "not_found"
+    "status": "ok",
+    "chunks": 1,
+    "images": 1,
+    "lang": "fr",
+    "translated_it": true,
+    "common_name": "Petite centaurée maritime"
   },
   "Centella asiatica": {
     "species": "Centella asiatica",
@@ -1573,7 +1638,12 @@
   },
   "Centranthus angustifolius": {
     "species": "Centranthus angustifolius",
-    "status": "not_found"
+    "status": "ok",
+    "chunks": 1,
+    "images": 2,
+    "lang": "fr",
+    "translated_it": true,
+    "common_name": "Centranthe à feuilles étroites"
   },
   "Centranthus ruber": {
     "species": "Centranthus ruber",
@@ -1633,7 +1703,12 @@
   },
   "Chaenorrhinum minus": {
     "species": "Chaenorrhinum minus",
-    "status": "not_found"
+    "status": "ok",
+    "chunks": 7,
+    "images": 5,
+    "lang": "de",
+    "translated_it": true,
+    "common_name": "Das Kleine Leinkraut"
   },
   "Chamaerops humilis": {
     "species": "Chamaerops humilis",
@@ -1909,7 +1984,12 @@
   },
   "Coronilla juncea": {
     "species": "Coronilla juncea",
-    "status": "not_found"
+    "status": "ok",
+    "chunks": 3,
+    "images": 3,
+    "lang": "es",
+    "translated_it": true,
+    "common_name": "coronilla de hojas finas"
   },
   "Coronilla valentina": {
     "species": "Coronilla valentina",
@@ -2121,7 +2201,12 @@
   },
   "Cytisus lanigerus": {
     "species": "Cytisus lanigerus",
-    "status": "not_found"
+    "status": "ok",
+    "chunks": 4,
+    "images": 3,
+    "lang": "es",
+    "translated_it": true,
+    "common_name": "Calicotome villosa"
   },
   "Cytisus oromediterraneus": {
     "species": "Cytisus oromediterraneus",
@@ -2317,7 +2402,12 @@
   },
   "Dipcadi serotinum": {
     "species": "Dipcadi serotinum",
-    "status": "not_found"
+    "status": "ok",
+    "chunks": 2,
+    "images": 1,
+    "lang": "fr",
+    "translated_it": true,
+    "common_name": "Dipcadi tardif ou Jacinthe tardive"
   },
   "Diphasiastrum tristachyum": {
     "species": "Diphasiastrum tristachyum",
@@ -2649,7 +2739,12 @@
   },
   "Erodium foetidum": {
     "species": "Erodium foetidum",
-    "status": "not_found"
+    "status": "ok",
+    "chunks": 3,
+    "images": 4,
+    "lang": "fr",
+    "translated_it": true,
+    "common_name": "Bec-de-grue des pierriers"
   },
   "Erodium malacoides": {
     "species": "Erodium malacoides",
@@ -2773,7 +2868,12 @@
   },
   "Euphorbia flavicoma": {
     "species": "Euphorbia flavicoma",
-    "status": "not_found"
+    "status": "ok",
+    "chunks": 1,
+    "images": 1,
+    "lang": "fr",
+    "translated_it": true,
+    "common_name": "Euphorbe à têtes jaune d'or ou Euphorbe à ombelles jaunes"
   },
   "Euphorbia helioscopia": {
     "species": "Euphorbia helioscopia",
@@ -2849,7 +2949,12 @@
   },
   "Euphorbia spinosa": {
     "species": "Euphorbia spinosa",
-    "status": "not_found"
+    "status": "ok",
+    "chunks": 13,
+    "images": 5,
+    "lang": "it",
+    "translated_it": false,
+    "common_name": "piante a cuscino, dette anche piante a cuscinetto o a pulvino"
   },
   "Fagus sylvatica": {
     "species": "Fagus sylvatica",
@@ -3005,7 +3110,12 @@
   },
   "Gagea granatelli": {
     "species": "Gagea granatelli",
-    "status": "not_found"
+    "status": "ok",
+    "chunks": 3,
+    "images": 1,
+    "lang": "fr",
+    "translated_it": true,
+    "common_name": "Gagea granatellii"
   },
   "Galactites tomentosus": {
     "species": "Galactites tomentosus",
@@ -3089,7 +3199,12 @@
   },
   "Genista scorpius": {
     "species": "Genista scorpius",
-    "status": "not_found"
+    "status": "ok",
+    "chunks": 5,
+    "images": 3,
+    "lang": "fr",
+    "translated_it": true,
+    "common_name": "Genêt épineux, aussi appelé Genêt scorpion ou Epine-fleurie"
   },
   "Genista tinctoria": {
     "species": "Genista tinctoria",
@@ -3117,7 +3232,12 @@
   },
   "Gentiana burseri": {
     "species": "Gentiana burseri",
-    "status": "not_found"
+    "status": "ok",
+    "chunks": 3,
+    "images": 3,
+    "lang": "fr",
+    "translated_it": true,
+    "common_name": "gentiane de Burser"
   },
   "Gentiana cruciata": {
     "species": "Gentiana cruciata",
@@ -3161,7 +3281,12 @@
   },
   "Gentiana pyrenaica": {
     "species": "Gentiana pyrenaica",
-    "status": "not_found"
+    "status": "ok",
+    "chunks": 6,
+    "images": 2,
+    "lang": "fr",
+    "translated_it": true,
+    "common_name": "Gentiane des Pyrénées"
   },
   "Gentiana verna": {
     "species": "Gentiana verna",
@@ -3381,7 +3506,12 @@
   },
   "Globularia repens": {
     "species": "Globularia repens",
-    "status": "not_found"
+    "status": "ok",
+    "chunks": 3,
+    "images": 4,
+    "lang": "fr",
+    "translated_it": true,
+    "common_name": "Globulaire rampante"
   },
   "Gymnadenia conopsea": {
     "species": "Gymnadenia conopsea",
@@ -3481,7 +3611,12 @@
   },
   "Heracleum pyrenaicum": {
     "species": "Heracleum pyrenaicum",
-    "status": "not_found"
+    "status": "ok",
+    "chunks": 3,
+    "images": 3,
+    "lang": "es",
+    "translated_it": true,
+    "common_name": ""
   },
   "Heracleum sphondylium": {
     "species": "Heracleum sphondylium",
@@ -3661,7 +3796,12 @@
   },
   "Hypericum richeri": {
     "species": "Hypericum richeri",
-    "status": "not_found"
+    "status": "ok",
+    "chunks": 2,
+    "images": 3,
+    "lang": "fr",
+    "translated_it": true,
+    "common_name": "Millepertuis de Richer"
   },
   "Hypochaeris radicata": {
     "species": "Hypochaeris radicata",
@@ -3681,7 +3821,12 @@
   },
   "Impatiens balfouri": {
     "species": "Impatiens balfouri",
-    "status": "not_found"
+    "status": "ok",
+    "chunks": 3,
+    "images": 5,
+    "lang": "fr",
+    "translated_it": true,
+    "common_name": "Balsamine de Balfour, aussi parfois appelée Impatiente de Balfour"
   },
   "Impatiens glandulifera": {
     "species": "Impatiens glandulifera",
@@ -3885,7 +4030,12 @@
   },
   "Knautia maxima": {
     "species": "Knautia maxima",
-    "status": "not_found"
+    "status": "ok",
+    "chunks": 1,
+    "images": 1,
+    "lang": "it",
+    "translated_it": false,
+    "common_name": ""
   },
   "Koelreuteria paniculata": {
     "species": "Koelreuteria paniculata",
@@ -3929,7 +4079,12 @@
   },
   "Lactuca plumieri": {
     "species": "Lactuca plumieri",
-    "status": "not_found"
+    "status": "ok",
+    "chunks": 4,
+    "images": 2,
+    "lang": "fr",
+    "translated_it": true,
+    "common_name": "laitue de Plumier ou laiteron de Plumier ou encore mulgédie de Plumier"
   },
   "Lactuca serriola": {
     "species": "Lactuca serriola",
@@ -4293,7 +4448,12 @@
   },
   "Loncomelos pyrenaicus": {
     "species": "Loncomelos pyrenaicus",
-    "status": "not_found"
+    "status": "ok",
+    "chunks": 6,
+    "images": 5,
+    "lang": "fr",
+    "translated_it": true,
+    "common_name": "Ornithogale des Pyrénées"
   },
   "Lonicera alpigena": {
     "species": "Lonicera alpigena",
@@ -4673,7 +4833,12 @@
   },
   "Microthlaspi perfoliatum": {
     "species": "Microthlaspi perfoliatum",
-    "status": "not_found"
+    "status": "ok",
+    "chunks": 4,
+    "images": 1,
+    "lang": "fr",
+    "translated_it": true,
+    "common_name": ""
   },
   "Mirabilis jalapa": {
     "species": "Mirabilis jalapa",
@@ -4709,7 +4874,12 @@
   },
   "Morus kagayamae": {
     "species": "Morus kagayamae",
-    "status": "not_found"
+    "status": "ok",
+    "chunks": 6,
+    "images": 5,
+    "lang": "fr",
+    "translated_it": true,
+    "common_name": ""
   },
   "Muscari comosum": {
     "species": "Muscari comosum",
@@ -4905,7 +5075,12 @@
   },
   "Ononis minutissima": {
     "species": "Ononis minutissima",
-    "status": "not_found"
+    "status": "ok",
+    "chunks": 2,
+    "images": 2,
+    "lang": "fr",
+    "translated_it": true,
+    "common_name": ""
   },
   "Ononis natrix": {
     "species": "Ononis natrix",
@@ -5101,7 +5276,12 @@
   },
   "Orobanche amethystea": {
     "species": "Orobanche amethystea",
-    "status": "not_found"
+    "status": "ok",
+    "chunks": 2,
+    "images": 2,
+    "lang": "fr",
+    "translated_it": true,
+    "common_name": ""
   },
   "Orobanche caryophyllacea": {
     "species": "Orobanche caryophyllacea",
@@ -5609,7 +5789,12 @@
   },
   "Platanus x": {
     "species": "Platanus x",
-    "status": "not_found"
+    "status": "ok",
+    "chunks": 7,
+    "images": 3,
+    "lang": "it",
+    "translated_it": false,
+    "common_name": "Platanus"
   },
   "Poa annua": {
     "species": "Poa annua",
@@ -5805,7 +5990,12 @@
   },
   "Prunella hastifolia": {
     "species": "Prunella hastifolia",
-    "status": "not_found"
+    "status": "ok",
+    "chunks": 3,
+    "images": 1,
+    "lang": "fr",
+    "translated_it": true,
+    "common_name": ""
   },
   "Prunella laciniata": {
     "species": "Prunella laciniata",
@@ -6185,7 +6375,12 @@
   },
   "Rhamnus alpina": {
     "species": "Rhamnus alpina",
-    "status": "not_found"
+    "status": "ok",
+    "chunks": 2,
+    "images": 2,
+    "lang": "fr",
+    "translated_it": true,
+    "common_name": "Nerprun des Alpes"
   },
   "Rhamnus cathartica": {
     "species": "Rhamnus cathartica",
@@ -6197,7 +6392,12 @@
   },
   "Rhamnus pumila": {
     "species": "Rhamnus pumila",
-    "status": "not_found"
+    "status": "ok",
+    "chunks": 2,
+    "images": 2,
+    "lang": "fr",
+    "translated_it": true,
+    "common_name": "nerprun nain"
   },
   "Rhaponticum coniferum": {
     "species": "Rhaponticum coniferum",
@@ -6329,7 +6529,12 @@
   },
   "Rubus pedatifolius": {
     "species": "Rubus pedatifolius",
-    "status": "not_found"
+    "status": "ok",
+    "chunks": 2,
+    "images": 1,
+    "lang": "it",
+    "translated_it": false,
+    "common_name": ""
   },
   "Rubus ulmifolius": {
     "species": "Rubus ulmifolius",
@@ -6373,7 +6578,12 @@
   },
   "Ruta montana": {
     "species": "Ruta montana",
-    "status": "not_found"
+    "status": "ok",
+    "chunks": 2,
+    "images": 1,
+    "lang": "fr",
+    "translated_it": true,
+    "common_name": "Rue des montagnes"
   },
   "Salix alba": {
     "species": "Salix alba",
@@ -6513,11 +6723,21 @@
   },
   "Saxifraga media": {
     "species": "Saxifraga media",
-    "status": "not_found"
+    "status": "ok",
+    "chunks": 3,
+    "images": 5,
+    "lang": "es",
+    "translated_it": true,
+    "common_name": ""
   },
   "Saxifraga moschata": {
     "species": "Saxifraga moschata",
-    "status": "not_found"
+    "status": "ok",
+    "chunks": 2,
+    "images": 2,
+    "lang": "fr",
+    "translated_it": true,
+    "common_name": "Saxifrage musquée"
   },
   "Saxifraga paniculata": {
     "species": "Saxifraga paniculata",
@@ -6969,7 +7189,12 @@
   },
   "Spergula media": {
     "species": "Spergula media",
-    "status": "not_found"
+    "status": "ok",
+    "chunks": 2,
+    "images": 2,
+    "lang": "it",
+    "translated_it": false,
+    "common_name": "spergolaria media"
   },
   "Spiranthes spiralis": {
     "species": "Spiranthes spiralis",
@@ -7205,7 +7430,12 @@
   },
   "Tractema lilio-hyacinthus": {
     "species": "Tractema lilio-hyacinthus",
-    "status": "not_found"
+    "status": "ok",
+    "chunks": 3,
+    "images": 5,
+    "lang": "fr",
+    "translated_it": true,
+    "common_name": "Scille lis-jacinthe ou Jacinthe des Pyrénées, Tractema lilio-hyacinthus"
   },
   "Tractema verna": {
     "species": "Tractema verna",
@@ -7649,7 +7879,12 @@
   },
   "Vicia hybrida": {
     "species": "Vicia hybrida",
-    "status": "not_found"
+    "status": "ok",
+    "chunks": 5,
+    "images": 3,
+    "lang": "de",
+    "translated_it": true,
+    "common_name": "Die Hybrid-Wicke"
   },
   "Vicia pannonica": {
     "species": "Vicia pannonica",

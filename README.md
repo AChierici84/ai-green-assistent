@@ -70,6 +70,25 @@ Per costruire/aggiornare il database piante locale (ChromaDB + immagini):
 python build_plant_rag.py
 ```
 
+Per recuperare solo le specie non indicizzate (`indexed=0` nel DB SQLite), cercare Wikipedia in piu lingue e tradurre in italiano prima dell'upsert nella RAG:
+
+```powershell
+python build_plant_rag.py --from-sqlite-indexed-zero --langs it,en,fr,es,de,pt --translate-non-italian
+```
+
+Opzioni utili per il build RAG:
+
+```powershell
+# usa un DB SQLite specifico per leggere le specie indexed=0
+python build_plant_rag.py --from-sqlite-indexed-zero --sqlite-path data/plants.db
+
+# disattiva traduzione (mantiene il testo nella lingua trovata)
+python build_plant_rag.py --no-translate-non-italian
+
+# cambia modello OpenAI per traduzione
+python build_plant_rag.py --translation-model gpt-4o-mini
+```
+
 Output principali:
 - `data/plant_rag/` (database vettoriale persistente)
 - `data/images/<specie>/` (immagini scaricate)

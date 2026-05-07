@@ -19,16 +19,24 @@ Notes
 
 import csv
 import json
+import os
 import re
 import signal
+import sqlite3
 import sys
 import time
+import urllib.parse
 from pathlib import Path
 from typing import Optional
 
 import requests
 import chromadb
 from chromadb.utils.embedding_functions import SentenceTransformerEmbeddingFunction
+from dotenv import load_dotenv
+from openai import OpenAI
+
+
+load_dotenv()
 
 # ---------------------------------------------------------------------------
 # Paths
@@ -39,6 +47,8 @@ RAG_DIR = DATA_DIR / "plant_rag"
 IMAGES_DIR = DATA_DIR / "images"
 SPECIES_CSV = BASE_DIR / "unique_species_labels.csv"
 PROGRESS_FILE = DATA_DIR / "rag_progress.json"
+DEFAULT_SQLITE_DB_PATH = Path(os.getenv("PLANTS_SQLITE_PATH", str(DATA_DIR / "plants.db")))
+DEFAULT_ALIAS_CSV_PATH = BASE_DIR / "missing_species_alias.csv"
 
 # ---------------------------------------------------------------------------
 # Settings
@@ -72,6 +82,8 @@ MAX_IMAGES = 5
 CHUNK_WORDS = 150
 CHUNK_OVERLAP_WORDS = 20
 REQUEST_DELAY = 0.5   # seconds between Wikipedia calls
+DEFAULT_WIKI_LANGS = ("it", "en", "fr", "es", "de", "pt")
+DEFAULT_TRANSLATION_MODEL = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
 
 
 # ---------------------------------------------------------------------------
@@ -141,6 +153,148 @@ def split_wiki_sections(extract: str) -> list[tuple[str, str]]:
         body = parts[i + 1].strip() if i + 1 < len(parts) else ""
         sections.append((title, body))
     return sections
+
+
+def parse_langs(raw_langs: str | None) -> tuple[str, ...]:
+    if not raw_langs:
+        return DEFAULT_WIKI_LANGS
+    langs = []
+    seen = set()
+    for token in raw_langs.split(","):
+        lang = token.strip().lower()
+        if not lang or lang in seen:
+            continue
+        seen.add(lang)
+        langs.append(lang)
+    return tuple(langs) if langs else DEFAULT_WIKI_LANGS
+
+
+def split_text_for_translation(text: str, max_chars: int = 7000) -> list[str]:
+    if len(text) <= max_chars:
+        return [text]
+
+    paragraphs = [p for p in text.split("\n\n") if p.strip()]
+    chunks: list[str] = []
+    current = ""
+
+    for paragraph in paragraphs:
+        paragraph = paragraph.strip()
+        if not paragraph:
+            continue
+        candidate = f"{current}\n\n{paragraph}" if current else paragraph
+        if len(candidate) <= max_chars:
+            current = candidate
+            continue
+
+        if current:
+            chunks.append(current)
+            current = ""
+
+        if len(paragraph) <= max_chars:
+            current = paragraph
+        else:
+            for i in range(0, len(paragraph), max_chars):
+                chunks.append(paragraph[i:i + max_chars])
+
+    if current:
+        chunks.append(current)
+
+    return chunks or [text]
+
+
+def translate_text_to_italian(
+    client: OpenAI,
+    model: str,
+    species_name: str,
+    source_lang: str,
+    text: str,
+) -> str:
+    parts = split_text_for_translation(text)
+    translated_parts: list[str] = []
+
+    system_msg = (
+        "Sei un traduttore tecnico botanico. Traduci in italiano mantenendo precisione, "
+        "nomi scientifici, unita di misura e struttura del testo. "
+        "Non aggiungere spiegazioni. Restituisci solo il testo tradotto."
+    )
+
+    for idx, part in enumerate(parts, start=1):
+        user_msg = (
+            f"Specie: {species_name}\n"
+            f"Lingua sorgente: {source_lang}\n"
+            f"Parte {idx}/{len(parts)}\n\n"
+            f"Testo:\n{part}"
+        )
+        completion = client.chat.completions.create(
+            model=model,
+            temperature=0,
+            messages=[
+                {"role": "system", "content": system_msg},
+                {"role": "user", "content": user_msg},
+            ],
+        )
+        translated = (completion.choices[0].message.content or "").strip()
+        if not translated:
+            raise RuntimeError("Traduzione vuota dal modello OpenAI")
+        translated_parts.append(translated)
+
+    return "\n\n".join(translated_parts)
+
+
+def load_species_from_sqlite_indexed_zero(sqlite_path: Path) -> list[str]:
+    if not sqlite_path.exists():
+        raise FileNotFoundError(f"Database SQLite non trovato: {sqlite_path}")
+
+    conn = sqlite3.connect(sqlite_path)
+    try:
+        rows = conn.execute(
+            """
+            SELECT species_name
+            FROM plants
+            WHERE indexed = 0
+            ORDER BY species_name COLLATE NOCASE
+            """
+        ).fetchall()
+    finally:
+        conn.close()
+
+    return [str(r[0]).strip() for r in rows if r and str(r[0]).strip()]
+
+
+def parse_wikipedia_url(url: str) -> Optional[tuple[str, str]]:
+    txt = (url or "").strip()
+    m = re.match(r"^https?://([a-z\-]+)\.wikipedia\.org/wiki/(.+)$", txt, flags=re.IGNORECASE)
+    if not m:
+        return None
+    lang = m.group(1).lower()
+    title = urllib.parse.unquote(m.group(2)).replace("_", " ").strip()
+    if not title:
+        return None
+    return lang, title
+
+
+def load_alias_map(csv_path: Path) -> dict[str, dict[str, str]]:
+    if not csv_path.exists():
+        return {}
+
+    aliases: dict[str, dict[str, str]] = {}
+    with open(csv_path, "r", encoding="utf-8") as f:
+        reader = csv.DictReader(f, delimiter=";")
+        for row in reader:
+            species = (row.get("species_name") or "").strip()
+            wiki_url = (row.get("wikipedia_url") or "").strip()
+            if not species or not wiki_url:
+                continue
+            parsed = parse_wikipedia_url(wiki_url)
+            if not parsed:
+                continue
+            lang, title = parsed
+            aliases[species] = {
+                "lang": lang,
+                "title": title,
+                "url": wiki_url,
+            }
+    return aliases
 
 
 # ---------------------------------------------------------------------------
@@ -280,14 +434,34 @@ def collect_images(species_name: str, lang: str, species_img_dir: Path) -> list[
 # Core processing
 # ---------------------------------------------------------------------------
 
-def process_species(species_name: str, collection: chromadb.Collection) -> dict:
+def process_species(
+    species_name: str,
+    collection: chromadb.Collection,
+    wiki_langs: tuple[str, ...],
+    alias_info: dict[str, str] | None,
+    translator_client: OpenAI | None,
+    translation_model: str,
+    translate_non_italian: bool,
+) -> dict:
     slug = slugify(species_name)
     species_img_dir = IMAGES_DIR / slug
 
-    # --- Find Wikipedia page (Italian first, then English) ---
+    # --- Find Wikipedia page from configured languages ---
     result_extract: Optional[tuple[str, str]] = None
     lang = "it"
-    for try_lang in ("it", "en"):
+
+    if alias_info:
+        alias_lang = alias_info.get("lang", "").strip().lower()
+        alias_title = alias_info.get("title", "").strip()
+        if alias_lang and alias_title:
+            result_extract = fetch_wiki_extract(alias_title, alias_lang)
+            if result_extract:
+                lang = alias_lang
+                print(f"  [alias] {species_name} -> {alias_lang}:{alias_title}")
+
+    for try_lang in wiki_langs:
+        if result_extract:
+            break
         result_extract = fetch_wiki_extract(species_name, try_lang)
         if result_extract:
             lang = try_lang
@@ -310,6 +484,20 @@ def process_species(species_name: str, collection: chromadb.Collection) -> dict:
         text_parts.append(f"{sec_title}\n{sec_body}" if sec_title else sec_body)
 
     full_text = "\n\n".join(text_parts)
+    translated = False
+
+    if lang != "it" and translate_non_italian and translator_client is not None:
+        try:
+            full_text = translate_text_to_italian(
+                client=translator_client,
+                model=translation_model,
+                species_name=species_name,
+                source_lang=lang,
+                text=full_text,
+            )
+            translated = True
+        except Exception as exc:
+            print(f"  [warn] translation failed ({lang}->it): {exc}")
 
     # Common name extracted from lead
     lead_text = sections[0][1] if sections else ""
@@ -332,6 +520,9 @@ def process_species(species_name: str, collection: chromadb.Collection) -> dict:
             "image_paths": json.dumps(image_paths),
             "chunk_index": i,
             "lang": lang,
+            "source_lang": lang,
+            "translated_it": translated,
+            "content_lang": "it" if translated else lang,
         }
         for i in range(len(chunks))
     ]
@@ -340,7 +531,7 @@ def process_species(species_name: str, collection: chromadb.Collection) -> dict:
 
     print(
         f"  [ok] {len(chunks)} chunks | {len(image_paths)} images "
-        f"| lang={lang} | common='{common_name}'"
+        f"| lang={lang} | translated={translated} | common='{common_name}'"
     )
     return {
         "species": species_name,
@@ -348,6 +539,7 @@ def process_species(species_name: str, collection: chromadb.Collection) -> dict:
         "chunks": len(chunks),
         "images": len(image_paths),
         "lang": lang,
+        "translated_it": translated,
         "common_name": common_name,
     }
 
@@ -373,18 +565,75 @@ def save_progress(progress: dict) -> None:
 # ---------------------------------------------------------------------------
 
 def main() -> None:
+    import argparse
+
+    parser = argparse.ArgumentParser(
+        description="Build/aggiorna RAG piante da Wikipedia con fallback multilingua.",
+    )
+    parser.add_argument(
+        "--langs",
+        default=",".join(DEFAULT_WIKI_LANGS),
+        help="Lingue Wikipedia in ordine di tentativo, separate da virgola (es: it,en,fr,es)",
+    )
+    parser.add_argument(
+        "--from-sqlite-indexed-zero",
+        action="store_true",
+        help="Processa solo specie con indexed=0 nel DB SQLite plants",
+    )
+    parser.add_argument(
+        "--sqlite-path",
+        default=str(DEFAULT_SQLITE_DB_PATH),
+        help="Percorso DB SQLite usato con --from-sqlite-indexed-zero",
+    )
+    parser.add_argument(
+        "--translate-non-italian",
+        action=argparse.BooleanOptionalAction,
+        default=True,
+        help="Traduce in italiano i contenuti wiki trovati in lingua diversa da it (default: true)",
+    )
+    parser.add_argument(
+        "--translation-model",
+        default=DEFAULT_TRANSLATION_MODEL,
+        help="Modello OpenAI per traduzione in italiano",
+    )
+    parser.add_argument(
+        "--alias-csv",
+        default=str(DEFAULT_ALIAS_CSV_PATH),
+        help="CSV mapping specie->url Wikipedia (colonne: species_name;wikipedia_url)",
+    )
+    args = parser.parse_args()
+
+    wiki_langs = parse_langs(args.langs)
+
     RAG_DIR.mkdir(parents=True, exist_ok=True)
     IMAGES_DIR.mkdir(parents=True, exist_ok=True)
 
-    # Read species list
+    # Read species list (from CSV or SQLite indexed=0)
     species_list: list[str] = []
-    with open(SPECIES_CSV, "r", encoding="utf-8") as f:
-        for row in csv.DictReader(f):
-            name = row.get("species_name", "").strip()
-            if name:
-                species_list.append(name)
+    if args.from_sqlite_indexed_zero:
+        sqlite_path = Path(args.sqlite_path)
+        species_list = load_species_from_sqlite_indexed_zero(sqlite_path)
+        print(f"Species from SQLite indexed=0: {len(species_list)}")
+    else:
+        with open(SPECIES_CSV, "r", encoding="utf-8") as f:
+            for row in csv.DictReader(f):
+                name = row.get("species_name", "").strip()
+                if name:
+                    species_list.append(name)
 
-    print(f"Species in CSV: {len(species_list)}")
+    print(f"Species to process: {len(species_list)}")
+
+    alias_map = load_alias_map(Path(args.alias_csv))
+    if alias_map:
+        print(f"Alias mappings loaded: {len(alias_map)}")
+
+    translator_client: OpenAI | None = None
+    if args.translate_non_italian:
+        api_key = os.getenv("OPENAI_API_KEY", "").strip()
+        if api_key:
+            translator_client = OpenAI(api_key=api_key)
+        else:
+            print("[warn] OPENAI_API_KEY assente: traduzione disattivata, uso testo originale.")
 
     # ChromaDB with multilingual sentence-transformer embeddings
     ef = SentenceTransformerEmbeddingFunction(model_name=EMBEDDING_MODEL)
@@ -413,7 +662,15 @@ def main() -> None:
         global_idx = species_list.index(species) + 1
         print(f"[{global_idx}/{len(species_list)}] {species}")
         try:
-            result = process_species(species, collection)
+            result = process_species(
+                species_name=species,
+                collection=collection,
+                wiki_langs=wiki_langs,
+                alias_info=alias_map.get(species),
+                translator_client=translator_client,
+                translation_model=args.translation_model,
+                translate_non_italian=args.translate_non_italian,
+            )
             progress[species] = result
         except Exception as exc:
             print(f"  ERROR: {exc}")
