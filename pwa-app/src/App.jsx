@@ -594,7 +594,8 @@ export default function App() {
           startIso: item.created_at_iso,
           intervalDays: parsedInterval,
           occurrences: 16,
-          title: item.user_given_name || item.plant_name || "Innaffiatura"
+          title: item.user_given_name || item.plant_name || "Innaffiatura",
+          annaffiaturaTime: profile?.annaffiatura_time || null
         });
       }
     } catch (err) {
@@ -614,11 +615,17 @@ export default function App() {
       return "";
     }
 
+    const eventHour = wateringPlan.annaffiaturaTime === "sera" ? 19 : 8;
+    startDate.setUTCHours(eventHour, 0, 0, 0);
     const endDate = new Date(startDate);
-    endDate.setDate(endDate.getDate() + 1);
+    endDate.setUTCHours(eventHour + 1, 0, 0, 0);
 
-    const startToken = formatDateYYYYMMDD(startDate);
-    const endToken = formatDateYYYYMMDD(endDate);
+    function formatDateTimeGcal(d) {
+      return d.toISOString().replace(/[-:]/g, "").replace(/\.\d{3}/, "");
+    }
+
+    const startToken = formatDateTimeGcal(startDate);
+    const endToken = formatDateTimeGcal(endDate);
     const recur = `RRULE:FREQ=DAILY;INTERVAL=${wateringPlan.intervalDays};COUNT=${wateringPlan.occurrences}`;
 
     const params = new URLSearchParams({
