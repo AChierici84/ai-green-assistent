@@ -129,6 +129,29 @@ body {
   box-shadow: 0 8px 24px rgba(20, 55, 37, 0.08);
 }
 
+.view-menu {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.55rem;
+  padding: 0.55rem;
+}
+
+.menu-btn {
+  background: #e8f4ed;
+  color: #164a2f;
+  border: 1px solid #b9d8c8;
+  border-radius: 12px;
+  padding: 0.6rem 0.7rem;
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.menu-btn.active {
+  background: #164a2f;
+  color: #ecfff3;
+  border-color: #164a2f;
+}
+
 .upload-form,
 .chat-form {
   display: grid;
@@ -536,6 +559,134 @@ pre {
   padding: 0.1rem 0.3rem;
 }
 
+.my-plant-save {
+  margin-top: 1rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid #d5e6dc;
+}
+
+.my-plant-form {
+  display: grid;
+  gap: 0.6rem;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+}
+
+.my-plants-list {
+  display: grid;
+  gap: 0.55rem;
+}
+
+.my-plant-item {
+  background: #f6fbf7;
+  border: 1px solid #d2e4d8;
+  border-radius: 12px;
+  padding: 0.6rem 0.7rem;
+  cursor: pointer;
+  transition: border-color 150ms ease, box-shadow 150ms ease, background 150ms ease;
+}
+
+.my-plant-item:hover {
+  border-color: #2e8a64;
+}
+
+.my-plant-item.active {
+  border-color: #1e7a56;
+  box-shadow: 0 0 0 2px rgba(30, 122, 86, 0.18);
+  background: #eef8f2;
+}
+
+.my-plant-item p {
+  margin: 0.2rem 0 0;
+}
+
+.my-plant-item-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.watering-calendar {
+  margin-top: 1rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid #d5e6dc;
+}
+
+.watering-month-title {
+  margin: 0 0 0.45rem;
+  text-transform: capitalize;
+  font-weight: 700;
+}
+
+.watering-export {
+  display: inline-flex;
+  margin-bottom: 0.55rem;
+  text-decoration: none;
+}
+
+.watering-weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 0.35rem;
+  margin-bottom: 0.35rem;
+}
+
+.watering-weekdays span {
+  font-size: 0.78rem;
+  color: #3f644f;
+  text-align: center;
+}
+
+.watering-cells {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 0.35rem;
+}
+
+.watering-cell {
+  min-height: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #d2e4d8;
+  border-radius: 10px;
+  background: #f6fbf7;
+  font-size: 0.85rem;
+}
+
+.watering-cell.is-empty {
+  background: transparent;
+  border-style: dashed;
+  border-color: #e3eee8;
+}
+
+.watering-cell.is-today {
+  border-color: #1e7a56;
+  box-shadow: 0 0 0 1px rgba(30, 122, 86, 0.2);
+}
+
+.watering-cell.is-highlighted {
+  background: #1e7a56;
+  color: #f3fff7;
+  border-color: #1e7a56;
+}
+
+.watering-actions {
+  margin-top: 0.7rem;
+  display: grid;
+  gap: 0.55rem;
+}
+
+.watering-date-editor {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+
+
 .error {
   margin: 0;
   color: var(--alert);
@@ -597,6 +748,10 @@ pre {
     height: 2rem;
   }
 
+  .view-menu {
+    grid-template-columns: 1fr;
+  }
+
   .profile-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -630,5 +785,13 @@ pre {
 
   .profile-item.expanded .profile-tooltip {
     display: block;
+  }
+
+  .my-plant-form {
+    grid-template-columns: 1fr;
+  }
+
+  .watering-date-editor {
+    grid-template-columns: 1fr;
   }
 }

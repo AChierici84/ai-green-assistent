@@ -39,6 +39,7 @@ E disponibile una PWA React in `pwa-app/` con flusso completo:
 - upload immagine e riconoscimento specie (`/search`)
 - apertura scheda pianta con estrazioni (`/plant/{name}` + `/plant/{name}/profile`)
 - domanda sulla cura (`/chat/plant-care`)
+- salvataggio "Le tue piante" con nome personalizzato (`/user/plants`)
 
 Avvio in sviluppo:
 
@@ -136,6 +137,7 @@ Nota autenticazione:
 - endpoint login: `POST /auth/google` (valida l'id_token Google)
 - con `REQUIRE_GOOGLE_AUTH=0` i token Bearer sono opzionali
 - con `REQUIRE_GOOGLE_AUTH=1` gli endpoint principali (`/search`, `/plant/*`, `/chat/plant-care`, `/species/*`) richiedono login
+- endpoint sempre autenticati: `POST /user/plants`, `GET /user/plants`
 
 ## Build database SQLite piante
 

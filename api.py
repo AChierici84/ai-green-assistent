@@ -215,6 +215,146 @@ def get_plant_profile_from_db(name: str) -> dict[str, Any] | None:
     return payload
 
 
+def ensure_user_plants_table(conn: sqlite3.Connection) -> None:
+    conn.execute(
+        """
+        CREATE TABLE IF NOT EXISTS user_plants (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            plant_name TEXT NOT NULL,
+            user_given_name TEXT NOT NULL,
+            user_id TEXT NOT NULL,
+            user_email TEXT,
+            created_at TEXT NOT NULL
+        )
+        """
+    )
+    conn.commit()
+
+
+def _user_plant_row_to_payload(row: sqlite3.Row) -> dict[str, Any]:
+    return {
+        "id": int(row["id"]),
+        "plant_name": row["plant_name"],
+        "user_given_name": row["user_given_name"],
+        "user": row["user_email"] or row["user_id"],
+        "created_at_iso": row["created_at"],
+        "created_at": _format_datetime_display(row["created_at"]),
+    }
+
+
+def create_user_plant(plant_name: str, user_given_name: str, user: dict[str, Any]) -> dict[str, Any]:
+    plant_name_clean = plant_name.strip()
+    user_given_name_clean = user_given_name.strip()
+    user_id = str(user.get("sub") or "").strip()
+    user_email = str(user.get("email") or "").strip()
+    created_at = datetime.utcnow().replace(microsecond=0).isoformat() + "Z"
+
+    if not plant_name_clean:
+        raise HTTPException(status_code=400, detail="Nome pianta obbligatorio.")
+    if not user_given_name_clean:
+        raise HTTPException(status_code=400, detail="Nome scelto dall'utente obbligatorio.")
+    if not user_id:
+        raise HTTPException(status_code=401, detail="Utente Google non valido.")
+
+    with get_plants_db_connection() as conn:
+        ensure_user_plants_table(conn)
+        cursor = conn.execute(
+            (
+                "INSERT INTO user_plants "
+                "(plant_name, user_given_name, user_id, user_email, created_at) "
+                "VALUES (?, ?, ?, ?, ?)"
+            ),
+            (plant_name_clean, user_given_name_clean, user_id, user_email, created_at),
+        )
+        conn.commit()
+
+        row = conn.execute(
+            (
+                "SELECT id, plant_name, user_given_name, user_id, user_email, created_at "
+                "FROM user_plants WHERE id = ?"
+            ),
+            (cursor.lastrowid,),
+        ).fetchone()
+
+    return _user_plant_row_to_payload(row)
+
+
+def list_user_plants(user: dict[str, Any]) -> list[dict[str, Any]]:
+    user_id = str(user.get("sub") or "").strip()
+    if not user_id:
+        raise HTTPException(status_code=401, detail="Utente Google non valido.")
+
+    with get_plants_db_connection() as conn:
+        ensure_user_plants_table(conn)
+        rows = conn.execute(
+            (
+                "SELECT id, plant_name, user_given_name, user_id, user_email, created_at "
+                "FROM user_plants WHERE user_id = ? ORDER BY id DESC"
+            ),
+            (user_id,),
+        ).fetchall()
+
+    return [_user_plant_row_to_payload(row) for row in rows]
+
+
+def delete_user_plant_by_id(user: dict[str, Any], plant_id: int) -> bool:
+    user_id = str(user.get("sub") or "").strip()
+    if not user_id:
+        raise HTTPException(status_code=401, detail="Utente Google non valido.")
+
+    with get_plants_db_connection() as conn:
+        ensure_user_plants_table(conn)
+        existing = conn.execute(
+            "SELECT id FROM user_plants WHERE id = ? AND user_id = ? LIMIT 1",
+            (plant_id, user_id),
+        ).fetchone()
+
+        if existing is None:
+            return False
+
+        conn.execute(
+            "DELETE FROM user_plants WHERE id = ? AND user_id = ?",
+            (plant_id, user_id),
+        )
+        conn.commit()
+
+    return True
+
+
+def update_user_plant_created_at_by_id(user: dict[str, Any], plant_id: int, created_at_iso: str) -> dict[str, Any] | None:
+    user_id = str(user.get("sub") or "").strip()
+    if not user_id:
+        raise HTTPException(status_code=401, detail="Utente Google non valido.")
+
+    with get_plants_db_connection() as conn:
+        ensure_user_plants_table(conn)
+        existing = conn.execute(
+            "SELECT id FROM user_plants WHERE id = ? AND user_id = ? LIMIT 1",
+            (plant_id, user_id),
+        ).fetchone()
+
+        if existing is None:
+            return None
+
+        conn.execute(
+            "UPDATE user_plants SET created_at = ? WHERE id = ? AND user_id = ?",
+            (created_at_iso, plant_id, user_id),
+        )
+        conn.commit()
+
+        row = conn.execute(
+            (
+                "SELECT id, plant_name, user_given_name, user_id, user_email, created_at "
+                "FROM user_plants WHERE id = ? AND user_id = ? LIMIT 1"
+            ),
+            (plant_id, user_id),
+        ).fetchone()
+
+    if row is None:
+        return None
+    return _user_plant_row_to_payload(row)
+
+
 def _build_profile_context(profile: dict[str, Any] | None) -> str:
     if not profile:
         return ""
@@ -288,6 +428,19 @@ class PlantChatRequest(BaseModel):
     plant_name: str = Field(..., min_length=2, description="Nome comune o scientifico della pianta")
     question: str = Field(..., min_length=3, description="Domanda sulla cura della pianta")
     lang: str = Field("it", description="Lingua Wikipedia da usare per il contesto")
+
+
+class SaveUserPlantRequest(BaseModel):
+    plant_name: str = Field(..., min_length=2, description="Nome della specie trovata")
+    user_given_name: str = Field(..., min_length=1, max_length=80, description="Nome scelto dall'utente")
+
+
+class UpdateFirstWateringDateRequest(BaseModel):
+    first_watering_date: str = Field(
+        ...,
+        pattern=r"^\d{4}-\d{2}-\d{2}$",
+        description="Data prima innaffiatura in formato YYYY-MM-DD",
+    )
 
 
 class GoogleAuthRequest(BaseModel):
@@ -520,6 +673,79 @@ def auth_google(payload: GoogleAuthRequest):
             "aud": validated.get("aud", ""),
         }
     )
+
+
+@app.post("/user/plants")
+def save_user_plant(payload: SaveUserPlantRequest, authorization: str | None = Header(default=None)):
+    user = _get_google_user_from_authorization(authorization)
+    if not user:
+        raise HTTPException(status_code=401, detail="Accedi con Google per salvare una pianta.")
+
+    saved = create_user_plant(
+        plant_name=payload.plant_name,
+        user_given_name=payload.user_given_name,
+        user=user,
+    )
+
+    _log_api(
+        "/user/plants",
+        "saved",
+        {
+            "plant_name": saved["plant_name"],
+            "user_given_name": saved["user_given_name"],
+            "user": saved["user"],
+        },
+    )
+
+    return JSONResponse(content={"saved": saved})
+
+
+@app.get("/user/plants")
+def get_user_plants(authorization: str | None = Header(default=None)):
+    user = _get_google_user_from_authorization(authorization)
+    if not user:
+        raise HTTPException(status_code=401, detail="Accedi con Google per vedere le tue piante.")
+
+    items = list_user_plants(user)
+    return JSONResponse(content={"items": items})
+
+
+@app.delete("/user/plants/{plant_id}")
+def delete_user_plant(plant_id: int, authorization: str | None = Header(default=None)):
+    user = _get_google_user_from_authorization(authorization)
+    if not user:
+        raise HTTPException(status_code=401, detail="Accedi con Google per eliminare una pianta.")
+
+    deleted = delete_user_plant_by_id(user=user, plant_id=plant_id)
+    if not deleted:
+        raise HTTPException(status_code=404, detail="Pianta salvata non trovata.")
+
+    _log_api("/user/plants/{plant_id}", "deleted", {"plant_id": plant_id})
+    return JSONResponse(content={"deleted": True, "id": plant_id})
+
+
+@app.patch("/user/plants/{plant_id}/first-watering-date")
+def update_user_plant_first_watering_date(
+    plant_id: int,
+    payload: UpdateFirstWateringDateRequest,
+    authorization: str | None = Header(default=None),
+):
+    user = _get_google_user_from_authorization(authorization)
+    if not user:
+        raise HTTPException(status_code=401, detail="Accedi con Google per aggiornare la data.")
+
+    created_at_iso = f"{payload.first_watering_date}T00:00:00Z"
+    updated = update_user_plant_created_at_by_id(user=user, plant_id=plant_id, created_at_iso=created_at_iso)
+    if updated is None:
+        raise HTTPException(status_code=404, detail="Pianta salvata non trovata.")
+
+    _log_api(
+        "/user/plants/{plant_id}/first-watering-date",
+        "updated",
+        {"plant_id": plant_id, "created_at_iso": updated["created_at_iso"]},
+    )
+
+    return JSONResponse(content={"updated": updated})
 
 
 @app.get("/health")

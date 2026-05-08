@@ -93,6 +93,36 @@ export async function verifyGoogleToken(idToken) {
   return parseResponse(response);
 }
 
+export async function saveMyPlant(plantName, userGivenName) {
+  const response = await apiFetch("/user/plants", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ plant_name: plantName, user_given_name: userGivenName })
+  });
+  return parseResponse(response);
+}
+
+export async function getMyPlants() {
+  const response = await apiFetch("/user/plants");
+  return parseResponse(response);
+}
+
+export async function deleteMyPlant(plantId) {
+  const response = await apiFetch(`/user/plants/${plantId}`, {
+    method: "DELETE"
+  });
+  return parseResponse(response);
+}
+
+export async function updateMyPlantFirstWaterDate(plantId, firstWateringDate) {
+  const response = await apiFetch(`/user/plants/${plantId}/first-watering-date`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ first_watering_date: firstWateringDate })
+  });
+  return parseResponse(response);
+}
+
 export function toAbsoluteImage(urlOrPath) {
   if (!urlOrPath) {
     return "";
