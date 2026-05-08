@@ -1,0 +1,12 @@
+.git
+.gitignore
+.gitattributes
+.venv
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.log
+logs/
+pwa-app/node_modules/
+pwa-app/dist/

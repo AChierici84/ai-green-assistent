@@ -14,6 +14,7 @@ import httpx
 from dotenv import load_dotenv
 from fastapi import FastAPI, File, UploadFile, HTTPException, Query, Header
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse, JSONResponse, FileResponse
 from openai import OpenAI
 from pydantic import BaseModel, Field
@@ -41,6 +42,7 @@ REQUIRE_GOOGLE_AUTH = os.getenv("REQUIRE_GOOGLE_AUTH", "0").strip().lower() in {
     "yes",
     "on",
 }
+PWA_DIST_DIR = Path(os.getenv("PWA_DIST_DIR", "pwa-app/dist"))
 
 index: Any = None
 rag_collection: Any = None
@@ -808,6 +810,10 @@ def species_common_names(
 
 @app.get("/", response_class=HTMLResponse)
 def ui():
+    pwa_index = PWA_DIST_DIR / "index.html"
+    if pwa_index.exists():
+        return pwa_index.read_text(encoding="utf-8")
+
     with open(os.path.join(os.path.dirname(__file__), "ui.html"), encoding="utf-8") as f:
         return f.read()
 
@@ -1166,6 +1172,11 @@ def plant_care_chat(payload: PlantChatRequest, authorization: str | None = Heade
     )
 
     return JSONResponse(content=response_payload)
+
+
+# Mount the production frontend build for single-service deployments (e.g. Hugging Face Spaces).
+if PWA_DIST_DIR.exists() and PWA_DIST_DIR.is_dir():
+    app.mount("/", StaticFiles(directory=str(PWA_DIST_DIR), html=True), name="pwa")
 
 
 if __name__ == "__main__":

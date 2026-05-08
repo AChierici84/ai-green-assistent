@@ -1,3 +1,12 @@
+---
+title: AI Green Assistant
+sdk: docker
+app_port: 7860
+colorFrom: green
+colorTo: emerald
+pinned: false
+---
+
 # AI Green Assistant
 
 API FastAPI + UI web per:
@@ -32,6 +41,32 @@ Server locale:
 - API base: `http://localhost:8000`
 - UI: `http://localhost:8000/`
 - Swagger: `http://localhost:8000/docs`
+
+## Deploy su Hugging Face Spaces (Docker)
+
+Questa repo e pronta per Spaces in modalita Docker:
+- file `Dockerfile` alla root
+- API FastAPI + frontend PWA serviti dallo stesso container
+- porta esposta: `7860`
+
+Passi:
+
+1. Crea un nuovo Space su Hugging Face con SDK `Docker`.
+2. Collega/pusha questa repository nello Space.
+3. In `Settings -> Secrets` aggiungi almeno:
+  - `OPENAI_API_KEY`
+  - `GOOGLE_CLIENT_ID` (se vuoi login Google)
+4. Opzionali in `Variables/Secrets`:
+  - `OPENAI_MODEL`
+  - `REQUIRE_GOOGLE_AUTH` (consigliato `1` in produzione)
+  - `RAG_DB_PATH` (default `data/plant_rag`)
+  - `PLANTS_SQLITE_PATH` (default `data/plants.db`)
+5. Avvia il build dello Space.
+
+Note operative:
+- In Spaces il frontend viene compilato nel Docker build e servito dalla API.
+- Se usi Google login, configura gli URI autorizzati nel progetto Google OAuth con il dominio dello Space (https://<user>-<space>.hf.space).
+- Per usare ricerca immagini servono i dati in `data/` (index/cache) presenti nella repository o caricati nello Space.
 
 ## Frontend React PWA
 
