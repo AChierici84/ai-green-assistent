@@ -565,8 +565,8 @@ pre {
   }
 
   .profile-item {
-    align-items: stretch;
-    text-align: left;
+    align-items: center;
+    text-align: center;
   }
 
   .profile-tooltip {
