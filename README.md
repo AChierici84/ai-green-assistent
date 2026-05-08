@@ -53,6 +53,7 @@ App locale:
 
 Configurazione endpoint API (opzionale):
 - variabile `VITE_API_BASE` (default `http://localhost:8000`)
+- variabile `VITE_GOOGLE_CLIENT_ID` (obbligatoria per login Google nella PWA)
 
 Per produzione:
 
@@ -106,6 +107,8 @@ Puoi impostare le variabili in `.env` (caricato automaticamente) o via shell.
 - `WIKI_USER_AGENT` (default: `ai-green-assistant/1.0 (contact: local-dev)`)
 - `OPENAI_API_KEY` (obbligatoria per `/plant/{name}` e `/chat/plant-care`)
 - `OPENAI_MODEL` (default: `gpt-4o-mini`)
+- `GOOGLE_CLIENT_ID` (uno o piu client id Google OAuth separati da virgola)
+- `REQUIRE_GOOGLE_AUTH` (default: `0`; se `1/true/yes/on` richiede Bearer Google token)
 
 Esempio `.env`:
 
@@ -118,7 +121,21 @@ PLANCLEF_MODEL_NAME=ViT-B-32
 RAG_DB_PATH=data/plant_rag
 PLANTS_SQLITE_PATH=data/plants.db
 WIKI_USER_AGENT=ai-green-assistant/1.0 (contact: local-dev)
+GOOGLE_CLIENT_ID=xxxxxxxxxxxx-abcdefg.apps.googleusercontent.com
+REQUIRE_GOOGLE_AUTH=0
 ```
+
+Variabili `.env` lato PWA (`pwa-app/.env`):
+
+```env
+VITE_API_BASE=http://localhost:8000
+VITE_GOOGLE_CLIENT_ID=xxxxxxxxxxxx-abcdefg.apps.googleusercontent.com
+```
+
+Nota autenticazione:
+- endpoint login: `POST /auth/google` (valida l'id_token Google)
+- con `REQUIRE_GOOGLE_AUTH=0` i token Bearer sono opzionali
+- con `REQUIRE_GOOGLE_AUTH=1` gli endpoint principali (`/search`, `/plant/*`, `/chat/plant-care`, `/species/*`) richiedono login
 
 ## Build database SQLite piante
 

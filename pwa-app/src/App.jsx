@@ -1,15 +1,20 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { GoogleLogin } from "@react-oauth/google";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import {
   askPlantCare,
   getPlantCard,
   getPlantProfile,
+  setAuthToken,
   getSpeciesCommonNames,
   getSpeciesPreviews,
   searchPlantImage,
+  verifyGoogleToken,
   toAbsoluteImage
 } from "./api";
+
+const AUTH_STORAGE_KEY = "green-assistant-auth";
 
 const PROFILE_LABELS = {
   annaffiatura_gg: "Annaffiatura",
@@ -66,6 +71,8 @@ function shouldAutoSelectTopResult(results) {
 }
 
 export default function App() {
+  const [auth, setAuth] = useState(null);
+  const [authBusy, setAuthBusy] = useState(false);
   const [file, setFile] = useState(null);
   const [preview, setPreview] = useState("");
   const [isDragActive, setIsDragActive] = useState(false);
@@ -96,6 +103,8 @@ export default function App() {
   const searchSteps = ["Leggo i dettagli della foglia", "Confronto con le specie note", "Preparo i risultati migliori"];
 
   const canAsk = selectedSpecies && question.trim().length > 2;
+  const isLoggedIn = Boolean(auth?.idToken);
+  const googleClientIdConfigured = Boolean(import.meta.env.VITE_GOOGLE_CLIENT_ID);
   const galleryImages = useMemo(() => {
     if (!plantCard?.images?.length) {
       return [];
@@ -104,6 +113,27 @@ export default function App() {
   }, [plantCard]);
 
   const activeImage = galleryImages.length ? galleryImages[imageIndex % galleryImages.length] : "";
+
+  useEffect(() => {
+    const raw = window.localStorage.getItem(AUTH_STORAGE_KEY);
+    if (!raw) {
+      setAuthToken("");
+      return;
+    }
+
+    try {
+      const saved = JSON.parse(raw);
+      if (saved?.idToken) {
+        setAuth(saved);
+        setAuthToken(saved.idToken);
+      } else {
+        setAuthToken("");
+      }
+    } catch {
+      window.localStorage.removeItem(AUTH_STORAGE_KEY);
+      setAuthToken("");
+    }
+  }, []);
 
   useEffect(() => {
     setExpandedProfileKey("");
@@ -197,6 +227,10 @@ export default function App() {
 
   async function handleSearch(event) {
     event.preventDefault();
+    if (!isLoggedIn) {
+      setError("Accedi con Google per usare la ricerca piante.");
+      return;
+    }
     if (!file) {
       setError("Carica prima un'immagine della pianta.");
       return;
@@ -266,6 +300,10 @@ export default function App() {
 
   async function handleQuestion(event) {
     event.preventDefault();
+    if (!isLoggedIn) {
+      setError("Accedi con Google per fare domande sulla cura.");
+      return;
+    }
     if (!canAsk) {
       return;
     }
@@ -297,6 +335,43 @@ export default function App() {
     setImageIndex((prev) => (prev + 1) % galleryImages.length);
   }
 
+  async function handleGoogleSuccess(credentialResponse) {
+    const idToken = credentialResponse?.credential || "";
+    if (!idToken) {
+      setError("Login Google non riuscito: token mancante.");
+      return;
+    }
+
+    setError("");
+    setAuthBusy(true);
+
+    try {
+      const data = await verifyGoogleToken(idToken);
+      const nextAuth = {
+        idToken,
+        user: data.user || null,
+        expiresAt: data.expires_at || null
+      };
+      setAuth(nextAuth);
+      setAuthToken(idToken);
+      window.localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(nextAuth));
+    } catch (err) {
+      setAuth(null);
+      setAuthToken("");
+      window.localStorage.removeItem(AUTH_STORAGE_KEY);
+      setError(err.message || "Login Google non riuscito.");
+    } finally {
+      setAuthBusy(false);
+    }
+  }
+
+  function handleLogout() {
+    setAuth(null);
+    setAuthToken("");
+    window.localStorage.removeItem(AUTH_STORAGE_KEY);
+    setError("");
+  }
+
   return (
     <main className="page">
       <section className="hero">
@@ -307,6 +382,40 @@ export default function App() {
           </div>
 
           <h1>Ti aiuta a <span className="hero-highlight">riconoscere</span> e <span className="hero-highlight">curare</span> le tue piante.</h1>
+
+          <div className="auth-box">
+            {!googleClientIdConfigured && (
+              <p className="auth-warning">
+                Imposta VITE_GOOGLE_CLIENT_ID per abilitare il login con Google.
+              </p>
+            )}
+
+            {googleClientIdConfigured && !isLoggedIn && (
+              <div className="auth-login">
+                <GoogleLogin
+                  onSuccess={handleGoogleSuccess}
+                  onError={() => setError("Login Google annullato o non riuscito.")}
+                  useOneTap
+                  shape="pill"
+                  text="signin_with"
+                />
+              </div>
+            )}
+
+            {isLoggedIn && (
+              <div className="auth-user">
+                <div>
+                  <strong>{auth?.user?.name || "Utente Google"}</strong>
+                  <p>{auth?.user?.email || ""}</p>
+                </div>
+                <button type="button" className="btn-secondary" onClick={handleLogout}>
+                  Esci
+                </button>
+              </div>
+            )}
+
+            {authBusy && <p className="status">Verifica accesso Google...</p>}
+          </div>
         </div>
       </section>
 
@@ -349,9 +458,11 @@ export default function App() {
             </p>
           </div>
 
-          <button type="submit" disabled={busy.search}>
+          <button type="submit" disabled={busy.search || !isLoggedIn}>
             {busy.search ? "Riconoscimento in corso..." : "Riconosci pianta"}
           </button>
+
+          {!isLoggedIn && <p className="status">Accedi con Google per avviare il riconoscimento.</p>}
 
           {busy.search && (
             <div className="upload-progress" role="status" aria-live="polite">
@@ -500,7 +611,7 @@ export default function App() {
               rows={4}
               placeholder="Esempio: devo rinvasarla ora o aspettare?"
             />
-            <button type="submit" disabled={!canAsk || busy.chat}>
+            <button type="submit" disabled={!canAsk || busy.chat || !isLoggedIn}>
               {busy.chat ? "Sto preparando la risposta..." : "Chiedi consigli"}
             </button>
           </form>

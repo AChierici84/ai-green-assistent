@@ -1,8 +1,11 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
+import { GoogleOAuthProvider } from "@react-oauth/google";
 import { registerSW } from "virtual:pwa-register";
 import App from "./App";
 import "./styles.css";
+
+const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || "";
 
 registerSW({
   immediate: true,
@@ -15,6 +18,12 @@ registerSW({
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
-    <App />
+    {googleClientId ? (
+      <GoogleOAuthProvider clientId={googleClientId}>
+        <App />
+      </GoogleOAuthProvider>
+    ) : (
+      <App />
+    )}
   </React.StrictMode>
 );

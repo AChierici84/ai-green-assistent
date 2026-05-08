@@ -12,7 +12,7 @@ from typing import Any
 import chromadb
 import httpx
 from dotenv import load_dotenv
-from fastapi import FastAPI, File, UploadFile, HTTPException, Query
+from fastapi import FastAPI, File, UploadFile, HTTPException, Query, Header
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse, JSONResponse, FileResponse
 from openai import OpenAI
@@ -30,6 +30,17 @@ WIKI_USER_AGENT = os.getenv(
 )
 OPENAI_MODEL = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
 PLANTS_SQLITE_PATH = os.getenv("PLANTS_SQLITE_PATH", "data/plants.db")
+GOOGLE_CLIENT_IDS = [
+    value.strip()
+    for value in os.getenv("GOOGLE_CLIENT_ID", "").split(",")
+    if value.strip()
+]
+REQUIRE_GOOGLE_AUTH = os.getenv("REQUIRE_GOOGLE_AUTH", "0").strip().lower() in {
+    "1",
+    "true",
+    "yes",
+    "on",
+}
 
 index: Any = None
 rag_collection: Any = None
@@ -279,6 +290,51 @@ class PlantChatRequest(BaseModel):
     lang: str = Field("it", description="Lingua Wikipedia da usare per il contesto")
 
 
+class GoogleAuthRequest(BaseModel):
+    id_token: str = Field(..., min_length=20, description="Google ID token")
+
+
+def _validate_google_token(id_token: str) -> dict[str, Any]:
+    try:
+        with httpx.Client(timeout=8.0) as client:
+            response = client.get(
+                "https://oauth2.googleapis.com/tokeninfo",
+                params={"id_token": id_token},
+            )
+    except Exception as e:
+        raise HTTPException(status_code=502, detail=f"Errore verifica token Google: {e}")
+
+    if response.status_code != 200:
+        raise HTTPException(status_code=401, detail="Token Google non valido.")
+
+    payload = response.json()
+    audience = str(payload.get("aud") or "")
+
+    if GOOGLE_CLIENT_IDS and audience not in GOOGLE_CLIENT_IDS:
+        raise HTTPException(status_code=401, detail="Token Google con client_id non autorizzato.")
+
+    return payload
+
+
+def _get_google_user_from_authorization(authorization: str | None) -> dict[str, Any] | None:
+    if not authorization:
+        if REQUIRE_GOOGLE_AUTH:
+            raise HTTPException(status_code=401, detail="Authorization Bearer richiesta.")
+        return None
+
+    scheme, _, token = authorization.partition(" ")
+    if scheme.lower() != "bearer" or not token.strip():
+        raise HTTPException(status_code=401, detail="Header Authorization non valido.")
+
+    validated = _validate_google_token(token.strip())
+    return {
+        "sub": validated.get("sub", ""),
+        "email": validated.get("email", ""),
+        "name": validated.get("name", ""),
+        "picture": validated.get("picture", ""),
+    }
+
+
 def fetch_wikipedia_text_context(name: str, lang: str):
     base = f"https://{lang}.wikipedia.org"
     wiki_headers = {
@@ -394,7 +450,9 @@ def get_index():
 async def search_similar(
     file: UploadFile = File(..., description="Immagine della pianta da ricercare"),
     k: int = Query(default=5, ge=1, le=50, description="Numero di risultati da restituire"),
+    authorization: str | None = Header(default=None),
 ):
+    _get_google_user_from_authorization(authorization)
     _log_api(
         "/search",
         "input",
@@ -443,6 +501,27 @@ async def log_requests(request, call_next):
     return response
 
 
+@app.post("/auth/google")
+def auth_google(payload: GoogleAuthRequest):
+    validated = _validate_google_token(payload.id_token)
+
+    user = {
+        "sub": validated.get("sub", ""),
+        "email": validated.get("email", ""),
+        "name": validated.get("name", ""),
+        "picture": validated.get("picture", ""),
+    }
+
+    return JSONResponse(
+        content={
+            "ok": True,
+            "user": user,
+            "expires_at": validated.get("exp", ""),
+            "aud": validated.get("aud", ""),
+        }
+    )
+
+
 @app.get("/health")
 def health():
     status = get_search_backend_status()
@@ -461,7 +540,9 @@ def search_status():
 @app.get("/species/previews")
 def species_previews(
     names: list[str] = Query(default=[], description="Nomi specie da risolvere per anteprima immagine"),
+    authorization: str | None = Header(default=None),
 ):
+    _get_google_user_from_authorization(authorization)
     if not names:
         return JSONResponse(content={"previews": {}})
 
@@ -472,7 +553,9 @@ def species_previews(
 @app.get("/species/common-names")
 def species_common_names(
     names: list[str] = Query(default=[], description="Nomi specie di cui ottenere il nome comune"),
+    authorization: str | None = Header(default=None),
 ):
+    _get_google_user_from_authorization(authorization)
     if not names:
         return JSONResponse(content={"common_names": {}})
 
@@ -530,8 +613,10 @@ def get_image(full_path: str):
 def plant_info(
     name: str,
     lang: str = Query(default="it", description="Codice lingua Wikipedia (es. it, en, fr)"),
+    authorization: str | None = Header(default=None),
 ):
     """Recupera informazioni su una pianta dalla RAG con riassunto OpenAI."""
+    _get_google_user_from_authorization(authorization)
     _log_api("/plant/{name}", "input", {"name": name, "lang": lang})
 
     api_key = os.getenv("OPENAI_API_KEY", "").strip()
@@ -694,7 +779,8 @@ def plant_info(
 
 
 @app.get("/plant/{name}/profile")
-def plant_profile(name: str):
+def plant_profile(name: str, authorization: str | None = Header(default=None)):
+    _get_google_user_from_authorization(authorization)
     _log_api("/plant/{name}/profile", "input", {"name": name})
 
     try:
@@ -721,7 +807,8 @@ def plant_profile(name: str):
 
 
 @app.post("/chat/plant-care")
-def plant_care_chat(payload: PlantChatRequest):
+def plant_care_chat(payload: PlantChatRequest, authorization: str | None = Header(default=None)):
+    _get_google_user_from_authorization(authorization)
     _log_api(
         "/chat/plant-care",
         "input",

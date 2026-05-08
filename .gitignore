@@ -5,3 +5,5 @@
 /data/images/
 /data/plant_rag/
 /logs/
+client_secret*
+pwa-app/.env

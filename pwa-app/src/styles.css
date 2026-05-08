@@ -84,6 +84,43 @@ body {
   color: #9fe0ba;
 }
 
+.auth-box {
+  margin-top: 0.85rem;
+  display: grid;
+  gap: 0.5rem;
+}
+
+.auth-login {
+  display: inline-flex;
+}
+
+.auth-user {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.55rem 0.7rem;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.auth-user strong {
+  display: block;
+  line-height: 1.1;
+}
+
+.auth-user p {
+  margin: 0.2rem 0 0;
+  font-size: 0.86rem;
+  opacity: 0.95;
+}
+
+.auth-warning {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #ffe4c2;
+}
+
 .panel {
   background: var(--card);
   border: 1px solid rgba(21, 73, 50, 0.14);

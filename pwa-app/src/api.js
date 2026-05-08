@@ -1,7 +1,24 @@
 const API_BASE = import.meta.env.VITE_API_BASE || "http://localhost:8000";
+let authToken = "";
 
 function buildUrl(path) {
   return `${API_BASE}${path}`;
+}
+
+export function setAuthToken(token) {
+  authToken = token || "";
+}
+
+async function apiFetch(path, options = {}) {
+  const headers = new Headers(options.headers || {});
+  if (authToken) {
+    headers.set("Authorization", `Bearer ${authToken}`);
+  }
+
+  return fetch(buildUrl(path), {
+    ...options,
+    headers
+  });
 }
 
 async function parseResponse(response) {
@@ -17,7 +34,7 @@ export async function searchPlantImage(file, k = 5) {
   const formData = new FormData();
   formData.append("file", file);
 
-  const response = await fetch(buildUrl(`/search?k=${k}`), {
+  const response = await apiFetch(`/search?k=${k}`, {
     method: "POST",
     body: formData
   });
@@ -26,13 +43,13 @@ export async function searchPlantImage(file, k = 5) {
 
 export async function getPlantCard(name) {
   const encoded = encodeURIComponent(name);
-  const response = await fetch(buildUrl(`/plant/${encoded}?lang=it`));
+  const response = await apiFetch(`/plant/${encoded}?lang=it`);
   return parseResponse(response);
 }
 
 export async function getPlantProfile(name) {
   const encoded = encodeURIComponent(name);
-  const response = await fetch(buildUrl(`/plant/${encoded}/profile`));
+  const response = await apiFetch(`/plant/${encoded}/profile`);
   return parseResponse(response);
 }
 
@@ -43,7 +60,7 @@ export async function getSpeciesPreviews(speciesNames) {
 
   const params = new URLSearchParams();
   speciesNames.forEach((name) => params.append("names", name));
-  const response = await fetch(buildUrl(`/species/previews?${params.toString()}`));
+  const response = await apiFetch(`/species/previews?${params.toString()}`);
   return parseResponse(response);
 }
 
@@ -54,15 +71,24 @@ export async function getSpeciesCommonNames(speciesNames) {
 
   const params = new URLSearchParams();
   speciesNames.forEach((name) => params.append("names", name));
-  const response = await fetch(buildUrl(`/species/common-names?${params.toString()}`));
+  const response = await apiFetch(`/species/common-names?${params.toString()}`);
   return parseResponse(response);
 }
 
 export async function askPlantCare(plantName, question) {
-  const response = await fetch(buildUrl("/chat/plant-care"), {
+  const response = await apiFetch("/chat/plant-care", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ plant_name: plantName, question, lang: "it" })
+  });
+  return parseResponse(response);
+}
+
+export async function verifyGoogleToken(idToken) {
+  const response = await apiFetch("/auth/google", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ id_token: idToken })
   });
   return parseResponse(response);
 }
