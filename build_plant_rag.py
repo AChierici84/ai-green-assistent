@@ -5,7 +5,6 @@ Build a plant RAG from Wikipedia for every species in unique_species_labels.csv.
 Output
 ------
   data/plant_rag/          — ChromaDB persistent store
-  data/images/<slug>/      — downloaded images (up to MAX_IMAGES per species)
   data/rag_progress.json   — resume file (re-run safe)
 
 Notes
@@ -14,7 +13,8 @@ Notes
 - Tries Italian Wikipedia first, falls back to English.
 - Skips sections: Note, Bibliografia, Voci correlate, Altri progetti,
   Collegamenti esterni (and their English equivalents).
-- Metadata per chunk: species_name, common_name, image_paths (JSON list), lang.
+- Metadata per chunk: species_name, common_name, lang.
+- Image paths per species are stored in plants.db (plants.image_paths JSON).
 """
 
 import csv
@@ -26,6 +26,7 @@ import sqlite3
 import sys
 import time
 import urllib.parse
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Optional
 
@@ -53,7 +54,7 @@ DEFAULT_ALIAS_CSV_PATH = BASE_DIR / "missing_species_alias.csv"
 # ---------------------------------------------------------------------------
 # Settings
 # ---------------------------------------------------------------------------
-HEADERS = {"User-Agent": "ai-green-assistant/1.0 (https://github.com/local)"}
+HEADERS = {"User-Agent": "clorofilla/1.0 (https://github.com/local)"}
 
 # Section titles (lowercase) to skip entirely
 SKIP_SECTIONS: set[str] = {
@@ -67,6 +68,9 @@ IMAGE_SKIP_KEYWORDS = (
     "commons-logo", "wikidata", "wikiquote", "disambig", "folder",
     "wiktionary", "wikimedia", "icon", "edit-clear", "blue_pencil",
     "padlock", "question_book", "portal", "wikiversity",
+    "pencil", "edit", "camera", "information", "ambox", "stub",
+    "sound-icon", "speaker", "audio", "symbol", "logo", "coat of arms",
+    "flag", "seal", "emblem", "infobox",
 )
 
 IMAGE_SKIP_EXTENSIONS = (
@@ -333,7 +337,7 @@ def fetch_wiki_extract(title: str, lang: str) -> Optional[tuple[str, str]]:
 
 
 def fetch_wiki_image_urls(title: str, lang: str) -> list[str]:
-    """Return up to MAX_IMAGES+5 image URLs for the page, filtering out icons."""
+    """Return up to MAX_IMAGES+5 image URLs for the page, filtering out icons and non-photographs."""
     # Step 1 — get file names listed on the page
     data = _action_api(
         lang,
@@ -354,7 +358,11 @@ def fetch_wiki_image_urls(title: str, lang: str) -> list[str]:
         for img in page.get("images", []):
             t = img.get("title", "")
             t_lower = t.lower()
+            # Skip by keyword
             if any(kw in t_lower for kw in IMAGE_SKIP_KEYWORDS):
+                continue
+            # Skip by extension
+            if any(t_lower.endswith(ext) for ext in IMAGE_SKIP_EXTENSIONS):
                 continue
             file_titles.append(t)
 
@@ -368,7 +376,7 @@ def fetch_wiki_image_urls(title: str, lang: str) -> list[str]:
         action="query",
         prop="imageinfo",
         titles="|".join(batch),
-        iiprop="url",
+        iiprop="url|width|height",
     )
     if not data2:
         return []
@@ -377,57 +385,68 @@ def fetch_wiki_image_urls(title: str, lang: str) -> list[str]:
     for pid, page in data2.get("query", {}).get("pages", {}).items():
         for info in page.get("imageinfo", []):
             u = info.get("url", "")
-            if u:
-                urls.append(u)
+            if not u:
+                continue
+            # Only filter by dimensions if we actually have the data
+            # (Wikipedia sometimes doesn't return width/height)
+            width = info.get("width")
+            height = info.get("height")
+            if width is not None and height is not None:
+                # If we have size data, filter out very small icons (< 200px)
+                if width < 200 or height < 200:
+                    continue
+            urls.append(u)
 
     return urls
 
 
 # ---------------------------------------------------------------------------
-# Image download
+# Image references
 # ---------------------------------------------------------------------------
 
-def download_image(img_url: str, save_path: Path) -> bool:
+def collect_images(species_name: str, lang: str) -> list[str]:
+    """Return up to MAX_IMAGES Wikipedia image URLs for the species page."""
+    return fetch_wiki_image_urls(species_name, lang)[:MAX_IMAGES]
+
+
+def save_species_images_to_sqlite(sqlite_path: Path, species_name: str, image_paths: list[str]) -> None:
+    """Store per-species image paths in plants.db for API/UI consumption.
+
+    Uses JSON string in plants.image_paths and preserves existing profile fields.
+    """
+    sqlite_path.parent.mkdir(parents=True, exist_ok=True)
+    now_iso = datetime.now(timezone.utc).isoformat()
+    payload = json.dumps(image_paths, ensure_ascii=False)
+
+    if not sqlite_path.exists():
+        return
+
+    conn = sqlite3.connect(sqlite_path)
     try:
-        r = requests.get(img_url, headers=HEADERS, timeout=20, stream=True)
-        r.raise_for_status()
-        save_path.parent.mkdir(parents=True, exist_ok=True)
-        with open(save_path, "wb") as f:
-            for chunk in r.iter_content(8192):
-                f.write(chunk)
-        return True
-    except Exception as e:
-        print(f"    [img-err] {img_url}: {e}")
-        return False
+        row = conn.execute(
+            "SELECT 1 FROM sqlite_master WHERE type='table' AND name='plants' LIMIT 1"
+        ).fetchone()
+        if row is None:
+            return
 
+        try:
+            conn.execute("ALTER TABLE plants ADD COLUMN image_paths TEXT")
+        except Exception:
+            pass
 
-def collect_images(species_name: str, lang: str, species_img_dir: Path) -> list[str]:
-    """Download up to MAX_IMAGES images; return list of absolute saved paths."""
-    urls = fetch_wiki_image_urls(species_name, lang)
-    image_paths: list[str] = []
-
-    for img_url in urls:
-        url_lower = img_url.lower()
-        file_name_lower = img_url.split("?")[0].rstrip("/").split("/")[-1].lower()
-        if any(url_lower.endswith(ext) for ext in IMAGE_SKIP_EXTENSIONS):
-            continue
-        if any(kw in file_name_lower for kw in IMAGE_SKIP_KEYWORDS):
-            continue
-
-        raw_name = img_url.split("?")[0].rstrip("/").split("/")[-1]
-        safe_name = re.sub(r"[^\w.\-]", "_", raw_name)
-        save_path = species_img_dir / safe_name
-
-        if save_path.exists():
-            image_paths.append(str(save_path.relative_to(BASE_DIR)))
-        else:
-            if download_image(img_url, save_path):
-                image_paths.append(str(save_path.relative_to(BASE_DIR)))
-
-        if len(image_paths) >= MAX_IMAGES:
-            break
-
-    return image_paths
+        conn.execute(
+            """
+            INSERT INTO plants (species_name, image_paths, updated_at)
+            VALUES (?, ?, ?)
+            ON CONFLICT(species_name) DO UPDATE SET
+                image_paths=excluded.image_paths,
+                updated_at=excluded.updated_at
+            """,
+            (species_name, payload, now_iso),
+        )
+        conn.commit()
+    finally:
+        conn.close()
 
 
 # ---------------------------------------------------------------------------
@@ -442,9 +461,9 @@ def process_species(
     translator_client: OpenAI | None,
     translation_model: str,
     translate_non_italian: bool,
+    sqlite_path: Path,
 ) -> dict:
     slug = slugify(species_name)
-    species_img_dir = IMAGES_DIR / slug
 
     # --- Find Wikipedia page from configured languages ---
     result_extract: Optional[tuple[str, str]] = None
@@ -504,8 +523,8 @@ def process_species(
     common_name = extract_common_name(lead_text, species_name)
 
     # --- Images ---
-    species_img_dir.mkdir(parents=True, exist_ok=True)
-    image_paths = collect_images(resolved_title, lang, species_img_dir)
+    image_paths = collect_images(resolved_title, lang)
+    save_species_images_to_sqlite(sqlite_path, species_name, image_paths)
 
     # --- Chunk & upsert into ChromaDB ---
     chunks = chunk_by_words(full_text)
@@ -517,7 +536,6 @@ def process_species(
         {
             "species_name": species_name,
             "common_name": common_name,
-            "image_paths": json.dumps(image_paths),
             "chunk_index": i,
             "lang": lang,
             "source_lang": lang,
@@ -606,8 +624,6 @@ def main() -> None:
     wiki_langs = parse_langs(args.langs)
 
     RAG_DIR.mkdir(parents=True, exist_ok=True)
-    IMAGES_DIR.mkdir(parents=True, exist_ok=True)
-
     # Read species list (from CSV or SQLite indexed=0)
     species_list: list[str] = []
     if args.from_sqlite_indexed_zero:
@@ -670,6 +686,7 @@ def main() -> None:
                 translator_client=translator_client,
                 translation_model=args.translation_model,
                 translate_non_italian=args.translate_non_italian,
+                sqlite_path=Path(args.sqlite_path),
             )
             progress[species] = result
         except Exception as exc:
@@ -696,7 +713,7 @@ def main() -> None:
     print(f"  Errors     : {errors}")
     print(f"  Total docs : {collection.count()}")
     print(f"  ChromaDB   : {RAG_DIR}")
-    print(f"  Images     : {IMAGES_DIR}")
+    print("  Images     : stored in plants.db (plants.image_paths JSON)")
 
 
 if __name__ == "__main__":

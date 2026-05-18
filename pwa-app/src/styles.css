@@ -46,6 +46,13 @@ body {
   padding: 1rem 1.1rem 1.15rem;
 }
 
+.hero-topbar {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.85rem;
+}
+
 .hero-brand {
   display: flex;
   align-items: center;
@@ -85,13 +92,15 @@ body {
 }
 
 .auth-box {
-  margin-top: 0.85rem;
+  margin-top: 0;
   display: grid;
   gap: 0.5rem;
+  justify-items: end;
 }
 
 .auth-login {
-  display: inline-flex;
+  display: flex;
+  justify-content: flex-end;
 }
 
 .auth-user {
@@ -102,6 +111,27 @@ body {
   padding: 0.55rem 0.7rem;
   border-radius: 12px;
   background: rgba(255, 255, 255, 0.1);
+}
+
+.auth-user-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.auth-admin-link {
+  border: 0;
+  background: transparent;
+  color: #c2f3d8;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 0;
+  text-decoration: underline;
+}
+
+.auth-admin-sep {
+  color: rgba(248, 255, 247, 0.85);
 }
 
 .auth-user strong {
@@ -119,6 +149,7 @@ body {
   margin: 0;
   font-size: 0.9rem;
   color: #ffe4c2;
+  text-align: right;
 }
 
 .panel {
@@ -127,6 +158,34 @@ body {
   border-radius: 18px;
   padding: 1rem;
   box-shadow: 0 8px 24px rgba(20, 55, 37, 0.08);
+}
+
+.guest-cta-panel {
+  background: linear-gradient(145deg, #164a2f, #1b5638);
+  border-color: rgba(159, 224, 186, 0.25);
+  color: #f8fff7;
+}
+
+.guest-cta-text {
+  margin: 0;
+  color: #f8fff7;
+}
+
+.guest-cta-link {
+  border: 0;
+  background: transparent;
+  padding: 0;
+  font: inherit;
+  cursor: pointer;
+  text-transform: uppercase;
+}
+
+.guest-register-panel {
+  border-color: rgba(22, 74, 47, 0.2);
+}
+
+.guest-register-text {
+  margin-bottom: 0.85rem;
 }
 
 .view-menu {
@@ -248,6 +307,18 @@ button:disabled {
   padding: 0.5rem 1rem;
 }
 
+.btn-more-species {
+  display: block;
+  width: 100%;
+  margin-top: 0.75rem;
+  text-align: center;
+}
+
+.btn-more-species:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
 .btn-small {
   font-size: 0.78rem;
   padding: 0.25rem 0.65rem;
@@ -330,7 +401,7 @@ button:disabled {
 
 .result-preview {
   width: 100%;
-  height: 110px;
+  height: 88px;
   object-fit: cover;
   border-radius: 10px;
 }
@@ -340,6 +411,29 @@ button:disabled {
   color: #4a7a60;
   font-style: italic;
   line-height: 1.2;
+}
+
+.badge-draft {
+  display: inline-block;
+  font-size: 0.72rem;
+  color: #7a5a1a;
+  background: #fff3cd;
+  border: 1px solid #f5c842;
+  border-radius: 4px;
+  padding: 0.1rem 0.4rem;
+  margin-top: 0.2rem;
+  line-height: 1.4;
+}
+
+.banner-draft {
+  background: #fff8e1;
+  border-left: 4px solid #f5c842;
+  border-radius: 4px;
+  padding: 0.6rem 0.9rem;
+  margin-bottom: 0.8rem;
+  font-size: 0.85rem;
+  color: #6b4c00;
+  line-height: 1.5;
 }
 
 .score-bar {
@@ -380,8 +474,8 @@ button:disabled {
 .gallery-stage img {
   width: 100%;
   border-radius: 14px;
-  min-height: 180px;
-  max-height: 360px;
+  min-height: 130px;
+  max-height: 240px;
   object-fit: cover;
 }
 
@@ -600,11 +694,250 @@ pre {
   margin: 0.2rem 0 0;
 }
 
+.my-plant-item-photo {
+  width: 100%;
+  max-height: 180px;
+  object-fit: cover;
+  border-radius: 6px;
+  margin: 0.5rem 0 0.25rem;
+}
+
+@media (min-width: 1024px) {
+  .my-plants-list {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0.45rem;
+  }
+
+  .my-plant-item {
+    padding: 0.5rem 0.55rem;
+  }
+
+  .my-plant-item-photo {
+    max-height: 130px;
+  }
+}
+
+.btn-upload-photo {
+  display: block;
+  width: 100%;
+  margin-top: 0.4rem;
+  text-align: center;
+}
+
+.my-plant-detail-photo {
+  width: 100%;
+  height: 180px;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+.my-plant-user-gallery {
+  margin: 0.55rem 0 0.7rem;
+}
+
+.my-plant-user-gallery-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.my-plant-user-gallery-title {
+  margin: 0 0 0.35rem;
+  font-weight: 700;
+  color: #285943;
+}
+
+.my-plant-user-gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.45rem;
+}
+
 .my-plant-item-head {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 0.5rem;
+}
+
+.admin-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.65rem;
+  margin-bottom: 0.75rem;
+}
+
+.admin-stat-card {
+  border: 1px solid #d2e4d8;
+  background: #f6fbf7;
+  border-radius: 12px;
+  padding: 0.6rem 0.75rem;
+  display: grid;
+  gap: 0.25rem;
+}
+
+.admin-stat-card strong {
+  font-size: 1.2rem;
+}
+
+.admin-stat-card span {
+  font-size: 0.9rem;
+  color: #356a51;
+}
+
+.admin-table-wrap {
+  overflow-x: auto;
+}
+
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.92rem;
+}
+
+.admin-table th,
+.admin-table td {
+  text-align: left;
+  border-bottom: 1px solid #d9e9df;
+  padding: 0.55rem 0.4rem;
+}
+
+.admin-table th {
+  color: #2b5e46;
+}
+
+.admin-chart-block {
+  margin: 0.7rem 0 0.85rem;
+}
+
+.admin-chart-block h3 {
+  margin: 0 0 0.45rem;
+}
+
+.admin-filter-row {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin: 0.1rem 0 0.7rem;
+  flex-wrap: wrap;
+}
+
+.admin-filter-label {
+  font-size: 0.88rem;
+  color: #2b5e46;
+  font-weight: 700;
+}
+
+.admin-filter-btn.is-active {
+  background: #1e7a56;
+  color: #ecfff3;
+  border-color: #1e7a56;
+}
+
+.admin-bar-list {
+  display: grid;
+  gap: 0.45rem;
+}
+
+.admin-bar-row {
+  display: grid;
+  grid-template-columns: minmax(140px, 1.4fr) minmax(130px, 3fr) auto;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.admin-bar-label {
+  font-size: 0.88rem;
+  color: #2b5e46;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.admin-bar-track {
+  height: 10px;
+  border-radius: 999px;
+  background: #deeee5;
+  overflow: hidden;
+}
+
+.admin-bar-fill {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, #1e7a56, #56a87f);
+}
+
+.admin-bar-value {
+  min-width: 2ch;
+  text-align: right;
+  font-size: 0.9rem;
+}
+
+.admin-daily-list {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.admin-columns-chart {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(42px, 1fr));
+  gap: 0.45rem;
+  align-items: end;
+  min-height: 180px;
+  padding: 0.45rem 0.3rem 0.25rem;
+  border: 1px solid #d9e9df;
+  border-radius: 12px;
+  background: #f7fcf9;
+}
+
+.admin-column-item {
+  display: grid;
+  gap: 0.2rem;
+  justify-items: center;
+}
+
+.admin-column-track {
+  width: 100%;
+  height: 118px;
+  border-radius: 8px;
+  background: #e3f1e9;
+  display: flex;
+  align-items: flex-end;
+  overflow: hidden;
+}
+
+.admin-column-fill {
+  width: 100%;
+  background: linear-gradient(180deg, #4aa57a, #1e7a56);
+  border-radius: 6px 6px 0 0;
+}
+
+.admin-column-value {
+  font-size: 0.82rem;
+  color: #23533d;
+}
+
+.admin-column-label {
+  font-size: 0.76rem;
+  color: #3a6650;
+}
+
+.admin-daily-row {
+  display: grid;
+  grid-template-columns: minmax(110px, 1.2fr) 1fr 1fr;
+  gap: 0.5rem;
+  font-size: 0.88rem;
+  border-bottom: 1px solid #d9e9df;
+  padding: 0.3rem 0;
+}
+
+.admin-daily-day {
+  color: #2b5e46;
+}
+
+.admin-daily-metric {
+  color: #335f4b;
 }
 
 .watering-calendar {
@@ -743,6 +1076,31 @@ pre {
     border-radius: 16px;
   }
 
+  .hero-topbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .auth-box {
+    justify-items: start;
+  }
+
+  .auth-login {
+    justify-content: flex-start;
+  }
+
+  .auth-warning {
+    text-align: left;
+  }
+
+  .auth-user {
+    width: 100%;
+  }
+
+  .auth-user-actions {
+    justify-content: flex-end;
+  }
+
   .gallery-nav {
     width: 2rem;
     height: 2rem;
@@ -789,6 +1147,33 @@ pre {
 
   .my-plant-form {
     grid-template-columns: 1fr;
+  }
+
+  .admin-stats-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-bar-row {
+    grid-template-columns: 1fr;
+    gap: 0.25rem;
+  }
+
+  .admin-bar-value {
+    text-align: left;
+  }
+
+  .admin-daily-row {
+    grid-template-columns: 1fr;
+    gap: 0.15rem;
+  }
+
+  .admin-columns-chart {
+    grid-template-columns: repeat(auto-fit, minmax(34px, 1fr));
+    min-height: 150px;
+  }
+
+  .admin-column-track {
+    height: 96px;
   }
 
   .watering-date-editor {

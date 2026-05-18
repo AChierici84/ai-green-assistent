@@ -47,7 +47,7 @@ EPPO_SEARCH_URL = "https://gd.eppo.int/search?query={query}"
 HTTP_TIMEOUT = 12.0
 HTTP_USER_AGENT = os.getenv(
     "EXTERNAL_SOURCES_USER_AGENT",
-    "ai-green-assistant/1.0 (contact: local-dev)",
+    "clorofilla/1.0 (contact: local-dev)",
 )
 
 
@@ -58,6 +58,7 @@ def init_db(conn: sqlite3.Connection) -> None:
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             species_name TEXT NOT NULL UNIQUE,
             indexed INTEGER NOT NULL DEFAULT 0,
+            image_paths TEXT,
             annaffiatura_gg INTEGER,
             annaffiatura_time TEXT,
             luce TEXT,
@@ -69,6 +70,20 @@ def init_db(conn: sqlite3.Connection) -> None:
             concimazione TEXT,
             prevenzione TEXT,
             updated_at TEXT NOT NULL
+        )
+        """
+    )
+    # Migration for existing DBs created before image_paths support.
+    try:
+        conn.execute("ALTER TABLE plants ADD COLUMN image_paths TEXT")
+        conn.commit()
+    except Exception:
+        pass
+    conn.execute(
+        """
+        CREATE TABLE IF NOT EXISTS leafsnap_aliases (
+            leafsnap_label TEXT PRIMARY KEY,
+            db_species_name TEXT NOT NULL
         )
         """
     )
@@ -324,6 +339,7 @@ def upsert_plant(
     species_name: str,
     indexed: bool,
     profile: dict | None,
+    image_paths: str | None = None,
 ) -> None:
     now_iso = datetime.now(timezone.utc).isoformat()
     profile = profile or {}
@@ -333,6 +349,7 @@ def upsert_plant(
         INSERT INTO plants (
             species_name,
             indexed,
+            image_paths,
             annaffiatura_gg,
             annaffiatura_time,
             luce,
@@ -345,9 +362,10 @@ def upsert_plant(
             prevenzione,
             updated_at
         )
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ON CONFLICT(species_name) DO UPDATE SET
             indexed=excluded.indexed,
+            image_paths=COALESCE(excluded.image_paths, plants.image_paths),
             annaffiatura_gg=excluded.annaffiatura_gg,
             annaffiatura_time=excluded.annaffiatura_time,
             luce=excluded.luce,
@@ -363,6 +381,7 @@ def upsert_plant(
         (
             species_name,
             1 if indexed else 0,
+            image_paths,
             profile.get("annaffiatura_gg"),
             profile.get("annaffiatura_time"),
             profile.get("luce"),

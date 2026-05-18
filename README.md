@@ -1,13 +1,13 @@
 ---
-title: AI Green Assistant
+title: Clorofilla
 sdk: docker
 app_port: 7860
 colorFrom: green
-colorTo: emerald
+colorTo: blue
 pinned: false
 ---
 
-# AI Green Assistant
+# Clorofilla
 
 API FastAPI + UI web per:
 - ricerca specie vegetali simili da immagine (OpenCLIP + FAISS)
@@ -66,7 +66,7 @@ Passi:
 Note operative:
 - In Spaces il frontend viene compilato nel Docker build e servito dalla API.
 - Se usi Google login, configura gli URI autorizzati nel progetto Google OAuth con il dominio dello Space (https://<user>-<space>.hf.space).
-- Per usare ricerca immagini servono i dati in `data/` (index/cache) presenti nella repository o caricati nello Space.
+- Per usare ricerca immagini, tutti gli artifact FAISS/cache e il database ChromaDB vengono scaricati automaticamente dal dataset Hugging Face `AChierici84/GreenAssistent-assets` se non sono gia presenti nei path configurati.
 
 ## Frontend React PWA
 
@@ -128,8 +128,15 @@ python build_plant_rag.py --translation-model gpt-4o-mini
 
 Output principali:
 - `data/plant_rag/` (database vettoriale persistente)
-- `data/images/<specie>/` (immagini scaricate)
+- `image_paths` nel RAG (URL immagini Wikipedia salvati nei metadati)
 - `data/rag_progress.json` (resume del processo)
+
+Migrazione una tantum da path locali a URL remoti:
+
+```bash
+python migrate_rag_image_paths_to_urls.py --dry-run --limit 10
+python migrate_rag_image_paths_to_urls.py
+```
 
 ## Configurazione (variabili ambiente)
 
@@ -138,9 +145,13 @@ Puoi impostare le variabili in `.env` (caricato automaticamente) o via shell.
 - `PLANCLEF_INDEX_PATH` (default: `data/planclef.faiss`)
 - `PLANCLEF_CACHE_PATH` (default: `data/planclef_cache.pt`)
 - `PLANCLEF_MODEL_NAME` (default: `ViT-B-32`)
+- `LEAFSNAP_INDEX_PATH` (default: `data/leafsnap.faiss`, oppure `/data/greenassistent-assets/...` su Spaces con persistent storage)
+- `LEAFSNAP_CACHE_PATH` (default: `data/leafsnap_cache.pt`, oppure `/data/greenassistent-assets/...` su Spaces con persistent storage)
+- `HF_ASSETS_DATASET_REPO` (default: `AChierici84/GreenAssistent-assets`)
 - `RAG_DB_PATH` (default: `data/plant_rag`)
 - `PLANTS_SQLITE_PATH` (default: `data/plants.db`)
-- `WIKI_USER_AGENT` (default: `ai-green-assistant/1.0 (contact: local-dev)`)
+- `USER_PLANTS_SQLITE_PATH` (default: `data/user_plants.db`)
+- `WIKI_USER_AGENT` (default: `clorofilla/1.0 (contact: local-dev)`)
 - `OPENAI_API_KEY` (obbligatoria per `/plant/{name}` e `/chat/plant-care`)
 - `OPENAI_MODEL` (default: `gpt-4o-mini`)
 - `GOOGLE_CLIENT_ID` (uno o piu client id Google OAuth separati da virgola)
@@ -156,7 +167,8 @@ PLANCLEF_CACHE_PATH=data/planclef_cache.pt
 PLANCLEF_MODEL_NAME=ViT-B-32
 RAG_DB_PATH=data/plant_rag
 PLANTS_SQLITE_PATH=data/plants.db
-WIKI_USER_AGENT=ai-green-assistant/1.0 (contact: local-dev)
+USER_PLANTS_SQLITE_PATH=data/user_plants.db
+WIKI_USER_AGENT=clorofilla/1.0 (contact: local-dev)
 GOOGLE_CLIENT_ID=xxxxxxxxxxxx-abcdefg.apps.googleusercontent.com
 REQUIRE_GOOGLE_AUTH=0
 ```
@@ -364,6 +376,8 @@ Esempio risposta:
 - Path: `/images/{full_path}`
 
 Serve le immagini presenti sotto `data/images`.
+
+Nota: `/plant/{name}` accetta anche URL remoti salvati in `image_paths`; il servizio locale resta utile solo se mantieni una cache su disco.
 
 ## UI
 

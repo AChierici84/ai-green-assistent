@@ -1,5 +1,16 @@
-const API_BASE = import.meta.env.VITE_API_BASE || "http://localhost:8000";
+function getApiBase() {
+  if (import.meta.env.VITE_API_BASE) {
+    return import.meta.env.VITE_API_BASE;
+  }
+  if (window.location.port === "5173") {
+    return "http://localhost:8000";
+  }
+  return "";
+}
+
+const API_BASE = getApiBase();
 let authToken = "";
+let unauthorizedHandler = null;
 
 function buildUrl(path) {
   return `${API_BASE}${path}`;
@@ -9,16 +20,37 @@ export function setAuthToken(token) {
   authToken = token || "";
 }
 
+export function setUnauthorizedHandler(handler) {
+  unauthorizedHandler = typeof handler === "function" ? handler : null;
+}
+
 async function apiFetch(path, options = {}) {
-  const headers = new Headers(options.headers || {});
-  if (authToken) {
-    headers.set("Authorization", `Bearer ${authToken}`);
+  async function doFetch() {
+    const headers = new Headers(options.headers || {});
+    if (authToken) {
+      headers.set("Authorization", `Bearer ${authToken}`);
+    }
+
+    return fetch(buildUrl(path), {
+      ...options,
+      headers
+    });
   }
 
-  return fetch(buildUrl(path), {
-    ...options,
-    headers
-  });
+  const response = await doFetch();
+
+  if (
+    response.status === 401
+    && !options.__skipAuthRefresh
+    && unauthorizedHandler
+  ) {
+    const refreshed = await unauthorizedHandler();
+    if (refreshed) {
+      return doFetch();
+    }
+  }
+
+  return response;
 }
 
 async function parseResponse(response) {
@@ -75,6 +107,12 @@ export async function getSpeciesCommonNames(speciesNames) {
   return parseResponse(response);
 }
 
+export async function getSpeciesBuildStatus(speciesName) {
+  const encoded = encodeURIComponent(speciesName);
+  const response = await apiFetch(`/species/${encoded}/build-status`);
+  return parseResponse(response);
+}
+
 export async function askPlantCare(plantName, question) {
   const response = await apiFetch("/chat/plant-care", {
     method: "POST",
@@ -123,6 +161,40 @@ export async function updateMyPlantFirstWaterDate(plantId, firstWateringDate) {
   return parseResponse(response);
 }
 
+export async function uploadMyPlantPhoto(plantId, file) {
+  const formData = new FormData();
+  formData.append("file", file);
+  const response = await apiFetch(`/user/plants/${plantId}/photo`, {
+    method: "POST",
+    body: formData,
+  });
+  return parseResponse(response);
+}
+
+export async function getAdminConsoleData(limit = 300, chartDays = 30) {
+  const safeLimit = Math.max(1, Math.min(1000, Number(limit) || 300));
+  const normalizedDays = Number(chartDays);
+  const safeChartDays = [7, 30, 90].includes(normalizedDays) ? normalizedDays : 30;
+  const response = await apiFetch(`/admin/console?limit=${safeLimit}&chart_days=${safeChartDays}`);
+  return parseResponse(response);
+}
+
+export async function logRecognition(payload) {
+  const response = await apiFetch("/recognitions/log", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      chosen_species: payload?.chosen_species || "",
+      used_openai: Boolean(payload?.used_openai),
+      image_url: payload?.image_url || null,
+      recognition_ms: Number.isFinite(Number(payload?.recognition_ms))
+        ? Math.max(0, Math.round(Number(payload?.recognition_ms)))
+        : null,
+    }),
+  });
+  return parseResponse(response);
+}
+
 export function toAbsoluteImage(urlOrPath) {
   if (!urlOrPath) {
     return "";
@@ -131,4 +203,10 @@ export function toAbsoluteImage(urlOrPath) {
     return urlOrPath;
   }
   return buildUrl(urlOrPath);
+}
+
+export function toOptimizedImage(urlOrPath, width = 640) {
+  const absolute = toAbsoluteImage(urlOrPath);
+  // Keep original URL to avoid broken thumbnails for non-standard Wikimedia assets.
+  return absolute;
 }

@@ -21,4 +21,4 @@ COPY . ./
 COPY --from=frontend-builder /frontend/dist /app/pwa-app/dist
 
 EXPOSE 7860
-CMD ["python", "-m", "uvicorn", "api:app", "--host", "0.0.0.0", "--port", "7860"]
+CMD ["sh", "-c", "python ensure_hf_assets.py || true; python -m uvicorn api:app --host 0.0.0.0 --port 7860"]

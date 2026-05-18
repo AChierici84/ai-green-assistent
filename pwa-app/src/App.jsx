@@ -4,21 +4,27 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import {
   askPlantCare,
+  getAdminConsoleData,
   deleteMyPlant,
   getMyPlants,
   getPlantCard,
   getPlantProfile,
+  getSpeciesBuildStatus,
   saveMyPlant,
   setAuthToken,
   getSpeciesCommonNames,
   getSpeciesPreviews,
   searchPlantImage,
   updateMyPlantFirstWaterDate,
+  uploadMyPlantPhoto,
   verifyGoogleToken,
-  toAbsoluteImage
+  setUnauthorizedHandler,
+  toAbsoluteImage,
+  toOptimizedImage,
+  logRecognition
 } from "./api";
 
-const AUTH_STORAGE_KEY = "green-assistant-auth";
+const AUTH_STORAGE_KEY = "clorofilla-auth";
 
 const PROFILE_LABELS = {
   annaffiatura_gg: "Annaffiatura",
@@ -68,10 +74,31 @@ function shouldAutoSelectTopResult(results) {
   }
 
   const [top, second] = results;
-  const topScore = Number(top?.score ?? 0);
-  const secondScore = Number(second?.score ?? 0);
+  const topScore = Number(top?.displayScore ?? top?.score ?? 0);
+  const secondScore = Number(second?.displayScore ?? second?.score ?? 0);
 
   return topScore - secondScore >= 0.08;
+}
+
+function normalizeSearchResults(rawResults) {
+  const sorted = [...(rawResults || [])].sort((a, b) => Number(b.score || 0) - Number(a.score || 0));
+  if (!sorted.length) {
+    return [];
+  }
+
+  const scores = sorted.map((item) => Number(item?.score ?? 0));
+  const maxScore = Math.max(...scores);
+
+  return sorted.map((item) => {
+    const score = Number(item?.score ?? 0);
+    // Keep bars readable by always scaling against the best result in the current list.
+    const displayScore = maxScore > 0 ? Math.max(0, Math.min(1, score / maxScore)) : 0;
+
+    return {
+      ...item,
+      displayScore,
+    };
+  });
 }
 
 function parseWateringIntervalDays(intervalDays) {
@@ -89,6 +116,17 @@ function parseWateringIntervalDays(intervalDays) {
   }
 
   return Math.max(1, Math.round(days));
+}
+
+function formatDurationMs(ms) {
+  const value = Number(ms || 0);
+  if (!Number.isFinite(value) || value <= 0) {
+    return "-";
+  }
+  if (value >= 1000) {
+    return `${(value / 1000).toFixed(2)} s`;
+  }
+  return `${Math.round(value)} ms`;
 }
 
 function formatDateYYYYMMDD(dateValue) {
@@ -109,7 +147,22 @@ function formatISOToInputDate(value) {
   return `${year}-${month}-${day}`;
 }
 
-export default function App() {
+function parseJwtPayload(token) {
+  try {
+    const parts = String(token || "").split(".");
+    if (parts.length < 2) {
+      return null;
+    }
+    const base64 = parts[1].replace(/-/g, "+").replace(/_/g, "/");
+    const padded = base64 + "=".repeat((4 - (base64.length % 4)) % 4);
+    const json = window.atob(padded);
+    return JSON.parse(json);
+  } catch {
+    return null;
+  }
+}
+
+export default function App({ googleClientIdConfigured = false }) {
   const [auth, setAuth] = useState(null);
   const [authBusy, setAuthBusy] = useState(false);
   const [file, setFile] = useState(null);
@@ -120,6 +173,7 @@ export default function App() {
   const cameraInputRef = useRef(null);
 
   const [searchResults, setSearchResults] = useState([]);
+  const [searchFile, setSearchFile] = useState(null);
   const [speciesPreviews, setSpeciesPreviews] = useState({});
   const [speciesCommonNames, setSpeciesCommonNames] = useState({});
   const [selectedSpecies, setSelectedSpecies] = useState("");
@@ -128,6 +182,9 @@ export default function App() {
 
   const [plantCard, setPlantCard] = useState(null);
   const [plantProfile, setPlantProfile] = useState(null);
+  const [draftBuildMessage, setDraftBuildMessage] = useState("");
+  const draftPollTimerRef = useRef(null);
+  const selectedSpeciesRef = useRef("");
 
   const [question, setQuestion] = useState("");
   const [chatAnswer, setChatAnswer] = useState("");
@@ -135,6 +192,10 @@ export default function App() {
   const [myPlants, setMyPlants] = useState([]);
   const [saveStatus, setSaveStatus] = useState("");
   const [activeView, setActiveView] = useState("recognize");
+  const [adminConsole, setAdminConsole] = useState(null);
+  const [adminChartDays, setAdminChartDays] = useState(30);
+  const [lastSearchUsedOpenAI, setLastSearchUsedOpenAI] = useState(false);
+  const [lastSearchDurationMs, setLastSearchDurationMs] = useState(null);
   const [selectedMyPlant, setSelectedMyPlant] = useState(null);
   const [myPlantCard, setMyPlantCard] = useState(null);
   const [myPlantProfile, setMyPlantProfile] = useState(null);
@@ -143,6 +204,11 @@ export default function App() {
   const [isEditingFirstWaterDate, setIsEditingFirstWaterDate] = useState(false);
   const [firstWaterDateInput, setFirstWaterDateInput] = useState("");
   const [deletingPlantId, setDeletingPlantId] = useState(null);
+  const [uploadingPhotoId, setUploadingPhotoId] = useState(null);
+  const plantPhotoInputRef = useRef(null);
+  const plantPhotoTargetIdRef = useRef(null);
+  const refreshPromiseRef = useRef(null);
+  const lastSearchDurationRef = useRef(null);
 
   const [busy, setBusy] = useState({
     search: false,
@@ -151,6 +217,7 @@ export default function App() {
     savePlant: false,
     myPlants: false,
     myPlantDetail: false,
+    adminConsole: false,
     updateFirstWaterDate: false
   });
   const [error, setError] = useState("");
@@ -158,17 +225,108 @@ export default function App() {
 
   const searchSteps = ["Leggo i dettagli della foglia", "Confronto con le specie note", "Preparo i risultati migliori"];
 
-  const canAsk = selectedSpecies && question.trim().length > 2;
+  const activeChatPlantName = activeView === "my-plants"
+    ? (selectedMyPlant?.plant_name || "")
+    : "";
+
+  useEffect(() => {
+    selectedSpeciesRef.current = selectedSpecies;
+  }, [selectedSpecies]);
+
+  useEffect(() => {
+    return () => {
+      if (draftPollTimerRef.current) {
+        window.clearInterval(draftPollTimerRef.current);
+        draftPollTimerRef.current = null;
+      }
+    };
+  }, []);
+
+  function stopDraftPolling() {
+    if (draftPollTimerRef.current) {
+      window.clearInterval(draftPollTimerRef.current);
+      draftPollTimerRef.current = null;
+    }
+  }
+
+  function startDraftPolling(speciesName) {
+    stopDraftPolling();
+    let attempts = 0;
+    const maxAttempts = 45;
+
+    draftPollTimerRef.current = window.setInterval(async () => {
+      attempts += 1;
+      if (selectedSpeciesRef.current.toLowerCase() !== speciesName.toLowerCase()) {
+        stopDraftPolling();
+        return;
+      }
+
+      try {
+        const statusData = await getSpeciesBuildStatus(speciesName);
+        const status = statusData?.status?.status || "not_started";
+
+        if (statusData?.ready || status === "completed") {
+          const [card, profile] = await Promise.all([
+            getPlantCard(speciesName),
+            getPlantProfile(speciesName).catch(() => null)
+          ]);
+          if (selectedSpeciesRef.current.toLowerCase() === speciesName.toLowerCase()) {
+            setPlantCard(card);
+            setPlantProfile(profile);
+            setDraftBuildMessage("Scheda aggiornata con i contenuti completi.");
+            setSearchResults((prev) => prev.map((item) => (
+              item.species.toLowerCase() === speciesName.toLowerCase()
+                ? { ...item, is_draft: false }
+                : item
+            )));
+          }
+          stopDraftPolling();
+          return;
+        }
+
+        if (status === "failed") {
+          const reason = statusData?.status?.error || "Aggiornamento non riuscito.";
+          setDraftBuildMessage(`Scheda ancora in costruzione. ${reason}`);
+          stopDraftPolling();
+          return;
+        }
+
+        setDraftBuildMessage("Scheda in costruzione: sto aggiornando dati, immagini e knowledge base...");
+      } catch {
+        // Ignore transient polling errors; next tick will retry.
+      }
+
+      if (attempts >= maxAttempts) {
+        setDraftBuildMessage("Scheda ancora in preparazione. Riprova tra poco.");
+        stopDraftPolling();
+      }
+    }, 4000);
+  }
+  const canAsk = Boolean(activeChatPlantName) && question.trim().length > 2;
   const isLoggedIn = Boolean(auth?.idToken);
-  const googleClientIdConfigured = Boolean(import.meta.env.VITE_GOOGLE_CLIENT_ID);
+  const isAdmin = Boolean(auth?.user?.is_admin);
+  const isSelectedDraft = plantCard?.source === "db_draft" || plantProfile?.indexed === false;
   const galleryImages = useMemo(() => {
     if (!plantCard?.images?.length) {
       return [];
     }
-    return plantCard.images.map((imgUrl) => toAbsoluteImage(imgUrl));
+    return plantCard.images.map((imgUrl) => toOptimizedImage(imgUrl, 720));
   }, [plantCard]);
 
   const activeImage = galleryImages.length ? galleryImages[imageIndex % galleryImages.length] : "";
+  const myPlantUserPhotos = useMemo(() => {
+    if (!selectedMyPlant) {
+      return [];
+    }
+
+    const raw = Array.isArray(selectedMyPlant.user_photos) && selectedMyPlant.user_photos.length
+      ? selectedMyPlant.user_photos
+      : (selectedMyPlant.user_photo_url ? [selectedMyPlant.user_photo_url] : []);
+
+    return raw
+      .map((url) => toAbsoluteImage(String(url || "").trim()))
+      .filter(Boolean);
+  }, [selectedMyPlant]);
 
   const wateringMonthCalendar = useMemo(() => {
     if (!wateringSchedule.length) {
@@ -239,6 +397,86 @@ export default function App() {
       .filter((entry) => entry.value !== null && entry.value !== "");
   }, [myPlantProfile]);
 
+  async function refreshGoogleSessionSilently() {
+    if (refreshPromiseRef.current) {
+      return refreshPromiseRef.current;
+    }
+
+    const currentToken = auth?.idToken || "";
+    const payload = parseJwtPayload(currentToken);
+    const clientId = String(payload?.aud || "").trim();
+
+    if (!clientId || !window.google?.accounts?.id) {
+      return false;
+    }
+
+    const refreshPromise = new Promise((resolve) => {
+      let done = false;
+      const finish = (ok) => {
+        if (done) {
+          return;
+        }
+        done = true;
+        resolve(ok);
+      };
+
+      const timeoutId = window.setTimeout(() => finish(false), 8000);
+
+      try {
+        window.google.accounts.id.initialize({
+          client_id: clientId,
+          auto_select: true,
+          cancel_on_tap_outside: false,
+          callback: async (credentialResponse) => {
+            const idToken = credentialResponse?.credential || "";
+            if (!idToken) {
+              window.clearTimeout(timeoutId);
+              finish(false);
+              return;
+            }
+
+            try {
+              const data = await verifyGoogleToken(idToken);
+              const nextAuth = {
+                idToken,
+                user: {
+                  ...(data.user || auth?.user || {}),
+                  is_admin: Boolean(data?.is_admin),
+                },
+                expiresAt: data.expires_at || null
+              };
+              setAuth(nextAuth);
+              setAuthToken(idToken);
+              window.localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(nextAuth));
+              window.clearTimeout(timeoutId);
+              finish(true);
+            } catch {
+              window.clearTimeout(timeoutId);
+              finish(false);
+            }
+          }
+        });
+
+        window.google.accounts.id.prompt((notification) => {
+          if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
+            window.clearTimeout(timeoutId);
+            finish(false);
+          }
+        });
+      } catch {
+        window.clearTimeout(timeoutId);
+        finish(false);
+      }
+    });
+
+    refreshPromiseRef.current = refreshPromise;
+    try {
+      return await refreshPromise;
+    } finally {
+      refreshPromiseRef.current = null;
+    }
+  }
+
   useEffect(() => {
     const raw = window.localStorage.getItem(AUTH_STORAGE_KEY);
     if (!raw) {
@@ -261,17 +499,55 @@ export default function App() {
   }, []);
 
   useEffect(() => {
+    setUnauthorizedHandler(async () => {
+      const refreshed = await refreshGoogleSessionSilently();
+      if (!refreshed) {
+        setError("Sessione Google scaduta. Tocca Accedi per rinnovarla.");
+      }
+      return refreshed;
+    });
+
+    return () => setUnauthorizedHandler(null);
+  }, [auth?.idToken]);
+
+  useEffect(() => {
+    const exp = Number(auth?.expiresAt || 0);
+    if (!exp) {
+      return undefined;
+    }
+
+    const refreshBeforeMs = 2 * 60 * 1000;
+    const delayMs = (exp * 1000) - Date.now() - refreshBeforeMs;
+    if (delayMs <= 0) {
+      return undefined;
+    }
+
+    const timerId = window.setTimeout(() => {
+      refreshGoogleSessionSilently();
+    }, delayMs);
+
+    return () => window.clearTimeout(timerId);
+  }, [auth?.expiresAt, auth?.idToken]);
+
+  useEffect(() => {
     setExpandedProfileKey("");
   }, [plantProfile]);
 
   useEffect(() => {
     if (!isLoggedIn) {
       setMyPlants([]);
+      setAdminConsole(null);
       return;
     }
 
     loadMyPlants();
   }, [isLoggedIn]);
+
+  useEffect(() => {
+    if (activeView === "admin" && (!isLoggedIn || !isAdmin)) {
+      setActiveView("recognize");
+    }
+  }, [activeView, isAdmin, isLoggedIn]);
 
   useEffect(() => {
     if (!busy.search) {
@@ -316,6 +592,7 @@ export default function App() {
     setFile(nextFile);
     setSelectedSpecies("");
     setSearchResults([]);
+    setSearchFile(null);
     setSpeciesPreviews({});
     setSpeciesCommonNames({});
     setShowSpeciesGrid(true);
@@ -325,6 +602,9 @@ export default function App() {
     setChatAnswer("");
     setUserPlantName("");
     setSaveStatus("");
+    setLastSearchUsedOpenAI(false);
+    setLastSearchDurationMs(null);
+    lastSearchDurationRef.current = null;
     setImageIndex(0);
     setError("");
 
@@ -367,10 +647,6 @@ export default function App() {
 
   async function handleSearch(event) {
     event.preventDefault();
-    if (!isLoggedIn) {
-      setError("Accedi con Google per usare la ricerca piante.");
-      return;
-    }
     if (!file) {
       setError("Carica prima un'immagine della pianta.");
       return;
@@ -378,6 +654,7 @@ export default function App() {
 
     setError("");
     setSearchResults([]);
+    setSearchFile(file);
     setSpeciesPreviews({});
     setSpeciesCommonNames({});
     setSelectedSpecies("");
@@ -389,7 +666,11 @@ export default function App() {
 
     try {
       const data = await searchPlantImage(file, 5);
-      const results = [...(data.results || [])].sort((a, b) => b.score - a.score);
+      setLastSearchUsedOpenAI(Boolean(data?.gpt_fallback_used));
+      const nextDurationMs = Number.isFinite(Number(data?.recognition_ms)) ? Number(data.recognition_ms) : null;
+      setLastSearchDurationMs(nextDurationMs);
+      lastSearchDurationRef.current = nextDurationMs;
+      const results = normalizeSearchResults(data.results || []);
       setSearchResults(results);
       const speciesNames = results.map((item) => item.species);
       const [previewData, commonNameData] = await Promise.all([
@@ -413,11 +694,38 @@ export default function App() {
     }
   }
 
+  async function loadMoreSpecies() {
+    if (!searchFile || busy.moreSpecies) return;
+    setBusy((prev) => ({ ...prev, moreSpecies: true }));
+    try {
+      const nextK = searchResults.length + 5;
+      const data = await searchPlantImage(searchFile, nextK);
+      const allResults = normalizeSearchResults(data.results || []);
+      const existingNames = new Set(searchResults.map((r) => r.species));
+      const newResults = allResults.filter((r) => !existingNames.has(r.species));
+      if (!newResults.length) return;
+      const newSpeciesNames = newResults.map((r) => r.species);
+      const [previewData, commonNameData] = await Promise.all([
+        getSpeciesPreviews(newSpeciesNames),
+        getSpeciesCommonNames(newSpeciesNames),
+      ]);
+      setSpeciesPreviews((prev) => ({ ...prev, ...(previewData.previews || {}) }));
+      setSpeciesCommonNames((prev) => ({ ...prev, ...(commonNameData.common_names || {}) }));
+      setSearchResults((prev) => [...prev, ...newResults]);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setBusy((prev) => ({ ...prev, moreSpecies: false }));
+    }
+  }
+
   async function selectSpecies(speciesName) {
+    stopDraftPolling();
     setSelectedSpecies(speciesName);
     setShowSpeciesGrid(false);
     setPlantCard(null);
     setPlantProfile(null);
+    setDraftBuildMessage("");
     setChatAnswer("");
     setUserPlantName("");
     setSaveStatus("");
@@ -433,6 +741,29 @@ export default function App() {
       ]);
       setPlantCard(card);
       setPlantProfile(profile);
+
+      try {
+        await logRecognition({
+          chosen_species: speciesName,
+          used_openai: lastSearchUsedOpenAI,
+          image_url: null,
+          recognition_ms: lastSearchDurationRef.current ?? lastSearchDurationMs,
+        });
+      } catch {
+        // Logging failure should not block user flow.
+      }
+
+      const isDraft = card?.source === "db_draft" || profile?.indexed === false;
+      if (isDraft) {
+        setDraftBuildMessage("Scheda in costruzione: avvio aggiornamento automatico...");
+        startDraftPolling(speciesName);
+      } else {
+        setSearchResults((prev) => prev.map((item) => (
+          item.species.toLowerCase() === speciesName.toLowerCase()
+            ? { ...item, is_draft: false }
+            : item
+        )));
+      }
     } catch (err) {
       setError(err.message);
     } finally {
@@ -446,6 +777,10 @@ export default function App() {
       setError("Accedi con Google per fare domande sulla cura.");
       return;
     }
+    if (!activeChatPlantName) {
+      setError("Seleziona prima una pianta.");
+      return;
+    }
     if (!canAsk) {
       return;
     }
@@ -454,7 +789,7 @@ export default function App() {
     setBusy((prev) => ({ ...prev, chat: true }));
 
     try {
-      const data = await askPlantCare(selectedSpecies, question.trim());
+      const data = await askPlantCare(activeChatPlantName, question.trim());
       setChatAnswer(data.answer || "Nessuna risposta disponibile.");
     } catch (err) {
       setError(err.message);
@@ -498,7 +833,40 @@ export default function App() {
     try {
       const data = await saveMyPlant(selectedSpecies, trimmed);
       const saved = data.saved || null;
-      setSaveStatus(saved ? `Salvata: ${saved.user_given_name}` : "Pianta salvata.");
+      let photoUploaded = false;
+      let uploadedImageUrl = "";
+      if (saved?.id && file) {
+        try {
+          const uploadData = await uploadMyPlantPhoto(saved.id, file);
+          uploadedImageUrl = String(uploadData?.updated?.user_photo_url || "").trim();
+          photoUploaded = true;
+        } catch {
+          photoUploaded = false;
+        }
+      }
+
+      if (selectedSpecies) {
+        try {
+          await logRecognition({
+            chosen_species: selectedSpecies,
+            used_openai: lastSearchUsedOpenAI,
+            image_url: uploadedImageUrl || null,
+            recognition_ms: lastSearchDurationRef.current ?? lastSearchDurationMs,
+          });
+        } catch {
+          // Logging failure should not block save flow.
+        }
+      }
+
+      if (saved) {
+        setSaveStatus(
+          photoUploaded
+            ? `Salvata: ${saved.user_given_name} (foto associata)`
+            : `Salvata: ${saved.user_given_name}`
+        );
+      } else {
+        setSaveStatus("Pianta salvata.");
+      }
       setUserPlantName("");
       await loadMyPlants();
     } catch (err) {
@@ -567,6 +935,9 @@ export default function App() {
     }
 
     setError("");
+    setQuestion("");
+    setChatAnswer("");
+    setSelectedSpecies(item.plant_name);
     setSelectedMyPlant(item);
     setMyPlantCard(null);
     setMyPlantProfile(null);
@@ -707,16 +1078,21 @@ export default function App() {
       const data = await verifyGoogleToken(idToken);
       const nextAuth = {
         idToken,
-        user: data.user || null,
+        user: {
+          ...(data.user || {}),
+          is_admin: Boolean(data?.is_admin),
+        },
         expiresAt: data.expires_at || null
       };
       setAuth(nextAuth);
       setAuthToken(idToken);
       window.localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(nextAuth));
+      setActiveView("recognize");
     } catch (err) {
       setAuth(null);
       setAuthToken("");
       window.localStorage.removeItem(AUTH_STORAGE_KEY);
+      setAdminConsole(null);
       setError(err.message || "Login Google non riuscito.");
     } finally {
       setAuthBusy(false);
@@ -728,6 +1104,7 @@ export default function App() {
     setAuthToken("");
     window.localStorage.removeItem(AUTH_STORAGE_KEY);
     setMyPlants([]);
+    setAdminConsole(null);
     setSaveStatus("");
     setActiveView("recognize");
     setSelectedMyPlant(null);
@@ -740,64 +1117,153 @@ export default function App() {
     setError("");
   }
 
+  async function loadAdminConsole(chartDays = adminChartDays) {
+    if (!isLoggedIn) {
+      setError("Accedi con Google per usare AD Console.");
+      return;
+    }
+    if (!isAdmin) {
+      setError("Accesso admin non autorizzato.");
+      return;
+    }
+
+    setError("");
+    setBusy((prev) => ({ ...prev, adminConsole: true }));
+    try {
+      const data = await getAdminConsoleData(500, chartDays);
+      setAdminConsole(data || null);
+    } catch (err) {
+      setError(err.message || "Errore caricamento AD Console.");
+    } finally {
+      setBusy((prev) => ({ ...prev, adminConsole: false }));
+    }
+  }
+
+  function openAdminConsole() {
+    setActiveView("admin");
+    loadAdminConsole();
+  }
+
+  function applyAdminChartDays(nextDays) {
+    const safeDays = [7, 30, 90].includes(Number(nextDays)) ? Number(nextDays) : 30;
+    setAdminChartDays(safeDays);
+    loadAdminConsole(safeDays);
+  }
+
+  function openRegisterPage() {
+    setActiveView("register");
+    setError("");
+  }
+
+  function openPlantPhotoDialog(plantId) {
+    plantPhotoTargetIdRef.current = plantId;
+    plantPhotoInputRef.current?.click();
+  }
+
+  async function handlePlantPhotoFileChange(event) {
+    const photoFile = event.target.files?.[0] || null;
+    event.target.value = "";
+    if (!photoFile || !plantPhotoTargetIdRef.current) {
+      return;
+    }
+    const targetId = plantPhotoTargetIdRef.current;
+    plantPhotoTargetIdRef.current = null;
+    setUploadingPhotoId(targetId);
+    setError("");
+    try {
+      const data = await uploadMyPlantPhoto(targetId, photoFile);
+      const updated = data.updated;
+      if (updated) {
+        setMyPlants((prev) => prev.map((item) => (item.id === updated.id ? updated : item)));
+        if (selectedMyPlant?.id === updated.id) {
+          setSelectedMyPlant(updated);
+        }
+      }
+    } catch (err) {
+      setError(err.message || "Errore durante l'upload della foto.");
+    } finally {
+      setUploadingPhotoId(null);
+    }
+  }
+
   const googleCalendarUrl = buildGoogleCalendarRecurringUrl();
 
   return (
     <main className="page">
+      {/* Hidden input for user plant photo upload */}
+      <input
+        ref={plantPhotoInputRef}
+        type="file"
+        accept="image/*"
+        capture="environment"
+        style={{ display: "none" }}
+        onChange={handlePlantPhotoFileChange}
+      />
       <section className="hero">
         <div className="hero-inner">
-          <div className="hero-brand">
-            <img src="/icons/icon-512.svg" alt="Icona Green Assistent" className="hero-logo" />
-            <p className="tag">Green Assistent</p>
+          <div className="hero-topbar">
+            <div className="hero-brand">
+              <img src="/icons/icon-512.svg" alt="Icona Clorofilla" className="hero-logo" />
+              <p className="tag">Clorofilla</p>
+            </div>
+
+            <div className="auth-box">
+              {!googleClientIdConfigured && (
+                <p className="auth-warning">
+                  Configura GOOGLE_CLIENT_ID nello Space per abilitare il login con Google.
+                </p>
+              )}
+
+              {googleClientIdConfigured && !isLoggedIn && (
+                <div className="auth-login">
+                  <GoogleLogin
+                    onSuccess={handleGoogleSuccess}
+                    onError={() => setError("Login Google annullato o non riuscito.")}
+                    shape="pill"
+                    text="signin_with"
+                  />
+                </div>
+              )}
+
+              {isLoggedIn && (
+                <div className="auth-user">
+                  <div>
+                    <strong>{auth?.user?.name || "Utente Google"}</strong>
+                    <p>{auth?.user?.email || ""}</p>
+                  </div>
+                  <div className="auth-user-actions">
+                    {isAdmin && (
+                      <>
+                        <button type="button" className="auth-admin-link" onClick={openAdminConsole}>
+                          AD Console
+                        </button>
+                        <span className="auth-admin-sep" aria-hidden="true">|</span>
+                      </>
+                    )}
+                    <button type="button" className="btn-secondary" onClick={handleLogout}>
+                      Esci
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {authBusy && <p className="status">Verifica accesso Google...</p>}
+            </div>
           </div>
 
           <h1>Ti aiuta a <span className="hero-highlight">riconoscere</span> e <span className="hero-highlight">curare</span> le tue piante.</h1>
-
-          <div className="auth-box">
-            {!googleClientIdConfigured && (
-              <p className="auth-warning">
-                Imposta VITE_GOOGLE_CLIENT_ID per abilitare il login con Google.
-              </p>
-            )}
-
-            {googleClientIdConfigured && !isLoggedIn && (
-              <div className="auth-login">
-                <GoogleLogin
-                  onSuccess={handleGoogleSuccess}
-                  onError={() => setError("Login Google annullato o non riuscito.")}
-                  useOneTap
-                  shape="pill"
-                  text="signin_with"
-                />
-              </div>
-            )}
-
-            {isLoggedIn && (
-              <div className="auth-user">
-                <div>
-                  <strong>{auth?.user?.name || "Utente Google"}</strong>
-                  <p>{auth?.user?.email || ""}</p>
-                </div>
-                <button type="button" className="btn-secondary" onClick={handleLogout}>
-                  Esci
-                </button>
-              </div>
-            )}
-
-            {authBusy && <p className="status">Verifica accesso Google...</p>}
-          </div>
         </div>
       </section>
 
-      {isLoggedIn && (
-        <section className="panel view-menu">
-          <button
-            type="button"
-            className={`menu-btn ${activeView === "recognize" ? "active" : ""}`}
-            onClick={() => setActiveView("recognize")}
-          >
-            Riconosci nuova pianta
-          </button>
+      <section className="panel view-menu">
+        <button
+          type="button"
+          className={`menu-btn ${activeView === "recognize" ? "active" : ""}`}
+          onClick={() => setActiveView("recognize")}
+        >
+          Riconosci nuova pianta
+        </button>
+        {isLoggedIn && (
           <button
             type="button"
             className={`menu-btn ${activeView === "my-plants" ? "active" : ""}`}
@@ -805,11 +1271,19 @@ export default function App() {
           >
             Le tue piante
           </button>
-        </section>
-      )}
+        )}
+        {!isLoggedIn && (
+          <button
+            type="button"
+            className={`menu-btn ${activeView === "register" ? "active" : ""}`}
+            onClick={openRegisterPage}
+          >
+            Registrati
+          </button>
+        )}
+      </section>
 
       {activeView === "recognize" ? (
-        isLoggedIn ? (
         <section className="panel">
           <form onSubmit={handleSearch} className="upload-form">
             <input
@@ -884,11 +1358,6 @@ export default function App() {
             </div>
           )}
         </section>
-        ) : (
-        <section className="panel">
-          <p className="status">Accedi con Google per caricare la foto della pianta.</p>
-        </section>
-        )
       ) : null}
 
       {activeView === "recognize" && !!searchResults.length && (
@@ -915,20 +1384,33 @@ export default function App() {
                     {!!speciesPreviews[item.species] && (
                       <img
                         className="result-preview"
-                        src={toAbsoluteImage(speciesPreviews[item.species])}
+                        src={toOptimizedImage(speciesPreviews[item.species], 420)}
                         alt={`Esempio ${item.species}`}
+                        loading="lazy"
+                        decoding="async"
                       />
                     )}
                     <strong>{item.species}</strong>
                     {!!speciesCommonNames[item.species] && (
                       <span className="result-common-name">({speciesCommonNames[item.species]})</span>
                     )}
-                    <div className="score-bar" aria-label={`Affinita ${(item.score * 100).toFixed(1)} percento`}>
-                      <div className="score-fill" style={{ width: `${Math.max(0, Math.min(100, item.score * 100))}%` }} />
+                    {!!item.is_draft && (
+                      <span className="badge-draft">🔨 scheda in costruzione</span>
+                    )}
+                    <div className="score-bar" aria-label={`Affinita ${(Number(item.displayScore ?? item.score ?? 0) * 100).toFixed(1)} percento`}>
+                      <div className="score-fill" style={{ width: `${Math.max(0, Math.min(100, Number(item.displayScore ?? item.score ?? 0) * 100))}%` }} />
                     </div>
                   </button>
                 ))}
               </div>
+              <button
+                type="button"
+                className="btn-secondary btn-more-species"
+                onClick={loadMoreSpecies}
+                disabled={busy.moreSpecies}
+              >
+                {busy.moreSpecies ? "Cerco..." : "+ Altre specie"}
+              </button>
             </>
           )}
         </section>
@@ -941,6 +1423,13 @@ export default function App() {
           <div>
             <h2>{plantCard.title}</h2>
             {plantCard.common_name && <p>Nome comune: {plantCard.common_name}</p>}
+            {!!isSelectedDraft && (
+              <div className="banner-draft">
+                🔨 <strong>Scheda in costruzione</strong> — questa specie è stata identificata
+                dall'IA ma la sua scheda completa non è ancora disponibile.
+              </div>
+            )}
+            {!!draftBuildMessage && <p className="status">{draftBuildMessage}</p>}
 
             {!!galleryImages.length && (
               <div className="gallery-wrap">
@@ -953,7 +1442,12 @@ export default function App() {
                   &lt;
                 </button>
                 <div className="gallery-stage">
-                  <img src={activeImage} alt={`${plantCard.title} foto ${imageIndex + 1}`} />
+                  <img 
+                    src={activeImage} 
+                    alt={`${plantCard.title} foto ${imageIndex + 1}`} 
+                    decoding="async"
+                    onError={nextImage}
+                  />
                   <p className="gallery-counter">
                     {imageIndex + 1} / {galleryImages.length}
                   </p>
@@ -1048,7 +1542,15 @@ export default function App() {
 
           {!!myPlants.length && (
             <div className="my-plants-list">
-              {myPlants.map((item) => (
+              {myPlants.map((item) => {
+                const cardPhoto = Array.isArray(item.user_photos) && item.user_photos.length
+                  ? item.user_photos[0]
+                  : item.user_photo_url;
+                const photoCount = Array.isArray(item.user_photos)
+                  ? item.user_photos.length
+                  : (item.user_photo_url ? 1 : 0);
+
+                return (
                 <article
                   key={item.id}
                   className={`my-plant-item ${selectedMyPlant?.id === item.id ? "active" : ""}`}
@@ -1073,10 +1575,26 @@ export default function App() {
                       {deletingPlantId === item.id ? "Elimino..." : "Elimina"}
                     </button>
                   </div>
+                  {cardPhoto && (
+                    <img
+                      src={toAbsoluteImage(cardPhoto)}
+                      alt={`Foto di ${item.user_given_name}`}
+                      className="my-plant-item-photo"
+                    />
+                  )}
                   <p>Specie: {item.plant_name}</p>
                   <p>Inserita: {item.created_at}</p>
+                  <button
+                    type="button"
+                    className="btn-secondary btn-small btn-upload-photo"
+                    onClick={(event) => { event.stopPropagation(); openPlantPhotoDialog(item.id); }}
+                    disabled={uploadingPhotoId === item.id}
+                  >
+                    {uploadingPhotoId === item.id ? "Carico..." : (photoCount > 0 ? `📷 Aggiungi altra foto (${photoCount})` : "📷 Aggiungi foto")}
+                  </button>
                 </article>
-              ))}
+                );
+              })}
             </div>
           )}
         </section>
@@ -1086,14 +1604,49 @@ export default function App() {
         <p className="status">Caricamento scheda pianta salvata...</p>
       )}
 
-      {isLoggedIn && activeView === "my-plants" && myPlantCard && (
+      {isLoggedIn && activeView === "my-plants" && selectedMyPlant && (
         <section className="panel details">
           <div>
-            <h2>{myPlantCard.title}</h2>
+            <h2>{myPlantCard?.title || selectedMyPlant?.plant_name || "Scheda pianta"}</h2>
             {selectedMyPlant?.user_given_name && (
               <p>Il tuo nome: {selectedMyPlant.user_given_name}</p>
             )}
-            {myPlantCard.common_name && <p>Nome comune: {myPlantCard.common_name}</p>}
+            <div className="my-plant-user-gallery">
+              <div className="my-plant-user-gallery-head">
+                <p className="my-plant-user-gallery-title">Le tue foto</p>
+                <button
+                  type="button"
+                  className="btn-secondary btn-small"
+                  onClick={() => selectedMyPlant?.id && openPlantPhotoDialog(selectedMyPlant.id)}
+                  disabled={!selectedMyPlant?.id || uploadingPhotoId === selectedMyPlant?.id}
+                >
+                  {uploadingPhotoId === selectedMyPlant?.id ? "Carico..." : "Aggiungi foto"}
+                </button>
+              </div>
+
+              {!!myPlantUserPhotos.length ? (
+                <div className="my-plant-user-gallery-grid">
+                  {myPlantUserPhotos.map((photoUrl, idx) => (
+                    <img
+                      key={`${photoUrl}-${idx}`}
+                      src={photoUrl}
+                      alt={`Foto ${idx + 1} di ${selectedMyPlant?.user_given_name || "questa pianta"}`}
+                      className="my-plant-detail-photo"
+                      loading="lazy"
+                    />
+                  ))}
+                </div>
+              ) : (
+                <p className="status">Nessuna foto caricata per questa pianta.</p>
+              )}
+            </div>
+            {myPlantCard?.common_name && <p>Nome comune: {myPlantCard.common_name}</p>}
+
+            {!myPlantCard && (
+              <p className="status">
+                Scheda botanica non disponibile al momento. Le tue foto restano disponibili qui.
+              </p>
+            )}
 
             {!!myPlantProfileEntries.length && (
               <div className="profile-grid">
@@ -1107,10 +1660,14 @@ export default function App() {
             )}
           </div>
 
-          <h3>Descrizione</h3>
-          <div className="summary markdown-content">
-            <ReactMarkdown remarkPlugins={[remarkGfm]}>{myPlantCard.summary || ""}</ReactMarkdown>
-          </div>
+          {!!myPlantCard?.summary && (
+            <>
+              <h3>Descrizione</h3>
+              <div className="summary markdown-content">
+                <ReactMarkdown remarkPlugins={[remarkGfm]}>{myPlantCard.summary || ""}</ReactMarkdown>
+              </div>
+            </>
+          )}
 
           <div className="watering-calendar">
             <h3>Calendario innaffiature</h3>
@@ -1187,9 +1744,33 @@ export default function App() {
         </section>
       )}
 
-      {activeView === "recognize" && selectedSpecies && (
+      {!isLoggedIn && activeView === "register" && (
+        <section className="panel guest-register-panel">
+          <h2>Registrati o accedi con Google</h2>
+          <p className="status guest-register-text">
+            Accedi con Google per salvare le tue piante e chiedere consigli personalizzati sulla loro cura.
+          </p>
+          {googleClientIdConfigured ? (
+            <div className="auth-login">
+              <GoogleLogin
+                onSuccess={handleGoogleSuccess}
+                onError={() => setError("Login Google annullato o non riuscito.")}
+                shape="pill"
+                text="signin_with"
+              />
+            </div>
+          ) : (
+            <p className="auth-warning">Configura GOOGLE_CLIENT_ID per abilitare la registrazione Google.</p>
+          )}
+        </section>
+      )}
+
+      {isLoggedIn && activeView === "my-plants" && selectedMyPlant?.plant_name && (
         <section className="panel">
-          <h2>Domanda sulla cura</h2>
+          <h2>
+            Domanda sulla cura
+            {activeChatPlantName ? `: ${activeChatPlantName}` : ""}
+          </h2>
           <form onSubmit={handleQuestion} className="chat-form">
             <textarea
               value={question}
@@ -1206,6 +1787,183 @@ export default function App() {
               <ReactMarkdown remarkPlugins={[remarkGfm]}>{chatAnswer}</ReactMarkdown>
             </article>
           )}
+        </section>
+      )}
+
+      {isLoggedIn && isAdmin && activeView === "admin" && (
+        <section className="panel">
+          <div className="species-header">
+            <h2>AD Console</h2>
+            <button
+              type="button"
+              className="btn-secondary btn-small"
+              onClick={() => loadAdminConsole(adminChartDays)}
+              disabled={busy.adminConsole}
+            >
+              {busy.adminConsole ? "Aggiorno..." : "Aggiorna"}
+            </button>
+          </div>
+
+          <p className="status">Admin: {auth?.user?.email || ""}</p>
+
+          <div className="admin-stats-grid">
+            <div className="admin-stat-card">
+              <strong>{adminConsole?.stats?.registered_users_total ?? 0}</strong>
+              <span>Utenti registrati</span>
+            </div>
+            <div className="admin-stat-card">
+              <strong>{adminConsole?.stats?.saved_plants_total ?? 0}</strong>
+              <span>Piante salvate</span>
+            </div>
+            <div className="admin-stat-card">
+              <strong>{adminConsole?.stats?.external_user_images_total ?? 0}</strong>
+              <span>Immagini utente su store esterno</span>
+            </div>
+            <div className="admin-stat-card">
+              <strong>{adminConsole?.recognition?.total ?? 0}</strong>
+              <span>Riconoscimenti totali</span>
+            </div>
+            <div className="admin-stat-card">
+              <strong>{adminConsole?.recognition?.guest_total ?? 0}</strong>
+              <span>Riconoscimenti guest</span>
+            </div>
+            <div className="admin-stat-card">
+              <strong>{adminConsole?.recognition?.openai_total ?? 0}</strong>
+              <span>Con supporto OpenAI</span>
+            </div>
+            <div className="admin-stat-card">
+              <strong>{adminConsole?.recognition?.with_image_total ?? 0}</strong>
+              <span>Con URL immagine salvata</span>
+            </div>
+            <div className="admin-stat-card">
+              <strong>{formatDurationMs(adminConsole?.recognition?.avg_recognition_ms)}</strong>
+              <span>Tempo medio riconoscimento</span>
+            </div>
+            <div className="admin-stat-card">
+              <strong>{adminConsole?.inventory?.catalog?.species_db_total ?? 0}</strong>
+              <span>Specie totali su DB</span>
+            </div>
+            <div className="admin-stat-card">
+              <strong>{adminConsole?.inventory?.catalog?.species_rag_total ?? 0}</strong>
+              <span>Specie totali su RAG</span>
+            </div>
+            <div className="admin-stat-card">
+              <strong>{adminConsole?.inventory?.faiss?.plantclef?.species_total ?? 0}</strong>
+              <span>PlantCLEF specie indicizzate</span>
+            </div>
+            <div className="admin-stat-card">
+              <strong>{adminConsole?.inventory?.faiss?.plantclef?.images_total ?? 0}</strong>
+              <span>PlantCLEF immagini indicizzate</span>
+            </div>
+            <div className="admin-stat-card">
+              <strong>{adminConsole?.inventory?.faiss?.leafsnap?.species_total ?? 0}</strong>
+              <span>LeafSnap specie indicizzate</span>
+            </div>
+            <div className="admin-stat-card">
+              <strong>{adminConsole?.inventory?.faiss?.leafsnap?.images_total ?? 0}</strong>
+              <span>LeafSnap immagini indicizzate</span>
+            </div>
+          </div>
+
+          <div className="admin-filter-row" role="group" aria-label="Filtro giorni grafici">
+            <span className="admin-filter-label">Grafici:</span>
+            {[7, 30, 90].map((days) => (
+              <button
+                key={days}
+                type="button"
+                className={`btn-secondary btn-small admin-filter-btn ${adminChartDays === days ? "is-active" : ""}`}
+                onClick={() => applyAdminChartDays(days)}
+                disabled={busy.adminConsole}
+              >
+                {days} giorni
+              </button>
+            ))}
+          </div>
+
+          {!!(adminConsole?.charts?.top_species || []).length && (
+            <div className="admin-chart-block">
+              <h3>Specie piu riconosciute (ultimi {adminConsole?.recognition?.chart_days || adminChartDays} giorni)</h3>
+              <div className="admin-bar-list">
+                {(adminConsole?.charts?.top_species || []).map((row) => {
+                  const maxVal = Math.max(...(adminConsole?.charts?.top_species || []).map((r) => Number(r.count || 0)), 1);
+                  const width = Math.max(6, Math.round((Number(row.count || 0) / maxVal) * 100));
+                  return (
+                    <div key={row.species} className="admin-bar-row">
+                      <span className="admin-bar-label">{row.species}</span>
+                      <div className="admin-bar-track">
+                        <span className="admin-bar-fill" style={{ width: `${width}%` }} />
+                      </div>
+                      <strong className="admin-bar-value">{row.count}</strong>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {!!(adminConsole?.charts?.daily_series || []).length && (
+            <div className="admin-chart-block">
+              <h3>Trend giornaliero (ultimi {adminConsole?.recognition?.chart_days || adminChartDays} giorni)</h3>
+              <div className="admin-columns-chart" role="img" aria-label="Riconoscimenti giornalieri">
+                {(adminConsole?.charts?.daily_series || []).map((row) => {
+                  const all = adminConsole?.charts?.daily_series || [];
+                  const maxVal = Math.max(...all.map((r) => Number(r.total || 0)), 1);
+                  const total = Number(row.total || 0);
+                  const openai = Number(row.openai || 0);
+                  const heightPct = Math.max(4, Math.round((total / maxVal) * 100));
+                  const dayLabel = String(row.day || "").slice(5);
+
+                  return (
+                    <div key={row.day} className="admin-column-item" title={`${row.day} - Tot: ${total}, OpenAI: ${openai}`}>
+                      <div className="admin-column-track">
+                        <span className="admin-column-fill" style={{ height: `${heightPct}%` }} />
+                      </div>
+                      <strong className="admin-column-value">{total}</strong>
+                      <span className="admin-column-label">{dayLabel}</span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {busy.adminConsole && <p className="status">Caricamento dati admin...</p>}
+
+          {!busy.adminConsole && !(adminConsole?.users || []).length && (
+            <p className="status">Nessun utente registrato disponibile.</p>
+          )}
+
+          {!busy.adminConsole && !!(adminConsole?.users || []).length && (
+            <div className="admin-table-wrap">
+              <table className="admin-table">
+                <thead>
+                  <tr>
+                    <th>Email</th>
+                    <th>Data registrazione</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {(adminConsole?.users || []).map((item) => (
+                    <tr key={`${item.email}-${item.registered_at}`}>
+                      <td>{item.email}</td>
+                      <td>{item.registered_at_display || item.registered_at || ""}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </section>
+      )}
+
+      {!isLoggedIn && activeView !== "register" && (
+        <section className="panel guest-cta-panel">
+          <p className="status guest-cta-text">
+            Per salvare le tue piante o chiedere riguardo la loro cura{" "}
+            <button type="button" className="guest-cta-link hero-highlight" onClick={openRegisterPage}>
+              REGISTRATI QUI
+            </button>
+          </p>
         </section>
       )}
 

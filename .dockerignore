@@ -10,3 +10,8 @@ __pycache__/
 logs/
 pwa-app/node_modules/
 pwa-app/dist/
+data/planclef.faiss
+data/planclef_cache.pt
+data/leafsnap_field.faiss
+data/leafsnap_cache.pt
+data/plant_rag/
