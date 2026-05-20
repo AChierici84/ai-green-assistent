@@ -1,4 +1,4 @@
-import json
+﻿import json
 import logging
 import os
 import re
@@ -206,6 +206,12 @@ ADMIN_USERS = {
     if value.strip()
 }
 PWA_DIST_DIR = Path(os.getenv("PWA_DIST_DIR", "pwa-app/dist"))
+PLANT_CARD_CACHE_ENABLED = os.getenv("PLANT_CARD_CACHE_ENABLED", "1").strip().lower() in {
+    "1",
+    "true",
+    "yes",
+    "on",
+}
 
 index: Any = None
 rag_collection: Any = None
@@ -784,6 +790,112 @@ def get_rag_collection():
         except Exception as e:
             raise RuntimeError(f"Impossibile caricare il database RAG delle piante: {e}")
     return rag_collection
+
+
+def ensure_plant_cards_cache_table(conn: sqlite3.Connection) -> None:
+    conn.execute(
+        """
+        CREATE TABLE IF NOT EXISTS plant_cards_cache (
+            species_name TEXT NOT NULL,
+            lang TEXT NOT NULL,
+            title TEXT NOT NULL,
+            common_name TEXT,
+            summary TEXT NOT NULL,
+            markdown TEXT NOT NULL,
+            images_json TEXT NOT NULL,
+            source TEXT NOT NULL,
+            updated_at TEXT NOT NULL,
+            PRIMARY KEY (species_name, lang)
+        )
+        """
+    )
+    conn.execute(
+        "CREATE INDEX IF NOT EXISTS idx_plant_cards_cache_updated_at ON plant_cards_cache(updated_at)"
+    )
+    conn.commit()
+
+
+def get_cached_plant_card(name: str, lang: str) -> dict[str, Any] | None:
+    if not PLANT_CARD_CACHE_ENABLED:
+        return None
+
+    species_name = (name or "").strip()
+    lang_code = (lang or "it").strip().lower()
+    if not species_name:
+        return None
+
+    with get_plants_db_connection() as conn:
+        ensure_plant_cards_cache_table(conn)
+        row = conn.execute(
+            (
+                "SELECT title, common_name, summary, markdown, images_json, source, updated_at "
+                "FROM plant_cards_cache "
+                "WHERE lower(species_name) = lower(?) AND lower(lang) = lower(?) "
+                "LIMIT 1"
+            ),
+            (species_name, lang_code),
+        ).fetchone()
+
+    if row is None:
+        return None
+
+    images: list[str] = []
+    raw_images = row["images_json"] if "images_json" in row.keys() else "[]"
+    try:
+        parsed = json.loads(raw_images or "[]")
+        if isinstance(parsed, list):
+            images = [str(item) for item in parsed if str(item).strip()]
+    except Exception:
+        images = []
+
+    return {
+        "title": row["title"],
+        "common_name": row["common_name"] or "",
+        "markdown": row["markdown"],
+        "summary": row["summary"],
+        "images": images,
+        "source": row["source"],
+        "cache_updated_at": row["updated_at"],
+    }
+
+
+def upsert_cached_plant_card(name: str, lang: str, payload: dict[str, Any]) -> None:
+    if not PLANT_CARD_CACHE_ENABLED:
+        return
+
+    species_name = (name or "").strip()
+    lang_code = (lang or "it").strip().lower()
+    if not species_name:
+        return
+
+    title = str(payload.get("title") or species_name)
+    common_name = str(payload.get("common_name") or "")
+    summary = str(payload.get("summary") or "")
+    markdown = str(payload.get("markdown") or "")
+    source = str(payload.get("source") or "rag")
+    images = payload.get("images")
+    images_json = json.dumps(images if isinstance(images, list) else [], ensure_ascii=False)
+    updated_at = datetime.utcnow().replace(microsecond=0).isoformat() + "Z"
+
+    with get_plants_db_connection() as conn:
+        ensure_plant_cards_cache_table(conn)
+        conn.execute(
+            (
+                "INSERT INTO plant_cards_cache "
+                "(species_name, lang, title, common_name, summary, markdown, images_json, source, updated_at) "
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?) "
+                "ON CONFLICT(species_name, lang) DO UPDATE SET "
+                "title=excluded.title, "
+                "common_name=excluded.common_name, "
+                "summary=excluded.summary, "
+                "markdown=excluded.markdown, "
+                "images_json=excluded.images_json, "
+                "source=excluded.source, "
+                "updated_at=excluded.updated_at"
+            ),
+            (species_name, lang_code, title, common_name, summary, markdown, images_json, source, updated_at),
+        )
+        conn.commit()
 
 
 PLANT_PROFILE_FIELDS = (
@@ -2378,41 +2490,51 @@ def get_image(full_path: str):
 def plant_info(
     name: str,
     lang: str = Query(default="it", description="Codice lingua Wikipedia (es. it, en, fr)"),
+    refresh_cache: bool = Query(default=False, description="Forza rigenerazione cache scheda"),
     authorization: str | None = Header(default=None),
 ):
     """Recupera informazioni su una pianta dalla RAG con riassunto OpenAI."""
     _get_google_user_from_authorization(authorization, require_auth=False)
-    _log_api("/plant/{name}", "input", {"name": name, "lang": lang})
+    _log_api("/plant/{name}", "input", {"name": name, "lang": lang, "refresh_cache": refresh_cache})
+
+    normalized_name = (name or "").strip()
+    normalized_lang = (lang or "it").strip().lower()
+
+    if not refresh_cache:
+        cached_payload = get_cached_plant_card(normalized_name, normalized_lang)
+        if cached_payload is not None:
+            cached_payload["build_status"] = _species_build_status(cached_payload.get("title") or normalized_name)
+            _log_api(
+                "/plant/{name}",
+                "cache_hit",
+                {
+                    "title": cached_payload.get("title", normalized_name),
+                    "source": cached_payload.get("source", "rag"),
+                    "cache_updated_at": cached_payload.get("cache_updated_at", ""),
+                },
+            )
+            return JSONResponse(content=cached_payload)
 
     api_key = os.getenv("OPENAI_API_KEY", "").strip()
-    if not api_key:
-        raise HTTPException(
-            status_code=503,
-            detail="OPENAI_API_KEY non configurata. Imposta la variabile ambiente e riprova.",
-        )
 
     try:
         retrieval_mode = "rag"
-        # Query the RAG collection to find documents matching the plant name
         collection = get_rag_collection()
-        
-        # Search for documents where species_name matches
         results = collection.get(
-            where={"species_name": {"$eq": name}},
-            limit=20,  # Get multiple chunks for better context
+            where={"species_name": {"$eq": normalized_name}},
+            limit=20,
         )
-        
+
         if not results or not results.get("documents"):
-            # Plant not found in RAG, try fallback to Wikipedia (requested lang, then English)
             wiki_data = None
             try:
                 retrieval_mode = "wikipedia_fallback"
-                wiki_data = fetch_wikipedia_text_context(name, lang)
+                wiki_data = fetch_wikipedia_text_context(normalized_name, normalized_lang)
             except Exception:
-                if (lang or "").strip().lower() != "en":
+                if normalized_lang != "en":
                     try:
                         retrieval_mode = "wikipedia_fallback_en"
-                        wiki_data = fetch_wikipedia_text_context(name, "en")
+                        wiki_data = fetch_wikipedia_text_context(normalized_name, "en")
                     except Exception:
                         wiki_data = None
 
@@ -2424,12 +2546,11 @@ def plant_info(
                 image_paths = [thumbnail] if thumbnail else []
                 rag_used = False
             else:
-                # Final fallback: if species exists in DB, return a minimal draft card instead of 404.
-                db_profile = get_plant_profile_from_db(name)
+                db_profile = get_plant_profile_from_db(normalized_name)
                 if db_profile is not None:
                     retrieval_mode = "db_draft"
                     rag_used = False
-                    title = db_profile.get("species_name") or name
+                    title = db_profile.get("species_name") or normalized_name
                     common_name = ""
                     image_paths = _get_species_images_from_db(title)
                     if not db_profile.get("indexed"):
@@ -2447,59 +2568,59 @@ def plant_info(
                 else:
                     raise HTTPException(
                         status_code=404,
-                        detail=f"Pianta '{name}' non trovata nella RAG, in Wikipedia o nel database locale.",
+                        detail=f"Pianta '{normalized_name}' non trovata nella RAG, in Wikipedia o nel database locale.",
                     )
         else:
             retrieval_mode = "rag"
             rag_used = True
-            # Extract metadata from the first result
             metadatas = results.get("metadatas", [])
             first_meta = metadatas[0] if metadatas else {}
-            
-            title = first_meta.get("species_name", name)
+
+            title = first_meta.get("species_name", normalized_name)
             common_name = first_meta.get("common_name", "")
-            image_paths = _get_species_images_from_db(name)
+            image_paths = _get_species_images_from_db(normalized_name)
             if not image_paths:
-                # Backward compatibility with old RAG metadata layout.
                 image_paths_json = first_meta.get("image_paths", "[]")
                 try:
                     image_paths = json.loads(image_paths_json)
                 except (json.JSONDecodeError, TypeError):
                     image_paths = []
-            
-            # Combine chunks for OpenAI context (up to 6000 chars)
+
             documents = results.get("documents", [])
-            combined_text = "\n\n".join(documents[:10])  # Use up to 10 chunks
+            combined_text = "\n\n".join(documents[:10])
             if len(combined_text) > 6000:
                 combined_text = combined_text[:6000] + "\n..."
-            
-            # Generate summary using OpenAI
-            try:
-                client = OpenAI(api_key=api_key)
-                completion = client.chat.completions.create(
-                    model=OPENAI_MODEL,
-                    temperature=0.3,
-                    messages=[
-                        {
-                            "role": "system",
-                            "content": (
-                                "Sei un botanico esperto. Genera un riassunto conciso e affascinante "
-                                "della pianta in base al testo fornito. Includi: descrizione, habitat, "
-                                "caratteristiche distintive e usi. Rispondi in italiano."
-                            ),
-                        },
-                        {
-                            "role": "user",
-                            "content": (
-                                f"Crea un riassunto affascinante della pianta '{title}'.\n\n"
-                                f"Testo di riferimento:\n{combined_text}"
-                            ),
-                        },
-                    ],
-                )
-                extract = completion.choices[0].message.content or ""
-            except Exception as e:
-                raise HTTPException(status_code=502, detail=f"Errore nella generazione del riassunto: {e}")
+
+            if api_key:
+                try:
+                    client = OpenAI(api_key=api_key)
+                    completion = client.chat.completions.create(
+                        model=OPENAI_MODEL,
+                        temperature=0.3,
+                        messages=[
+                            {
+                                "role": "system",
+                                "content": (
+                                    "Sei un botanico esperto. Genera un riassunto conciso e affascinante "
+                                    "della pianta in base al testo fornito. Includi: descrizione, habitat, "
+                                    "caratteristiche distintive e usi. Rispondi in italiano."
+                                ),
+                            },
+                            {
+                                "role": "user",
+                                "content": (
+                                    f"Crea un riassunto affascinante della pianta '{title}'.\n\n"
+                                    f"Testo di riferimento:\n{combined_text}"
+                                ),
+                            },
+                        ],
+                    )
+                    extract = completion.choices[0].message.content or ""
+                except Exception as e:
+                    raise HTTPException(status_code=502, detail=f"Errore nella generazione del riassunto: {e}")
+            else:
+                # Fallback local summary to avoid hard failure when key is missing.
+                extract = _truncate(re.sub(r"\s+", " ", combined_text), 1200)
 
         _log_api(
             "/plant/{name}",
@@ -2510,35 +2631,28 @@ def plant_info(
                 "documents_found": len(results.get("documents", [])) if results else 0,
             },
         )
-    
+
     except HTTPException:
         raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Errore nel recupero informazioni pianta: {e}")
 
-    # Build image URLs/paths
     images: list[str] = []
-    base_url = ""
     data_dir = Path("data")
-    
-    for img_path in image_paths[:3]:  # Show up to 3 images
-        # Try as local file first
+
+    for img_path in image_paths[:3]:
         normalized_img_path = _normalize_image_path(img_path)
         local_path = data_dir / "images" / normalized_img_path
         if local_path.exists():
-            # Convert to URL path for serving
             images.append(f"/images/{normalized_img_path}")
-        else:
-            # Could be a URL
-            if str(img_path).startswith("http"):
-                images.append(img_path)
+        elif str(img_path).startswith("http"):
+            images.append(img_path)
 
-    # Build markdown response
     md_lines = [f"# {title}\n"]
-    
+
     if common_name:
         md_lines.append(f"**Nome comune:** {common_name}\n")
-    
+
     if images:
         img_tags = "".join(
             f'<img src="{url}" alt="{title}" width="280" style="margin:4px;border-radius:8px"/>'
@@ -2547,7 +2661,7 @@ def plant_info(
         md_lines.append(img_tags + "\n")
 
     md_lines.append(extract + "\n")
-    
+
     if rag_used:
         source_info = "Fonte: Database RAG"
     elif retrieval_mode.startswith("wikipedia"):
@@ -2555,7 +2669,7 @@ def plant_info(
     else:
         source_info = "Fonte: Database locale"
     md_lines.append(f"\n---\n{source_info}")
-    
+
     markdown = "\n".join(md_lines)
 
     payload = {
@@ -2567,6 +2681,12 @@ def plant_info(
         "source": "rag" if rag_used else ("wikipedia" if retrieval_mode.startswith("wikipedia") else "db_draft"),
         "build_status": _species_build_status(title),
     }
+
+    if payload["source"] in {"rag", "wikipedia"}:
+        try:
+            upsert_cached_plant_card(normalized_name, normalized_lang, payload)
+        except Exception as cache_exc:
+            logger.warning(f"Impossibile aggiornare cache scheda per '{normalized_name}': {cache_exc}")
 
     _log_api(
         "/plant/{name}",

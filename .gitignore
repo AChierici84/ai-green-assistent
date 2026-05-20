@@ -18,4 +18,3 @@ data/leafsnap.faiss
 data/plants.db
 data/user_plants.db
 pwa-app/node_modules/
-data/planclef_cache.pt

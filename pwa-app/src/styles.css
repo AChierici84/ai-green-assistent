@@ -53,11 +53,17 @@ body {
   gap: 0.85rem;
 }
 
+.hero-brand-block {
+  display: grid;
+  gap: 0.5rem;
+  max-width: 48ch;
+}
+
 .hero-brand {
   display: flex;
   align-items: center;
   gap: 0.65rem;
-  margin-bottom: 0.6rem;
+  margin-bottom: 0;
 }
 
 .hero-logo {
@@ -69,9 +75,9 @@ body {
 }
 
 .hero h1 {
-  margin: 0.1rem 0 0.6rem;
+  margin: 0;
   font-family: "Fraunces", serif;
-  font-size: clamp(1.6rem, 4vw, 2.5rem);
+  font-size: clamp(0.9rem, 1.9vw, 1.35rem);
   line-height: 1.12;
 }
 
@@ -82,7 +88,7 @@ body {
 
 .tag {
   letter-spacing: 0.06em;
-  font-size: 0.92rem;
+  font-size: 1.22rem;
   font-weight: 700;
   margin: 0;
 }
@@ -106,43 +112,84 @@ body {
 .auth-user {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 0.75rem;
+  justify-content: flex-end;
+  gap: 0.5rem;
   padding: 0.55rem 0.7rem;
   border-radius: 12px;
   background: rgba(255, 255, 255, 0.1);
 }
 
-.auth-user-actions {
+.auth-user-panel {
+  display: grid;
+  justify-items: end;
+  gap: 0.25rem;
+  position: relative;
+}
+
+.auth-user-header {
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
 }
 
-.auth-admin-link {
-  border: 0;
-  background: transparent;
-  color: #c2f3d8;
-  font: inherit;
-  font-weight: 700;
-  cursor: pointer;
-  padding: 0;
-  text-decoration: underline;
+.auth-menu-toggle {
+  display: inline-grid;
+  gap: 0.17rem;
+  border: 1px solid #8fd7ab;
+  background: #daf6e3;
+  border-radius: 10px;
+  padding: 0.32rem 0.42rem;
 }
 
-.auth-admin-sep {
-  color: rgba(248, 255, 247, 0.85);
+.auth-menu-bar {
+  width: 0.9rem;
+  height: 2px;
+  background: #1f7a43;
+  border-radius: 999px;
+}
+
+.auth-user-menu {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 0.3rem);
+  min-width: 8.2rem;
+  display: grid;
+  gap: 0.32rem;
+  padding: 0.36rem;
+  border: 1px solid #8fd7ab;
+  border-radius: 12px;
+  background: #effdf4;
+  box-shadow: 0 8px 20px rgba(16, 70, 43, 0.18);
+  z-index: 30;
+}
+
+.auth-user-menu-item {
+  border: 1px solid #8fd7ab;
+  background: #daf6e3;
+  color: #1f7a43;
+  font: inherit;
+  font-weight: 700;
+  padding: 0.42rem 0.64rem;
+  border-radius: 10px;
+  text-align: left;
+}
+
+.auth-menu-toggle:hover,
+.auth-user-menu-item:hover {
+  background: #cef0da;
 }
 
 .auth-user strong {
   display: block;
   line-height: 1.1;
+  text-align: right;
 }
 
 .auth-user p {
   margin: 0.2rem 0 0;
   font-size: 0.86rem;
   opacity: 0.95;
+  text-align: right;
 }
 
 .auth-warning {
@@ -471,12 +518,16 @@ button:disabled {
   position: relative;
 }
 
-.gallery-stage img {
+.gallery-photo {
   width: 100%;
   border-radius: 14px;
   min-height: 130px;
   max-height: 240px;
   object-fit: cover;
+}
+
+.gallery-photo-secondary {
+  display: none;
 }
 
 .gallery-nav {
@@ -501,6 +552,22 @@ button:disabled {
   font-size: 0.82rem;
   color: #effff6;
   background: rgba(12, 31, 21, 0.7);
+}
+
+@media (min-width: 1024px) {
+  .gallery-stage {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.55rem;
+  }
+
+  .gallery-photo {
+    max-height: 220px;
+  }
+
+  .gallery-photo-secondary {
+    display: block;
+  }
 }
 
 .summary {
@@ -540,6 +607,10 @@ pre {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
   gap: 0.75rem;
+}
+
+.gallery-wrap + .profile-grid {
+  margin-top: 1rem;
 }
 
 .profile-item {
@@ -759,6 +830,12 @@ pre {
   align-items: center;
   justify-content: space-between;
   gap: 0.5rem;
+}
+
+.my-plants-header-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
 }
 
 .admin-stats-grid {
@@ -1064,6 +1141,17 @@ pre {
   }
   100% {
     top: calc(100% - 56px);
+  }
+}
+
+@media (min-width: 721px) {
+  .hero-logo {
+    width: 2.35rem;
+    height: 2.35rem;
+  }
+
+  .tag {
+    font-size: 1.34rem;
   }
 }
 

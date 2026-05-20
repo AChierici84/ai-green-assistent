@@ -165,6 +165,7 @@ function parseJwtPayload(token) {
 export default function App({ googleClientIdConfigured = false }) {
   const [auth, setAuth] = useState(null);
   const [authBusy, setAuthBusy] = useState(false);
+  const [isAuthMenuOpen, setIsAuthMenuOpen] = useState(false);
   const [file, setFile] = useState(null);
   const [preview, setPreview] = useState("");
   const [isDragActive, setIsDragActive] = useState(false);
@@ -190,6 +191,7 @@ export default function App({ googleClientIdConfigured = false }) {
   const [chatAnswer, setChatAnswer] = useState("");
   const [userPlantName, setUserPlantName] = useState("");
   const [myPlants, setMyPlants] = useState([]);
+  const [isMyPlantsListCollapsed, setIsMyPlantsListCollapsed] = useState(false);
   const [saveStatus, setSaveStatus] = useState("");
   const [activeView, setActiveView] = useState("recognize");
   const [adminConsole, setAdminConsole] = useState(null);
@@ -207,6 +209,7 @@ export default function App({ googleClientIdConfigured = false }) {
   const [uploadingPhotoId, setUploadingPhotoId] = useState(null);
   const plantPhotoInputRef = useRef(null);
   const plantPhotoTargetIdRef = useRef(null);
+  const authMenuRef = useRef(null);
   const refreshPromiseRef = useRef(null);
   const lastSearchDurationRef = useRef(null);
 
@@ -305,6 +308,35 @@ export default function App({ googleClientIdConfigured = false }) {
   const canAsk = Boolean(activeChatPlantName) && question.trim().length > 2;
   const isLoggedIn = Boolean(auth?.idToken);
   const isAdmin = Boolean(auth?.user?.is_admin);
+
+  useEffect(() => {
+    if (!isLoggedIn) {
+      setIsAuthMenuOpen(false);
+    }
+  }, [isLoggedIn]);
+
+  useEffect(() => {
+    function handleDocumentMouseDown(event) {
+      if (!authMenuRef.current || authMenuRef.current.contains(event.target)) {
+        return;
+      }
+      setIsAuthMenuOpen(false);
+    }
+
+    function handleDocumentKeyDown(event) {
+      if (event.key === "Escape") {
+        setIsAuthMenuOpen(false);
+      }
+    }
+
+    document.addEventListener("mousedown", handleDocumentMouseDown);
+    document.addEventListener("keydown", handleDocumentKeyDown);
+    return () => {
+      document.removeEventListener("mousedown", handleDocumentMouseDown);
+      document.removeEventListener("keydown", handleDocumentKeyDown);
+    };
+  }, []);
+
   const isSelectedDraft = plantCard?.source === "db_draft" || plantProfile?.indexed === false;
   const galleryImages = useMemo(() => {
     if (!plantCard?.images?.length) {
@@ -314,6 +346,9 @@ export default function App({ googleClientIdConfigured = false }) {
   }, [plantCard]);
 
   const activeImage = galleryImages.length ? galleryImages[imageIndex % galleryImages.length] : "";
+  const secondaryImage = galleryImages.length > 1
+    ? galleryImages[(imageIndex + 1) % galleryImages.length]
+    : "";
   const myPlantUserPhotos = useMemo(() => {
     if (!selectedMyPlant) {
       return [];
@@ -802,7 +837,11 @@ export default function App({ googleClientIdConfigured = false }) {
     setBusy((prev) => ({ ...prev, myPlants: true }));
     try {
       const data = await getMyPlants();
-      setMyPlants(data.items || []);
+      const items = data.items || [];
+      setMyPlants(items);
+      if (!items.length) {
+        setIsMyPlantsListCollapsed(false);
+      }
     } catch (err) {
       setError(err.message);
     } finally {
@@ -897,6 +936,7 @@ export default function App({ googleClientIdConfigured = false }) {
       await deleteMyPlant(item.id);
       if (selectedMyPlant?.id === item.id) {
         setSelectedMyPlant(null);
+        setIsMyPlantsListCollapsed(false);
         setMyPlantCard(null);
         setMyPlantProfile(null);
         setWateringSchedule([]);
@@ -939,6 +979,7 @@ export default function App({ googleClientIdConfigured = false }) {
     setChatAnswer("");
     setSelectedSpecies(item.plant_name);
     setSelectedMyPlant(item);
+    setIsMyPlantsListCollapsed(true);
     setMyPlantCard(null);
     setMyPlantProfile(null);
     setWateringSchedule([]);
@@ -1100,6 +1141,7 @@ export default function App({ googleClientIdConfigured = false }) {
   }
 
   function handleLogout() {
+    setIsAuthMenuOpen(false);
     setAuth(null);
     setAuthToken("");
     window.localStorage.removeItem(AUTH_STORAGE_KEY);
@@ -1140,6 +1182,7 @@ export default function App({ googleClientIdConfigured = false }) {
   }
 
   function openAdminConsole() {
+    setIsAuthMenuOpen(false);
     setActiveView("admin");
     loadAdminConsole();
   }
@@ -1202,9 +1245,12 @@ export default function App({ googleClientIdConfigured = false }) {
       <section className="hero">
         <div className="hero-inner">
           <div className="hero-topbar">
-            <div className="hero-brand">
-              <img src="/icons/icon-512.svg" alt="Icona Clorofilla" className="hero-logo" />
-              <p className="tag">Clorofilla</p>
+            <div className="hero-brand-block">
+              <div className="hero-brand">
+                <img src="/icons/icon-512.svg" alt="Icona Clorofilla" className="hero-logo" />
+                <p className="tag">Clorofilla</p>
+              </div>
+              <h1>Ti aiuta a <span className="hero-highlight">riconoscere</span> e <span className="hero-highlight">curare</span> le tue piante.</h1>
             </div>
 
             <div className="auth-box">
@@ -1227,22 +1273,33 @@ export default function App({ googleClientIdConfigured = false }) {
 
               {isLoggedIn && (
                 <div className="auth-user">
-                  <div>
-                    <strong>{auth?.user?.name || "Utente Google"}</strong>
-                    <p>{auth?.user?.email || ""}</p>
-                  </div>
-                  <div className="auth-user-actions">
-                    {isAdmin && (
-                      <>
-                        <button type="button" className="auth-admin-link" onClick={openAdminConsole}>
-                          AD Console
+                  <div className="auth-user-panel" ref={authMenuRef}>
+                    <div className="auth-user-header">
+                      <strong>{auth?.user?.name || "Utente Google"}</strong>
+                      <button
+                        type="button"
+                        className="auth-menu-toggle"
+                        aria-label="Apri menu utente"
+                        aria-expanded={isAuthMenuOpen}
+                        onClick={() => setIsAuthMenuOpen((prev) => !prev)}
+                      >
+                        <span className="auth-menu-bar" aria-hidden="true" />
+                        <span className="auth-menu-bar" aria-hidden="true" />
+                        <span className="auth-menu-bar" aria-hidden="true" />
+                      </button>
+                    </div>
+                    {isAuthMenuOpen && (
+                      <div className="auth-user-menu" role="menu" aria-label="Menu utente">
+                        {isAdmin && (
+                          <button type="button" className="auth-user-menu-item" onClick={openAdminConsole}>
+                            Console
+                          </button>
+                        )}
+                        <button type="button" className="auth-user-menu-item" onClick={handleLogout}>
+                          Esci
                         </button>
-                        <span className="auth-admin-sep" aria-hidden="true">|</span>
-                      </>
+                      </div>
                     )}
-                    <button type="button" className="btn-secondary" onClick={handleLogout}>
-                      Esci
-                    </button>
                   </div>
                 </div>
               )}
@@ -1250,8 +1307,6 @@ export default function App({ googleClientIdConfigured = false }) {
               {authBusy && <p className="status">Verifica accesso Google...</p>}
             </div>
           </div>
-
-          <h1>Ti aiuta a <span className="hero-highlight">riconoscere</span> e <span className="hero-highlight">curare</span> le tue piante.</h1>
         </div>
       </section>
 
@@ -1442,14 +1497,23 @@ export default function App({ googleClientIdConfigured = false }) {
                   &lt;
                 </button>
                 <div className="gallery-stage">
-                  <img 
-                    src={activeImage} 
-                    alt={`${plantCard.title} foto ${imageIndex + 1}`} 
+                  <img
+                    className="gallery-photo"
+                    src={activeImage}
+                    alt={`${plantCard.title} foto ${imageIndex + 1}`}
                     decoding="async"
                     onError={nextImage}
                   />
+                  {!!secondaryImage && (
+                    <img
+                      className="gallery-photo gallery-photo-secondary"
+                      src={secondaryImage}
+                      alt={`${plantCard.title} foto ${((imageIndex + 1) % galleryImages.length) + 1}`}
+                      decoding="async"
+                    />
+                  )}
                   <p className="gallery-counter">
-                    {imageIndex + 1} / {galleryImages.length}
+                    {imageIndex + 1}{secondaryImage ? `-${((imageIndex + 1) % galleryImages.length) + 1}` : ""} / {galleryImages.length}
                   </p>
                 </div>
                 <button
@@ -1526,21 +1590,32 @@ export default function App({ googleClientIdConfigured = false }) {
         <section className="panel">
           <div className="species-header">
             <h2>Le tue piante</h2>
-            <button
-              type="button"
-              className="btn-secondary btn-small"
-              onClick={loadMyPlants}
-              disabled={busy.myPlants}
-            >
-              {busy.myPlants ? "Aggiorno..." : "Aggiorna"}
-            </button>
+            <div className="my-plants-header-actions">
+              {!!selectedMyPlant && isMyPlantsListCollapsed && (
+                <button
+                  type="button"
+                  className="btn-secondary btn-small"
+                  onClick={() => setIsMyPlantsListCollapsed(false)}
+                >
+                  Scegli un'altra pianta
+                </button>
+              )}
+              <button
+                type="button"
+                className="btn-secondary btn-small"
+                onClick={loadMyPlants}
+                disabled={busy.myPlants}
+              >
+                {busy.myPlants ? "Aggiorno..." : "Aggiorna"}
+              </button>
+            </div>
           </div>
 
           {!myPlants.length && !busy.myPlants && (
             <p className="status">Non hai ancora salvato piante.</p>
           )}
 
-          {!!myPlants.length && (
+          {!!myPlants.length && !isMyPlantsListCollapsed && (
             <div className="my-plants-list">
               {myPlants.map((item) => {
                 const cardPhoto = Array.isArray(item.user_photos) && item.user_photos.length
