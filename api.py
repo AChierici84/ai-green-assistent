@@ -313,11 +313,15 @@ def _serve_pwa_index() -> HTMLResponse:
     if pwa_index.exists():
         return HTMLResponse(content=pwa_index.read_text(encoding="utf-8"))
 
-    fallback_ui = Path(__file__).with_name("ui.html")
-    if fallback_ui.exists():
-        return HTMLResponse(content=fallback_ui.read_text(encoding="utf-8"))
-
     raise HTTPException(status_code=503, detail="Frontend non disponibile.")
+
+
+def _serve_landing_page() -> HTMLResponse:
+    landing_page = Path(__file__).with_name("ui.html")
+    if landing_page.exists():
+        return HTMLResponse(content=landing_page.read_text(encoding="utf-8"))
+
+    raise HTTPException(status_code=503, detail="Landing page non disponibile.")
 
 
 def _serve_pwa_file(filename: str, media_type: str | None = None) -> FileResponse:
@@ -2459,6 +2463,12 @@ def species_build_status(name: str, authorization: str | None = Header(default=N
 
 @app.get("/", response_class=HTMLResponse)
 def ui():
+    return _serve_landing_page()
+
+
+@app.get("/app", response_class=HTMLResponse)
+@app.get("/app/", response_class=HTMLResponse)
+def pwa_app():
     return _serve_pwa_index()
 
 

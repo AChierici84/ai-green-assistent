@@ -7,7 +7,6 @@ client_secret*
 pwa-app/.env
 missing_species_alias.csv
 unique_species_labels.csv
-data/images/
 missing_species.csv
 data/planclef.faiss
 data/planclef_cache.pt

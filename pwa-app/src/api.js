@@ -179,6 +179,11 @@ export async function getAdminConsoleData(limit = 300, chartDays = 30) {
   return parseResponse(response);
 }
 
+export async function getApiHealth() {
+  const response = await apiFetch("/health");
+  return parseResponse(response);
+}
+
 export async function logRecognition(payload) {
   const response = await apiFetch("/recognitions/log", {
     method: "POST",

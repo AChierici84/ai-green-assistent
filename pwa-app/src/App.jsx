@@ -5,6 +5,7 @@ import remarkGfm from "remark-gfm";
 import {
   askPlantCare,
   getAdminConsoleData,
+  getApiHealth,
   deleteMyPlant,
   getMyPlants,
   getPlantCard,
@@ -195,6 +196,8 @@ export default function App({ googleClientIdConfigured = false }) {
   const [saveStatus, setSaveStatus] = useState("");
   const [activeView, setActiveView] = useState("recognize");
   const [adminConsole, setAdminConsole] = useState(null);
+  const [adminHealth, setAdminHealth] = useState(null);
+  const [adminHealthError, setAdminHealthError] = useState("");
   const [adminChartDays, setAdminChartDays] = useState(30);
   const [lastSearchUsedOpenAI, setLastSearchUsedOpenAI] = useState(false);
   const [lastSearchDurationMs, setLastSearchDurationMs] = useState(null);
@@ -572,6 +575,8 @@ export default function App({ googleClientIdConfigured = false }) {
     if (!isLoggedIn) {
       setMyPlants([]);
       setAdminConsole(null);
+      setAdminHealth(null);
+      setAdminHealthError("");
       return;
     }
 
@@ -1134,6 +1139,8 @@ export default function App({ googleClientIdConfigured = false }) {
       setAuthToken("");
       window.localStorage.removeItem(AUTH_STORAGE_KEY);
       setAdminConsole(null);
+      setAdminHealth(null);
+      setAdminHealthError("");
       setError(err.message || "Login Google non riuscito.");
     } finally {
       setAuthBusy(false);
@@ -1147,6 +1154,8 @@ export default function App({ googleClientIdConfigured = false }) {
     window.localStorage.removeItem(AUTH_STORAGE_KEY);
     setMyPlants([]);
     setAdminConsole(null);
+    setAdminHealth(null);
+    setAdminHealthError("");
     setSaveStatus("");
     setActiveView("recognize");
     setSelectedMyPlant(null);
@@ -1170,10 +1179,34 @@ export default function App({ googleClientIdConfigured = false }) {
     }
 
     setError("");
+    setAdminHealthError("");
     setBusy((prev) => ({ ...prev, adminConsole: true }));
     try {
-      const data = await getAdminConsoleData(500, chartDays);
-      setAdminConsole(data || null);
+      const [consoleResult, healthResult] = await Promise.allSettled([
+        getAdminConsoleData(500, chartDays),
+        getApiHealth(),
+      ]);
+
+      let consoleErrorMessage = "";
+
+      if (consoleResult.status === "fulfilled") {
+        setAdminConsole(consoleResult.value || null);
+      } else {
+        setAdminConsole(null);
+        consoleErrorMessage = consoleResult.reason?.message || "Errore caricamento AD Console.";
+      }
+
+      if (healthResult.status === "fulfilled") {
+        setAdminHealth(healthResult.value || null);
+      } else {
+        setAdminHealth(null);
+        const message = healthResult.reason?.message || "Stato /health non disponibile.";
+        setAdminHealthError(message);
+      }
+
+      if (consoleErrorMessage) {
+        setError(consoleErrorMessage);
+      }
     } catch (err) {
       setError(err.message || "Errore caricamento AD Console.");
     } finally {
@@ -1881,62 +1914,103 @@ export default function App({ googleClientIdConfigured = false }) {
 
           <p className="status">Admin: {auth?.user?.email || ""}</p>
 
-          <div className="admin-stats-grid">
-            <div className="admin-stat-card">
-              <strong>{adminConsole?.stats?.registered_users_total ?? 0}</strong>
-              <span>Utenti registrati</span>
+          <div className="admin-chart-block">
+            <h3>Stato API (/health)</h3>
+            <div className="admin-stats-grid">
+              <div className="admin-stat-card">
+                <strong>{adminHealth?.status || "-"}</strong>
+                <span>API status</span>
+              </div>
+              <div className="admin-stat-card">
+                <strong>{adminHealth?.model || "-"}</strong>
+                <span>Modello ricerca</span>
+              </div>
+              <div className="admin-stat-card">
+                <strong>
+                  {typeof adminHealth?.search_backend_ready === "boolean"
+                    ? (adminHealth.search_backend_ready ? "SI" : "NO")
+                    : "-"}
+                </strong>
+                <span>Backend ricerca pronto</span>
+              </div>
             </div>
-            <div className="admin-stat-card">
-              <strong>{adminConsole?.stats?.saved_plants_total ?? 0}</strong>
-              <span>Piante salvate</span>
+            {adminHealthError && <p className="status">{adminHealthError}</p>}
+          </div>
+
+          <div className="admin-chart-block">
+            <h3>Utenti e Raccolta</h3>
+            <p className="admin-section-note">Panoramica rapida su utenti registrati e contenuti personali salvati.</p>
+            <div className="admin-stats-grid">
+              <div className="admin-stat-card">
+                <strong>{adminConsole?.stats?.registered_users_total ?? 0}</strong>
+                <span>Utenti registrati</span>
+              </div>
+              <div className="admin-stat-card">
+                <strong>{adminConsole?.stats?.saved_plants_total ?? 0}</strong>
+                <span>Piante salvate</span>
+              </div>
+              <div className="admin-stat-card">
+                <strong>{adminConsole?.stats?.external_user_images_total ?? 0}</strong>
+                <span>Immagini utente su store esterno</span>
+              </div>
             </div>
-            <div className="admin-stat-card">
-              <strong>{adminConsole?.stats?.external_user_images_total ?? 0}</strong>
-              <span>Immagini utente su store esterno</span>
+          </div>
+
+          <div className="admin-chart-block">
+            <h3>Riconoscimenti</h3>
+            <p className="admin-section-note">Volume, qualità e tempi medi del motore di riconoscimento.</p>
+            <div className="admin-stats-grid">
+              <div className="admin-stat-card">
+                <strong>{adminConsole?.recognition?.total ?? 0}</strong>
+                <span>Riconoscimenti totali</span>
+              </div>
+              <div className="admin-stat-card">
+                <strong>{adminConsole?.recognition?.guest_total ?? 0}</strong>
+                <span>Riconoscimenti guest</span>
+              </div>
+              <div className="admin-stat-card">
+                <strong>{adminConsole?.recognition?.openai_total ?? 0}</strong>
+                <span>Con supporto OpenAI</span>
+              </div>
+              <div className="admin-stat-card">
+                <strong>{adminConsole?.recognition?.with_image_total ?? 0}</strong>
+                <span>Con URL immagine salvata</span>
+              </div>
+              <div className="admin-stat-card">
+                <strong>{formatDurationMs(adminConsole?.recognition?.avg_recognition_ms)}</strong>
+                <span>Tempo medio riconoscimento</span>
+              </div>
             </div>
-            <div className="admin-stat-card">
-              <strong>{adminConsole?.recognition?.total ?? 0}</strong>
-              <span>Riconoscimenti totali</span>
-            </div>
-            <div className="admin-stat-card">
-              <strong>{adminConsole?.recognition?.guest_total ?? 0}</strong>
-              <span>Riconoscimenti guest</span>
-            </div>
-            <div className="admin-stat-card">
-              <strong>{adminConsole?.recognition?.openai_total ?? 0}</strong>
-              <span>Con supporto OpenAI</span>
-            </div>
-            <div className="admin-stat-card">
-              <strong>{adminConsole?.recognition?.with_image_total ?? 0}</strong>
-              <span>Con URL immagine salvata</span>
-            </div>
-            <div className="admin-stat-card">
-              <strong>{formatDurationMs(adminConsole?.recognition?.avg_recognition_ms)}</strong>
-              <span>Tempo medio riconoscimento</span>
-            </div>
-            <div className="admin-stat-card">
-              <strong>{adminConsole?.inventory?.catalog?.species_db_total ?? 0}</strong>
-              <span>Specie totali su DB</span>
-            </div>
-            <div className="admin-stat-card">
-              <strong>{adminConsole?.inventory?.catalog?.species_rag_total ?? 0}</strong>
-              <span>Specie totali su RAG</span>
-            </div>
-            <div className="admin-stat-card">
-              <strong>{adminConsole?.inventory?.faiss?.plantclef?.species_total ?? 0}</strong>
-              <span>PlantCLEF specie indicizzate</span>
-            </div>
-            <div className="admin-stat-card">
-              <strong>{adminConsole?.inventory?.faiss?.plantclef?.images_total ?? 0}</strong>
-              <span>PlantCLEF immagini indicizzate</span>
-            </div>
-            <div className="admin-stat-card">
-              <strong>{adminConsole?.inventory?.faiss?.leafsnap?.species_total ?? 0}</strong>
-              <span>LeafSnap specie indicizzate</span>
-            </div>
-            <div className="admin-stat-card">
-              <strong>{adminConsole?.inventory?.faiss?.leafsnap?.images_total ?? 0}</strong>
-              <span>LeafSnap immagini indicizzate</span>
+          </div>
+
+          <div className="admin-chart-block">
+            <h3>Inventario e Indici</h3>
+            <p className="admin-section-note">Copertura specie nel catalogo e disponibilità negli indici vettoriali.</p>
+            <div className="admin-stats-grid">
+              <div className="admin-stat-card">
+                <strong>{adminConsole?.inventory?.catalog?.species_db_total ?? 0}</strong>
+                <span>Specie totali su DB</span>
+              </div>
+              <div className="admin-stat-card">
+                <strong>{adminConsole?.inventory?.catalog?.species_rag_total ?? 0}</strong>
+                <span>Specie totali su RAG</span>
+              </div>
+              <div className="admin-stat-card">
+                <strong>{adminConsole?.inventory?.faiss?.plantclef?.species_total ?? 0}</strong>
+                <span>PlantCLEF specie indicizzate</span>
+              </div>
+              <div className="admin-stat-card">
+                <strong>{adminConsole?.inventory?.faiss?.plantclef?.images_total ?? 0}</strong>
+                <span>PlantCLEF immagini indicizzate</span>
+              </div>
+              <div className="admin-stat-card">
+                <strong>{adminConsole?.inventory?.faiss?.leafsnap?.species_total ?? 0}</strong>
+                <span>LeafSnap specie indicizzate</span>
+              </div>
+              <div className="admin-stat-card">
+                <strong>{adminConsole?.inventory?.faiss?.leafsnap?.images_total ?? 0}</strong>
+                <span>LeafSnap immagini indicizzate</span>
+              </div>
             </div>
           </div>
 

@@ -3,859 +3,536 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Clorofilla</title>
+  <title>Clorofilla | PWA per riconoscimento piante</title>
+  <meta name="description" content="Clorofilla: riconoscimento specie vegetali da foto, schede di cura e assistente botanico AI in una PWA." />
   <style>
+    @import url("https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Fraunces:opsz,wght@9..144,600&display=swap");
+
     :root {
-      --green: #2e7d32;
-      --light-green: #a5d6a7;
-      --bg: #f1f8f1;
-      --card: #ffffff;
-      --text: #1b1b1b;
-      --muted: #666;
-      --radius: 12px;
+      --bg-a: #1e7a56;
+      --bg-b: #cdeee0;
+      --panel: #fbfaf5;
+      --ink: #1f2b26;
+      --ink-soft: #486156;
+      --accent: #1e7a56;
+      --accent-2: #164a2f;
+      --line: rgba(22, 74, 47, 0.18);
+      --shadow: 0 18px 44px rgba(18, 66, 44, 0.16);
+      --radius-lg: 22px;
+      --radius-md: 14px;
+      --radius-sm: 10px;
     }
 
-    * { box-sizing: border-box; margin: 0; padding: 0; }
+    * {
+      box-sizing: border-box;
+    }
 
     body {
-      font-family: "Segoe UI", sans-serif;
-      background: var(--bg);
-      color: var(--text);
+      margin: 0;
       min-height: 100vh;
-      padding: 2rem 1rem;
+      font-family: "Space Grotesk", sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 15% 10%, rgba(255, 255, 255, 0.35), transparent 30%),
+        radial-gradient(circle at 90% 5%, rgba(255, 255, 255, 0.2), transparent 22%),
+        linear-gradient(140deg, var(--bg-a), var(--bg-b));
     }
 
-    header {
-      text-align: center;
-      margin-bottom: 2rem;
-    }
-
-    header h1 {
-      color: var(--green);
-      font-size: 2rem;
-    }
-
-    header p { color: var(--muted); margin-top: .4rem; }
-
-    .tabs {
-      display: flex;
-      justify-content: center;
-      gap: 1rem;
-      margin-bottom: 1.5rem;
-    }
-
-    .tab-btn {
-      padding: .55rem 1.6rem;
-      border: 2px solid var(--green);
-      border-radius: 999px;
-      background: transparent;
-      color: var(--green);
-      font-size: .95rem;
-      cursor: pointer;
-      transition: background .2s, color .2s;
-    }
-
-    .tab-btn.active, .tab-btn:hover {
-      background: var(--green);
-      color: #fff;
-    }
-
-    .panel { display: none; }
-    .panel.active { display: block; }
-
-    .card {
-      background: var(--card);
-      border-radius: var(--radius);
-      padding: 1.8rem;
-      max-width: 720px;
+    .page {
+      width: min(1240px, 96vw);
       margin: 0 auto;
-      box-shadow: 0 2px 12px rgba(0,0,0,.08);
+      padding: 2.2rem 0 2.8rem;
+      display: grid;
+      gap: 1rem;
+      animation: rise 700ms ease-out;
     }
 
-    label { display: block; font-weight: 600; margin-bottom: .5rem; }
-
-    input[type="file"],
-    input[type="text"],
-    input[type="number"],
-    select {
-      width: 100%;
-      padding: .55rem .8rem;
-      border: 1.5px solid #ccc;
-      border-radius: 8px;
-      font-size: .95rem;
-      margin-bottom: 1rem;
-      background: #fafafa;
+    .hero {
+      background: linear-gradient(150deg, #173f2d 0%, #215c40 82%);
+      border: 1px solid rgba(188, 233, 209, 0.35);
+      box-shadow: var(--shadow);
+      border-radius: var(--radius-lg);
+      color: #f4fff8;
+      padding: 1.2rem;
+      display: grid;
+      gap: 1.1rem;
     }
 
-    input:focus, select:focus {
-      outline: none;
-      border-color: var(--green);
-    }
-
-    .row { display: flex; gap: 1rem; }
-    .row > * { flex: 1; }
-
-    button.submit {
-      width: 100%;
-      padding: .7rem;
-      background: var(--green);
-      color: #fff;
-      border: none;
-      border-radius: 8px;
-      font-size: 1rem;
-      cursor: pointer;
-      transition: background .2s;
-    }
-
-    button.submit:hover { background: #1b5e20; }
-    button.submit:disabled { background: #aaa; cursor: not-allowed; }
-
-    /* Preview immagine caricata */
-    #preview-wrap {
-      margin-bottom: 1rem;
-      display: none;
-      text-align: center;
-    }
-
-    #preview-wrap img {
-      max-height: 200px;
-      border-radius: 8px;
-      box-shadow: 0 1px 6px rgba(0,0,0,.15);
-    }
-
-    /* Risultati ricerca immagine */
-    .result-list { margin-top: 1.5rem; }
-
-    .result-item {
-      display: flex;
-      justify-content: space-between;
+    .brand {
+      display: inline-flex;
       align-items: center;
-      padding: .6rem .9rem;
-      border-radius: 8px;
-      margin-bottom: .5rem;
-      background: var(--bg);
+      gap: 0.55rem;
+      width: fit-content;
+      padding: 0.38rem 0.68rem;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(197, 238, 215, 0.38);
+      font-size: 0.84rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
     }
 
-    .result-item .species {
+    .hero-highlight {
+      color: #9fe0ba;
+    }
+
+    .hero h1 {
+      margin: 0;
+      font-family: "Fraunces", serif;
+      font-size: clamp(0.9rem, 1.9vw, 1.35rem);
+      line-height: 1.08;
+      max-width: 100%;
+    }
+
+    .hero p {
+      margin: 0;
+      max-width: 100%;
+      color: rgba(241, 255, 248, 0.92);
+      line-height: 1.55;
+    }
+
+    .cta-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.72rem;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.4rem;
+      padding: 0.72rem 1.1rem;
+      border-radius: 11px;
+      text-decoration: none;
+      border: 1px solid transparent;
+      font-weight: 700;
+      transition: transform 180ms ease, box-shadow 180ms ease, background 180ms ease;
+    }
+
+    .btn:hover {
+      transform: translateY(-1px);
+    }
+
+    .btn-primary {
+      background: #f1ffe8;
+      color: #1f5e3d;
+      box-shadow: 0 8px 20px rgba(3, 42, 24, 0.22);
+    }
+
+    .btn-secondary {
+      background: transparent;
+      color: #e8fff3;
+      border-color: rgba(217, 248, 230, 0.42);
+    }
+
+    .meta {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0.5rem;
+    }
+
+    .chip {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 0.5rem 0.62rem;
+      border-radius: 999px;
+      font-size: 0.82rem;
       font-weight: 600;
-      color: #1e5f26;
-      text-decoration: underline;
+      color: #dbffe9;
+      border: 1px solid rgba(198, 241, 219, 0.3);
+      background: rgba(255, 255, 255, 0.07);
+      text-decoration: none;
       cursor: pointer;
+      transition: background 160ms ease;
     }
-    .result-item .score { color: var(--green); font-weight: 700; }
 
-    .bar-wrap { flex: 1; margin: 0 1rem; height: 8px; background: #ddd; border-radius: 4px; }
-    .bar { height: 100%; background: var(--light-green); border-radius: 4px; transition: width .5s; }
+    .chip:hover {
+      background: rgba(255, 255, 255, 0.18);
+    }
 
-    /* Info pianta */
-    .plant-header {
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-lg);
+      box-shadow: 0 12px 30px rgba(17, 54, 36, 0.09);
+      padding: 1.1rem;
+      display: grid;
+      gap: 0.85rem;
+    }
+
+    .panel h2 {
+      margin: 0;
+      font-size: 1.15rem;
+      color: var(--accent-2);
+    }
+
+    .panel p {
+      margin: 0;
+      color: var(--ink-soft);
+      line-height: 1.55;
+    }
+
+    .features {
+      display: grid;
+      gap: 0.7rem;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    }
+
+    .feature {
+      border: 1px solid var(--line);
+      border-radius: var(--radius-md);
+      background: linear-gradient(170deg, #ffffff 0%, #f2fbf5 100%);
+      padding: 0.85rem;
+      display: grid;
+      gap: 0.35rem;
+    }
+
+    .feature strong {
+      color: #1e5338;
+      font-size: 0.96rem;
+    }
+
+    .feature span {
+      color: #4c695b;
+      line-height: 1.45;
+      font-size: 0.93rem;
+    }
+
+    .howto {
+      display: grid;
+      gap: 0.65rem;
+    }
+
+    .step {
+      display: flex;
+      gap: 0.65rem;
+      align-items: flex-start;
+      padding: 0.72rem;
+      border-radius: var(--radius-md);
+      background: #f3faf5;
+      border: 1px solid rgba(30, 122, 86, 0.16);
+    }
+
+    .step-index {
+      width: 1.75rem;
+      height: 1.75rem;
+      flex-shrink: 0;
+      border-radius: 50%;
+      background: #1e7a56;
+      color: #f6fffa;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 0.87rem;
+      margin-top: 0.08rem;
+    }
+
+    .step p {
+      margin: 0;
+      color: #335646;
+      line-height: 1.5;
+    }
+
+    .sample {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 0.55rem;
+      background: #ffffff;
+      border: 1px solid rgba(21, 73, 50, 0.15);
+      border-radius: var(--radius-md);
+      padding: 0.72rem;
+    }
+
+    .sample figure {
+      margin: 0;
+      display: grid;
+      gap: 0.46rem;
+    }
+
+    .scan-wrap {
+      position: relative;
+      border-radius: var(--radius-sm);
+      overflow: hidden;
+      line-height: 0;
+    }
+
+    .sample img {
+      width: 100%;
+      max-height: 260px;
+      object-fit: cover;
+      border-radius: var(--radius-sm);
+      border: 1px solid rgba(28, 107, 76, 0.22);
+      display: block;
+    }
+
+    .scan-bar {
+      position: absolute;
+      left: 0;
+      width: 100%;
+      height: 3px;
+      background: linear-gradient(90deg,
+        transparent 0%,
+        rgba(159, 224, 186, 0.55) 20%,
+        #1e7a56 50%,
+        rgba(159, 224, 186, 0.55) 80%,
+        transparent 100%
+      );
+      box-shadow: 0 0 10px 3px rgba(30, 122, 86, 0.55);
+      animation: scan 2.4s ease-in-out infinite;
+      pointer-events: none;
+    }
+
+    @keyframes scan {
+      0%   { top: 0%; opacity: 0; }
+      5%   { opacity: 1; }
+      95%  { opacity: 1; }
+      100% { top: 100%; opacity: 0; }
+    }
+
+    .sample figcaption {
+      color: #416455;
+      font-size: 0.86rem;
+      word-break: break-all;
+    }
+
+    .footer {
+      padding: 1.4rem 1rem;
+      border-top: 1px solid rgba(22, 74, 47, 0.18);
+      margin-top: 0.4rem;
+    }
+
+    .footer-inner {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.8rem 1.4rem;
+      justify-content: space-between;
+    }
+
+    .footer-brand {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .footer-name {
+      font-family: "Fraunces", serif;
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: #173f2d;
+    }
+
+    .footer-copy {
+      margin: 0;
+      font-size: 0.84rem;
+      color: #476655;
+      flex: 1;
+      min-width: 200px;
+    }
+
+    .footer-links {
       display: flex;
       gap: 1rem;
-      flex-wrap: wrap;
-      margin-bottom: 1.2rem;
     }
 
-    .plant-header img {
-      height: 160px;
-      border-radius: 8px;
-      object-fit: cover;
-      box-shadow: 0 1px 6px rgba(0,0,0,.15);
-      flex-shrink: 0;
-    }
-
-    .plant-text p { line-height: 1.6; color: #333; margin-top: .5rem; }
-
-    .info-section-title {
-      margin-top: 1.4rem;
-      margin-bottom: .7rem;
-      color: #1e5f26;
-      font-size: 1rem;
-      font-weight: 700;
-    }
-
-    .profile-table-wrap {
-      margin-top: 1rem;
-      overflow-x: auto;
-      border: 1px solid #d8ead9;
-      border-radius: 10px;
-      background: #fcfffc;
-    }
-
-    .profile-table {
-      width: 100%;
-      border-collapse: collapse;
-      min-width: 560px;
-    }
-
-    .profile-table th,
-    .profile-table td {
-      padding: .7rem .85rem;
-      text-align: left;
-      vertical-align: top;
-      border-bottom: 1px solid #e6f1e7;
-    }
-
-    .profile-table th {
-      width: 220px;
-      color: #245f2d;
-      background: #f4faf4;
-      font-weight: 700;
-    }
-
-    .profile-table tr:last-child th,
-    .profile-table tr:last-child td {
-      border-bottom: none;
-    }
-
-    .profile-note {
-      margin-top: 1rem;
-      padding: .8rem 1rem;
-      background: #f7fbf7;
-      border: 1px solid #d8ead9;
-      border-radius: 10px;
-      color: #35563a;
-      font-size: .92rem;
-    }
-
-    .more-btn {
-      margin-top: .8rem;
-      padding: .45rem .9rem;
-      border: 1px solid var(--green);
-      background: #fff;
-      color: var(--green);
-      border-radius: 999px;
-      cursor: pointer;
+    .footer-links a {
+      font-size: 0.84rem;
       font-weight: 600;
-    }
-
-    .more-btn:hover { background: #f3faf3; }
-
-    .more-text {
-      margin-top: .8rem;
-      white-space: pre-wrap;
-      line-height: 1.6;
-      color: #2b2b2b;
-    }
-
-    .markdown-content h1,
-    .markdown-content h2,
-    .markdown-content h3 {
-      color: #1e5f26;
-      margin: .6rem 0;
-    }
-
-    .markdown-content p {
-      margin: .55rem 0;
-      line-height: 1.65;
-    }
-
-    .markdown-content ul,
-    .markdown-content ol {
-      margin: .5rem 0 .5rem 1.2rem;
-    }
-
-    .markdown-content code {
-      background: #eef6ef;
-      padding: .08rem .35rem;
-      border-radius: 4px;
-      font-size: .9em;
-    }
-
-    .plant-title { font-size: 1.4rem; font-weight: 700; color: var(--green); }
-
-    .chat-link-btn {
-      display: inline-block;
-      margin-top: 1rem;
-      margin-left: .7rem;
-      color: #fff;
-      background: var(--green);
-      border: 1px solid var(--green);
-      border-radius: 999px;
-      padding: .35rem .8rem;
-      font-size: .88rem;
-      cursor: pointer;
+      color: #1e7a56;
       text-decoration: none;
+      border-bottom: 1px solid transparent;
+      transition: border-color 160ms;
     }
 
-    .chat-link-btn:hover { background: #1b5e20; }
-
-    textarea {
-      width: 100%;
-      min-height: 96px;
-      padding: .55rem .8rem;
-      border: 1.5px solid #ccc;
-      border-radius: 8px;
-      font-size: .95rem;
-      margin-bottom: 1rem;
-      background: #fafafa;
-      resize: vertical;
-      font-family: inherit;
+    .footer-links a:hover {
+      border-color: #1e7a56;
     }
 
-    textarea:focus {
-      outline: none;
-      border-color: var(--green);
+    @media (max-width: 680px) {
+      .meta {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .page {
+        width: min(560px, 94vw);
+        padding-top: 1.25rem;
+      }
+
+      .hero,
+      .panel {
+        padding: 0.95rem;
+      }
+
+      .btn {
+        width: 100%;
+      }
+
+      .cta-row {
+        width: 100%;
+      }
     }
 
-    .chat-response {
-      margin-top: 1rem;
-      white-space: pre-wrap;
-      line-height: 1.6;
-      background: var(--bg);
-      border-radius: 10px;
-      padding: 1rem;
-      border: 1px solid #d8ead9;
-    }
-
-    .chat-meta {
-      color: var(--muted);
-      font-size: .86rem;
-      margin-top: .7rem;
-    }
-
-    .gallery {
-      display: flex;
-      gap: .6rem;
-      flex-wrap: wrap;
-      margin-top: 1rem;
-    }
-
-    .gallery img {
-      height: 130px;
-      border-radius: 8px;
-      object-fit: cover;
-      cursor: pointer;
-      transition: transform .2s;
-    }
-
-    .gallery img:hover { transform: scale(1.04); }
-
-    .spinner {
-      text-align: center;
-      padding: 2rem;
-      color: var(--muted);
-      font-size: .95rem;
-    }
-
-    .error-box {
-      background: #ffebee;
-      color: #c62828;
-      border-radius: 8px;
-      padding: .8rem 1rem;
-      margin-top: 1rem;
-      font-size: .9rem;
+    @keyframes rise {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
   </style>
 </head>
 <body>
-
-<header>
-  <h1>🌿 Clorofilla</h1>
-  <p>Riconosci piante e scopri informazioni botaniche</p>
-</header>
-
-<div class="tabs">
-  <button class="tab-btn active" data-tab="search" onclick="switchTab('search')">Ricerca per immagine</button>
-  <button class="tab-btn" data-tab="info" onclick="switchTab('info')">Info su una pianta</button>
-  <button class="tab-btn" data-tab="chat" onclick="switchTab('chat')">Chatbot cura</button>
-</div>
-
-<!-- ── TAB 1: Ricerca per immagine ── -->
-<div id="panel-search" class="panel active">
-  <div class="card">
-    <label for="img-input">Carica un'immagine</label>
-    <input type="file" id="img-input" accept="image/*" onchange="previewImage()" />
-
-    <div id="preview-wrap">
-      <img id="preview-img" src="" alt="anteprima" />
-    </div>
-
-    <div class="row">
-      <div>
-        <label for="k-input">Numero di risultati (k)</label>
-        <input type="number" id="k-input" value="5" min="1" max="50" />
+  <main class="page">
+    <section class="hero">
+      <div class="brand">
+        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 192 192" style="flex-shrink:0;border-radius:6px">
+          <defs>
+            <linearGradient id="bg" x1="0" x2="1" y1="0" y2="1">
+              <stop offset="0%" stop-color="#164a2f"/>
+              <stop offset="100%" stop-color="#1e7a56"/>
+            </linearGradient>
+          </defs>
+          <rect width="192" height="192" rx="36" fill="url(#bg)"/>
+          <path d="M97 35c26 11 40 33 40 57 0 29-18 53-46 66-4 2-8-1-8-5V61c0-18 8-30 14-26z" fill="#f4f0df"/>
+          <path d="M59 111c0-22 15-39 35-44v74c-20-5-35-17-35-30z" fill="#9fe0ba"/>
+        </svg>
+        Clorofilla App
       </div>
-    </div>
 
-    <button class="submit" id="search-btn" onclick="doSearch()">Cerca specie simili</button>
+      <h1>Riconosci una <span class="hero-highlight">pianta</span> da una <span class="hero-highlight">foto</span> e ricevi consigli di <span class="hero-highlight">cura</span> pratici.</h1>
+      <p>
+        <span class="hero-highlight" style="font-weight:700">Clorofilla</span> combina <span style="text-decoration:underline">riconoscimento immagini</span> (OpenCLIP + FAISS), schede botaniche <span class="hero-highlight">AI</span>
+        basate su knowledge base <span class="hero-highlight">RAG</span> e <span class="hero-highlight">chat</span> di supporto alla <span class="hero-highlight">cura</span> per accompagnarti nella gestione delle tue <span class="hero-highlight">piante</span>.
+      </p>
 
-    <div id="search-result"></div>
-  </div>
-</div>
-
-<!-- ── TAB 2: Info pianta ── -->
-<div id="panel-info" class="panel">
-  <div class="card">
-    <label for="plant-name">Nome della pianta</label>
-    <input type="text" id="plant-name" placeholder="es. Rosa canina" onkeydown="if(event.key==='Enter') doPlantInfo()" />
-
-    <div class="row">
-      <div>
-        <label for="lang-select">Lingua Wikipedia</label>
-        <select id="lang-select">
-          <option value="it">Italiano</option>
-          <option value="en">English</option>
-          <option value="fr">Français</option>
-          <option value="de">Deutsch</option>
-          <option value="es">Español</option>
-        </select>
+      <div class="cta-row">
+        <a class="btn btn-primary" href="/app">Prova l'App</a>
       </div>
-    </div>
 
-    <button class="submit" id="info-btn" onclick="doPlantInfo()">Cerca informazioni</button>
-
-    <div id="info-result"></div>
-  </div>
-</div>
-
-<!-- ── TAB 3: Chatbot cura piante ── -->
-<div id="panel-chat" class="panel">
-  <div class="card">
-    <label for="chat-plant-name">Nome della pianta</label>
-    <input type="text" id="chat-plant-name" placeholder="es. Rosa canina" />
-
-    <label for="chat-question">Domanda</label>
-    <textarea id="chat-question" placeholder="es. Quanta acqua devo dare in estate?"></textarea>
-
-    <div class="row">
-      <div>
-        <label for="chat-lang-select">Lingua contesto Wikipedia</label>
-        <select id="chat-lang-select">
-          <option value="it">Italiano</option>
-          <option value="en">English</option>
-          <option value="fr">Français</option>
-          <option value="de">Deutsch</option>
-          <option value="es">Español</option>
-        </select>
+      <div class="meta">
+        <a class="chip" href="#step-upload">Upload foglia ↓</a>
+        <a class="chip" href="#step-scheda">Scheda specie ↓</a>
+        <a class="chip" href="#step-chat">Chat cura piante ↓</a>
+        <a class="chip" href="#step-piante">Le tue piante ↓</a>
       </div>
-    </div>
+    </section>
 
-    <button class="submit" id="chat-btn" onclick="askPlantCareChat()">Chiedi al chatbot</button>
-    <div id="chat-result"></div>
-  </div>
-</div>
+    <section class="panel howto">
+      <h2>Come usare Clorofilla (passo passo)</h2>
 
-<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/dompurify@3.1.7/dist/purify.min.js"></script>
-<script>
-  function switchTab(tab) {
-    document.querySelectorAll('.tab-btn').forEach((b) => {
-      b.classList.toggle('active', b.dataset.tab === tab);
-    });
-    document.getElementById('panel-search').classList.toggle('active', tab === 'search');
-    document.getElementById('panel-info').classList.toggle('active', tab === 'info');
-    document.getElementById('panel-chat').classList.toggle('active', tab === 'chat');
-  }
+      <div class="step" id="step-upload">
+        <span class="step-index">1</span>
+        <p>
+          Premi <strong>Prova l'App</strong> per aprire l'app su <strong>/app</strong>.
+          Nella vista iniziale trascina un'immagine nella zona dedicata oppure premi per scegliere
+          un file dalla galleria o scattare una foto con la fotocamera. Usa una foto nitida con
+          luce naturale e soggetto centrato per ottenere i migliori risultati.
+        </p>
+      </div>
 
-  function previewImage() {
-    const file = document.getElementById('img-input').files[0];
-    if (!file) return;
-    const wrap = document.getElementById('preview-wrap');
-    const img = document.getElementById('preview-img');
-    img.src = URL.createObjectURL(file);
-    wrap.style.display = 'block';
-  }
+      <div class="step" id="step-scheda">
+        <span class="step-index">2</span>
+        <p>
+          Dopo il riconoscimento vedrai le specie candidate con punteggio di confidenza.
+          Seleziona quella che ti sembra corretta per aprire la <strong>scheda specie</strong>:
+          trovi sintesi botanica generata da <strong>AI</strong>, galleria immagini e il
+          <strong>profilo di cura</strong> con indicazioni su annaffiatura, luce, terriccio,
+          temperatura, concimazione e prevenzione parassiti.
+        </p>
+      </div>
 
-  async function doSearch() {
-    const fileInput = document.getElementById('img-input');
-    const k = parseInt(document.getElementById('k-input').value) || 5;
-    const out = document.getElementById('search-result');
-    const btn = document.getElementById('search-btn');
+      <div class="step" id="step-chat">
+        <span class="step-index">3</span>
+        <p>
+          Dalla scheda puoi aprire la <strong>chat di cura botanica</strong>: digita una domanda
+          specifica (es. &ldquo;le foglie ingialliscono, cosa faccio?&rdquo;) e ricevi una risposta
+          contestualizzata alla specie selezionata, basata sulla knowledge base <strong>RAG</strong>
+          con fallback a Wikipedia.
+        </p>
+      </div>
 
-    if (!fileInput.files.length) {
-      out.innerHTML = '<div class="error-box">Seleziona un\'immagine prima di cercare.</div>';
-      return;
-    }
+      <div class="step" id="step-piante">
+        <span class="step-index">4</span>
+        <p>
+          Con un account Google puoi salvare le piante nella sezione <strong>Le tue piante</strong>:
+          assegna un nome personalizzato, aggiungi foto e tieni traccia delle cure nel tempo.
+          La raccolta personale è sincronizzata al tuo profilo ed è accessibile da qualsiasi
+          dispositivo dopo il login.
+        </p>
+      </div>
 
-    btn.disabled = true;
-    out.innerHTML = '<div class="spinner">⏳ Ricerca in corso…</div>';
+      <aside class="sample">
+        <figure>
+          <div class="scan-wrap">
+            <img src="/images/abies_cephalonica/Abies_cephalonica_3.jpg" alt="Esempio foglia Abies cephalonica" loading="lazy" />
+            <div class="scan-bar"></div>
+          </div>
+          <figcaption>Abies cephalonica — esempio di foto adatta al riconoscimento</figcaption>
+        </figure>
+      </aside>
+    </section>
 
-    const formData = new FormData();
-    formData.append('file', fileInput.files[0]);
+    <section class="panel" id="step-google">
+      <h2>Accedi con Google e sblocca tutto</h2>
+      <p>
+        Clorofilla funziona anche senza account, ma registrandoti con Google ottieni vantaggi esclusivi:
+      </p>
+      <div class="features" style="margin-top:0.2rem">
+        <article class="feature">
+          <strong>Le tue piante salvate</strong>
+          <span>Tieni un diario personale delle piante che possiedi, con nome personalizzato e foto.</span>
+        </article>
+        <article class="feature">
+          <strong>Sincronizzazione multi-device</strong>
+          <span>La tua raccolta è legata al tuo account Google e accessibile ovunque ti colleghi.</span>
+        </article>
+        <article class="feature">
+          <strong>Foto personalizzate</strong>
+          <span>Carica foto delle tue piante reali per riconoscerle più facilmente in futuro.</span>
+        </article>
+        <article class="feature">
+          <strong>Storico cure</strong>
+          <span>Tieni traccia delle annaffiature e delle operazioni di manutenzione nel tempo.</span>
+        </article>
+      </div>
+      <div class="cta-row" style="margin-top:0.4rem">
+        <a class="btn btn-primary" href="/app" style="background:#1e7a56;color:#f1ffe8">Accedi con Google nell'App</a>
+      </div>
+    </section>
 
-    try {
-      const resp = await fetch(`/search?k=${k}`, { method: 'POST', body: formData });
-      if (!resp.ok) {
-        const err = await resp.json();
-        if (resp.status === 503) {
-          let extra = '';
-          try {
-            const stResp = await fetch('/search/status');
-            if (stResp.ok) {
-              const st = await stResp.json();
-              const mods = st.modules || {};
-              const lines = Object.keys(mods).map(k => `${k}: ${mods[k]}`);
-              extra = `<br><br><b>Diagnostica backend:</b><br>${lines.map(escHtml).join('<br>')}`;
-            }
-          } catch (_) {
-            // niente: mantieni almeno il messaggio principale
-          }
-          out.innerHTML = `<div class="error-box">${escHtml(err.detail || 'Backend immagini non disponibile.')}${extra}<br><br>Serve allowlist IT per librerie native Torch/FAISS nella cartella .venv.</div>`;
-          return;
-        }
-        out.innerHTML = `<div class="error-box">${err.detail || 'Errore sconosciuto'}</div>`;
-        return;
-      }
-      const data = await resp.json();
-      renderSearchResults(data.results, out);
-    } catch (e) {
-      out.innerHTML = `<div class="error-box">Errore di rete: ${e.message}</div>`;
-    } finally {
-      btn.disabled = false;
-    }
-  }
-
-  function renderSearchResults(results, container) {
-    if (!results.length) {
-      container.innerHTML = '<div class="error-box">Nessun risultato trovato.</div>';
-      return;
-    }
-    const maxScore = Math.max(...results.map(r => r.score));
-    const items = results.map(r => {
-      const pct = maxScore > 0 ? (r.score / maxScore * 100).toFixed(1) : 0;
-      return `
-        <div class="result-item">
-          <span class="species" onclick='openPlantInfoFromResult(${JSON.stringify(r.species)})' title="Apri informazioni su questa specie">${escHtml(r.species)}</span>
-          <div class="bar-wrap"><div class="bar" style="width:${pct}%"></div></div>
-          <span class="score">${r.score.toFixed(4)}</span>
-        </div>`;
-    }).join('');
-
-    container.innerHTML = `<div class="result-list">${items}</div>`;
-  }
-
-  function openPlantInfoFromResult(species) {
-    document.getElementById('plant-name').value = species;
-    switchTab('info');
-    doPlantInfo();
-  }
-
-  function openChatFromPlant(plantName) {
-    document.getElementById('chat-plant-name').value = plantName || '';
-    if (!document.getElementById('chat-question').value.trim()) {
-      document.getElementById('chat-question').value = 'Come posso prendermi cura di questa pianta?';
-    }
-    const infoLang = document.getElementById('lang-select').value;
-    if (infoLang) {
-      document.getElementById('chat-lang-select').value = infoLang;
-    }
-    switchTab('chat');
-  }
-
-  async function doPlantInfo() {
-    const name = document.getElementById('plant-name').value.trim();
-    const lang = document.getElementById('lang-select').value;
-    const out = document.getElementById('info-result');
-    const btn = document.getElementById('info-btn');
-
-    if (!name) {
-      out.innerHTML = '<div class="error-box">Inserisci il nome di una pianta.</div>';
-      return;
-    }
-
-    btn.disabled = true;
-    out.innerHTML = '<div class="spinner">⏳ Recupero informazioni…</div>';
-
-    try {
-      const encodedName = encodeURIComponent(name);
-      const [resp, profileResp] = await Promise.all([
-        fetch(`/plant/${encodedName}?lang=${lang}`),
-        fetch(`/plant/${encodedName}/profile`)
-      ]);
-
-      if (!resp.ok) {
-        const err = await resp.json();
-        out.innerHTML = `<div class="error-box">${err.detail || 'Errore sconosciuto'}</div>`;
-        return;
-      }
-
-      const data = await resp.json();
-      let profile = null;
-      if (profileResp.ok) {
-        profile = await profileResp.json();
-      } else if (profileResp.status !== 404) {
-        const err = await profileResp.json().catch(() => ({}));
-        out.innerHTML = `<div class="error-box">${escHtml(err.detail || 'Errore nel recupero profilo dal database.')}</div>`;
-        return;
-      }
-
-      renderPlantInfo(data, profile, out);
-    } catch (e) {
-      out.innerHTML = `<div class="error-box">Errore di rete: ${e.message}</div>`;
-    } finally {
-      btn.disabled = false;
-    }
-  }
-
-  function renderPlantInfo(data, profile, container) {
-    const imgs = [];
-    const seen = new Set();
-
-    // Priorita al campo immagini esplicito del backend
-    const apiImages = Array.isArray(data.images) ? data.images : [];
-    for (const src of apiImages) {
-      const s = String(src || '').trim();
-      if (s && !seen.has(s)) {
-        seen.add(s);
-        imgs.push(s);
-      }
-    }
-
-    // Fallback: estrai immagini da HTML o markdown dentro data.markdown
-    const markdownRaw = String(data.markdown || '');
-    const htmlImgRegex = /<img[^>]+src=["']([^"']+)["']/gi;
-    let m;
-    while ((m = htmlImgRegex.exec(markdownRaw)) !== null) {
-      const s = String(m[1] || '').trim();
-      if (s && !seen.has(s)) {
-        seen.add(s);
-        imgs.push(s);
-      }
-    }
-
-    const mdImgRegex = /!\[[^\]]*\]\(([^)\s]+)(?:\s+"[^"]*")?\)/g;
-    while ((m = mdImgRegex.exec(markdownRaw)) !== null) {
-      const s = String(m[1] || '').trim();
-      if (s && !seen.has(s)) {
-        seen.add(s);
-        imgs.push(s);
-      }
-    }
-
-    // Estrai testo puro (rimuovi tag HTML dal markdown)
-    const textOnly = (data.summary || markdownRaw
-      .replace(/<[^>]+>/g, '')
-      .replace(/^#+ .+\n?/m, '')
-      .replace(/---[\s\S]*$/, '')
-      .trim());
-
-    const markdownMain = markdownRaw
-      .replace(/<img[^>]*>/g, '')
-      .replace(/\n---[\s\S]*$/, '')
-      .trim();
-
-    const moreText = (data.extended_text || '').trim();
-    const moreId = `more-text-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
-
-    const coverImage = imgs.length
-      ? `<img src="${escHtml(imgs[0])}" alt="${escHtml(data.title)}" onerror="this.style.display='none'" />`
-      : '';
-
-    const galleryImages = imgs.slice(1);
-    const gallery = galleryImages.length
-      ? `<div class="gallery">${galleryImages.map(s => `<img src="${escHtml(s)}" alt="${escHtml(data.title)}" onerror="this.style.display='none'" />`).join('')}</div>`
-      : '';
-
-    const profileSection = renderPlantProfile(profile);
-
-    container.innerHTML = `
-      <div style="margin-top:1.5rem">
-        <div class="plant-header">
-          ${coverImage}
-          <div class="plant-title">${escHtml(data.title)}</div>
+    <footer class="footer">
+      <div class="footer-inner">
+        <div class="footer-brand">
+          <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 192 192" style="border-radius:8px">
+            <defs>
+              <linearGradient id="fbg" x1="0" x2="1" y1="0" y2="1">
+                <stop offset="0%" stop-color="#164a2f"/>
+                <stop offset="100%" stop-color="#1e7a56"/>
+              </linearGradient>
+            </defs>
+            <rect width="192" height="192" rx="36" fill="url(#fbg)"/>
+            <path d="M97 35c26 11 40 33 40 57 0 29-18 53-46 66-4 2-8-1-8-5V61c0-18 8-30 14-26z" fill="#f4f0df"/>
+            <path d="M59 111c0-22 15-39 35-44v74c-20-5-35-17-35-30z" fill="#9fe0ba"/>
+          </svg>
+          <span class="footer-name">Clorofilla</span>
         </div>
-        <div class="plant-text markdown-content">${renderMarkdown(markdownMain || textOnly)}</div>
-        ${profileSection}
-        ${gallery}
-        ${moreText ? `<button type="button" class="more-btn" onclick="toggleMore('${moreId}', this)">More</button>
-        <div id="${moreId}" class="more-text markdown-content" style="display:none;">${renderMarkdown(moreText)}</div>` : ''}
-        <button type="button" class="chat-link-btn" onclick='openChatFromPlant(${JSON.stringify(data.title)})'>💬 Apri chatbot</button>
-      </div>`;
-  }
-
-  function renderPlantProfile(profile) {
-    if (!profile) {
-      return '<div class="profile-note">Nessun dato strutturato disponibile in plants.db per questa specie.</div>';
-    }
-
-    const rows = [
-      ['Specie', profile.species_name],
-      ['Presente in RAG', profile.indexed ? 'Sì' : 'No'],
-      ['Annaffiatura (giorni)', formatProfileValue(profile.annaffiatura_gg)],
-      ['Momento annaffiatura', formatProfileValue(profile.annaffiatura_time)],
-      ['Luce', formatProfileValue(profile.luce)],
-      ['Temperatura', formatProfileValue(profile.temperatura)],
-      ['Umidità', formatProfileValue(profile.umidita)],
-      ['Altezza media', formatProfileValue(profile.altezza_media)],
-      ['Pulizia', formatProfileValue(profile.pulizia)],
-      ['Terriccio', formatProfileValue(profile.terriccio)],
-      ['Concimazione', formatProfileValue(profile.concimazione)],
-      ['Prevenzione', formatProfileValue(profile.prevenzione)],
-      ['Ultimo aggiornamento', formatProfileValue(profile.updated_at)]
-    ];
-
-    return `
-      <div class="info-section-title">Scheda strutturata dal database</div>
-      <div class="profile-table-wrap">
-        <table class="profile-table">
-          <tbody>
-            ${rows.map(([label, value]) => `<tr><th>${escHtml(label)}</th><td>${escHtml(value)}</td></tr>`).join('')}
-          </tbody>
-        </table>
-      </div>`;
-  }
-
-  function formatProfileValue(value) {
-    if (value === null || value === undefined) {
-      return '—';
-    }
-    const text = String(value).trim();
-    return text || '—';
-  }
-
-  async function askPlantCareChat() {
-    const plantName = document.getElementById('chat-plant-name').value.trim();
-    const question = document.getElementById('chat-question').value.trim();
-    const lang = document.getElementById('chat-lang-select').value;
-    const out = document.getElementById('chat-result');
-    const btn = document.getElementById('chat-btn');
-
-    if (!plantName || !question) {
-      out.innerHTML = '<div class="error-box">Inserisci nome pianta e domanda.</div>';
-      return;
-    }
-
-    btn.disabled = true;
-    out.innerHTML = '<div class="spinner">⏳ Il chatbot sta rispondendo…</div>';
-
-    try {
-      const resp = await fetch('/chat/plant-care', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ plant_name: plantName, question, lang })
-      });
-
-      const data = await resp.json();
-      if (!resp.ok) {
-        out.innerHTML = `<div class="error-box">${escHtml(data.detail || 'Errore sconosciuto')}</div>`;
-        return;
-      }
-
-      out.innerHTML = `
-        <div class="chat-response markdown-content">${renderMarkdown(data.answer || '')}</div>
-        <div class="chat-meta">Fonte: <a href="${escHtml(data.source || '#')}" target="_blank" rel="noopener">Wikipedia</a> · Modello: ${escHtml(data.model || '')}</div>
-      `;
-    } catch (e) {
-      out.innerHTML = `<div class="error-box">Errore di rete: ${escHtml(e.message)}</div>`;
-    } finally {
-      btn.disabled = false;
-    }
-  }
-
-  function toggleMore(id, btn) {
-    const el = document.getElementById(id);
-    if (!el) return;
-    const isHidden = el.style.display === 'none' || !el.style.display;
-    el.style.display = isHidden ? 'block' : 'none';
-    btn.textContent = isHidden ? 'Less' : 'More';
-  }
-
-  function escHtml(str) {
-    return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-  }
-
-  function renderMarkdown(md) {
-    const text = String(md || '').trim();
-    if (!text) return '';
-
-    if (window.marked) {
-      const rawHtml = window.marked.parse(text, {
-        gfm: true,
-        breaks: true,
-      });
-      if (window.DOMPurify) {
-        return window.DOMPurify.sanitize(rawHtml);
-      }
-      return rawHtml;
-    }
-
-    return basicMarkdownToHtml(text);
-  }
-
-  function basicMarkdownToHtml(md) {
-    const src = String(md || '').replace(/\r\n/g, '\n');
-    const lines = src.split('\n');
-    const out = [];
-    let inUl = false;
-    let inOl = false;
-
-    const closeLists = () => {
-      if (inUl) {
-        out.push('</ul>');
-        inUl = false;
-      }
-      if (inOl) {
-        out.push('</ol>');
-        inOl = false;
-      }
-    };
-
-    const inline = (value) => {
-      let s = escHtml(value);
-      s = s.replace(/`([^`]+)`/g, '<code>$1</code>');
-      s = s.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
-      s = s.replace(/\*([^*]+)\*/g, '<em>$1</em>');
-      s = s.replace(/\[([^\]]+)\]\((https?:\/\/[^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>');
-      return s;
-    };
-
-    for (const rawLine of lines) {
-      const line = rawLine.trim();
-
-      if (!line) {
-        closeLists();
-        continue;
-      }
-
-      if (line.startsWith('### ')) {
-        closeLists();
-        out.push(`<h3>${inline(line.slice(4))}</h3>`);
-        continue;
-      }
-      if (line.startsWith('## ')) {
-        closeLists();
-        out.push(`<h2>${inline(line.slice(3))}</h2>`);
-        continue;
-      }
-      if (line.startsWith('# ')) {
-        closeLists();
-        out.push(`<h1>${inline(line.slice(2))}</h1>`);
-        continue;
-      }
-
-      if (/^[-*]\s+/.test(line)) {
-        if (inOl) {
-          out.push('</ol>');
-          inOl = false;
-        }
-        if (!inUl) {
-          out.push('<ul>');
-          inUl = true;
-        }
-        out.push(`<li>${inline(line.replace(/^[-*]\s+/, ''))}</li>`);
-        continue;
-      }
-
-      if (/^\d+\.\s+/.test(line)) {
-        if (inUl) {
-          out.push('</ul>');
-          inUl = false;
-        }
-        if (!inOl) {
-          out.push('<ol>');
-          inOl = true;
-        }
-        out.push(`<li>${inline(line.replace(/^\d+\.\s+/, ''))}</li>`);
-        continue;
-      }
-
-      closeLists();
-      out.push(`<p>${inline(line)}</p>`);
-    }
-
-    closeLists();
-    return out.join('\n');
-  }
-</script>
+        <p class="footer-copy">&copy; 2026 &mdash; Assistente botanico AI. Riconoscimento specie, schede cura e chat contestuale.</p>
+        <nav class="footer-links">
+          <a href="/app">App</a>
+          <a href="/health">Stato servizio</a>
+        </nav>
+      </div>
+    </footer>
+  </main>
 </body>
 </html>
