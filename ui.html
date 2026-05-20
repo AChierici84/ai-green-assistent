@@ -363,6 +363,48 @@
       border-color: #1e7a56;
     }
 
+    .service-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.84rem;
+      font-weight: 600;
+      color: #476655;
+    }
+
+    .service-status-dot {
+      width: 0.5rem;
+      height: 0.5rem;
+      border-radius: 50%;
+      background: #999;
+      animation: pulse-idle 2s ease-in-out infinite;
+    }
+
+    .service-status-dot.ok {
+      background: #2ea858;
+      animation: pulse-ok 2s ease-in-out infinite;
+    }
+
+    .service-status-dot.error {
+      background: #d65745;
+      animation: pulse-error 1s ease-in-out infinite;
+    }
+
+    @keyframes pulse-ok {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.6; }
+    }
+
+    @keyframes pulse-error {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+
+    @keyframes pulse-idle {
+      0%, 100% { opacity: 0.7; }
+      50% { opacity: 0.4; }
+    }
+
     @media (max-width: 680px) {
       .meta {
         grid-template-columns: repeat(2, 1fr);
@@ -539,7 +581,10 @@
         <p class="footer-copy">&copy; 2026 &mdash; Assistente botanico AI. Riconoscimento specie, schede cura e chat contestuale.</p>
         <nav class="footer-links">
           <a href="/app">App</a>
-          <a href="/health">Stato servizio</a>
+          <span class="service-status">
+            <span class="service-status-dot"></span>
+            <span id="service-status-text">Controllo...</span>
+          </span>
         </nav>
       </div>
     </footer>
@@ -599,5 +644,35 @@
       });
     })();
   </script>
-</body>
-</html>
+
+  <script>
+    (function () {
+      const statusDot = document.querySelector(".service-status-dot");
+      const statusText = document.getElementById("service-status-text");
+      
+      if (!statusDot || !statusText) return;
+
+      async function checkHealth() {
+        try {
+          const response = await fetch("/health", { method: "GET" });
+          if (response.ok) {
+            const data = await response.json();
+            statusDot.classList.remove("error");
+            statusDot.classList.add("ok");
+            statusText.textContent = data.status === "ok" ? "Servizio online" : "Servizio disponibile";
+          } else {
+            statusDot.classList.remove("ok");
+            statusDot.classList.add("error");
+            statusText.textContent = "Servizio offline";
+          }
+        } catch (err) {
+          statusDot.classList.remove("ok");
+          statusDot.classList.add("error");
+          statusText.textContent = "Servizio offline";
+        }
+      }
+
+      checkHealth();
+      setInterval(checkHealth, 30000);
+    })();
+  </script>
