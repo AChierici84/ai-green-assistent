@@ -2406,7 +2406,10 @@ def pwa_manifest():
 
 @app.get("/favicon.ico")
 def pwa_favicon():
-    return _serve_pwa_file("favicon.ico", media_type="image/x-icon")
+    try:
+        return _serve_pwa_file("favicon.ico", media_type="image/x-icon")
+    except HTTPException:
+        return _serve_pwa_file("icons/favicon.svg", media_type="image/svg+xml")
 
 
 @app.get("/species/previews")

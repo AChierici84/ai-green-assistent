@@ -7,7 +7,7 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: "autoUpdate",
-      includeAssets: ["icons/icon-192.svg", "icons/icon-512.svg"],
+      includeAssets: ["icons/icon-192.svg", "icons/icon-512.svg", "icons/favicon.svg"],
       manifest: {
         name: "Clorofilla",
         short_name: "Clorofilla",

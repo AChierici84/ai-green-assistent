@@ -3,7 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Clorofilla | PWA per riconoscimento piante</title>
+  <link rel="icon" type="image/svg+xml" href="/icons/favicon.svg" />
+  <title>Clorofilla App</title>
   <meta name="description" content="Clorofilla: riconoscimento specie vegetali da foto, schede di cura e assistente botanico AI in una PWA." />
   <style>
     @import url("https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Fraunces:opsz,wght@9..144,600&display=swap");
@@ -127,6 +128,13 @@
       background: transparent;
       color: #e8fff3;
       border-color: rgba(217, 248, 230, 0.42);
+    }
+
+    .install-hint {
+      margin: 0;
+      text-align: center;
+      font-size: 0.86rem;
+      color: rgba(232, 255, 243, 0.9);
     }
 
     .meta {
@@ -417,7 +425,9 @@
 
       <div class="cta-row">
         <a class="btn btn-primary" href="/app">Prova l'App</a>
+        <button id="install-app-btn" class="btn btn-secondary" type="button" hidden>Installa App</button>
       </div>
+      <p id="install-app-hint" class="install-hint"></p>
 
       <div class="meta">
         <a class="chip" href="#step-upload">Upload foglia ↓</a>
@@ -534,5 +544,60 @@
       </div>
     </footer>
   </main>
+
+  <script>
+    (function () {
+      const installButton = document.getElementById("install-app-btn");
+      const installHint = document.getElementById("install-app-hint");
+      let deferredPrompt = null;
+
+      if (!installButton || !installHint) {
+        return;
+      }
+
+      const isStandalone = window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone === true;
+      if (isStandalone) {
+        installHint.textContent = "App gia installata su questo dispositivo.";
+        return;
+      }
+
+      const isIos = /iphone|ipad|ipod/i.test(window.navigator.userAgent || "");
+      if (isIos) {
+        installButton.hidden = false;
+        installHint.textContent = "Su iPhone: tocca Condividi e poi Aggiungi a Home.";
+      }
+
+      window.addEventListener("beforeinstallprompt", (event) => {
+        event.preventDefault();
+        deferredPrompt = event;
+        installButton.hidden = false;
+        installHint.textContent = "Installa Clorofilla App con un tap.";
+      });
+
+      installButton.addEventListener("click", async () => {
+        if (deferredPrompt) {
+          deferredPrompt.prompt();
+          try {
+            await deferredPrompt.userChoice;
+          } catch (error) {
+            console.warn("Install prompt chiuso o non completato", error);
+          }
+          deferredPrompt = null;
+          return;
+        }
+
+        if (isIos) {
+          installHint.textContent = "Apri Safari, tocca Condividi e scegli Aggiungi a Home.";
+        } else {
+          installHint.textContent = "Installazione diretta non disponibile su questo browser.";
+        }
+      });
+
+      window.addEventListener("appinstalled", () => {
+        installButton.hidden = true;
+        installHint.textContent = "Clorofilla App installata con successo.";
+      });
+    })();
+  </script>
 </body>
 </html>
