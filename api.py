@@ -25,7 +25,6 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse, JSONResponse, FileResponse
 from openai import OpenAI
 from pydantic import BaseModel, Field
-import pymysql
 
 load_dotenv()
 
@@ -71,7 +70,8 @@ MYSQL_PASSWORD = os.getenv("MYSQL_PASSWORD", "").strip() or os.getenv("DB_PASSWO
 MYSQL_DATABASE = os.getenv("MYSQL_DATABASE", "").strip()
 MYSQL_HOST = os.getenv("MYSQL_HOST", "localhost").strip() or "localhost"
 MYSQL_PORT_RAW = os.getenv("MYSQL_PORT", "").strip()
-MYSQL_ENABLED = os.getenv("MYSQL_ENABLED", "").strip().lower() in {
+MYSQL_ENABLED_RAW = os.getenv("MYSQL_ENABLED")
+MYSQL_ENABLED = (MYSQL_ENABLED_RAW or "").strip().lower() in {
     "1",
     "true",
     "yes",
@@ -84,17 +84,7 @@ MYSQL_USE_UNIX_SOCKET = os.getenv("MYSQL_USE_UNIX_SOCKET", "0").strip().lower() 
     "on",
 }
 MYSQL_UNIX_SOCKET = os.getenv("MYSQL_UNIX_SOCKET", "").strip()
-MYSQL_COMPONENTS_PRESENT = any(
-    [
-        MYSQL_USER,
-        os.getenv("MYSQL_PASSWORD", "").strip(),
-        MYSQL_DATABASE,
-        os.getenv("MYSQL_HOST", "").strip(),
-        MYSQL_PORT_RAW,
-        os.getenv("MYSQL_USE_UNIX_SOCKET", "").strip(),
-        MYSQL_UNIX_SOCKET,
-    ]
-)
+MYSQL_COMPONENTS_PRESENT = bool(MYSQL_USER and MYSQL_DATABASE)
 
 
 class _MySQLResult:
@@ -215,8 +205,10 @@ def _to_mysql_query(query: str) -> str:
 
 
 def _is_mysql_enabled() -> bool:
-    if MYSQL_ENABLED:
-        return True
+    # If explicitly configured, honor MYSQL_ENABLED strictly.
+    if MYSQL_ENABLED_RAW is not None:
+        return MYSQL_ENABLED
+    # Backward compatibility for legacy environments.
     return bool(MY_SQL_CONNECTION_STRING or MYSQL_COMPONENTS_PRESENT)
 
 
@@ -1034,8 +1026,21 @@ def get_plants_db_connection() -> Any:
     if not db_path.exists():
         raise HTTPException(status_code=503, detail="Database plants.db non disponibile.")
 
-    conn = sqlite3.connect(db_path)
-    conn.row_factory = sqlite3.Row
+    try:
+        conn = sqlite3.connect(db_path)
+        conn.row_factory = sqlite3.Row
+        # Quick sanity check to fail fast on non-SQLite files.
+        conn.execute("PRAGMA schema_version").fetchone()
+    except sqlite3.DatabaseError as exc:
+        raise HTTPException(
+            status_code=503,
+            detail=(
+                f"Il file configurato in PLANTS_SQLITE_PATH non e un database SQLite valido: {db_path}. "
+                f"Dettaglio: {exc}. "
+                "Se usi MySQL, imposta MYSQL_ENABLED=1."
+            ),
+        ) from exc
+
     try:
         conn.execute("ALTER TABLE plants ADD COLUMN image_paths TEXT")
         conn.commit()
@@ -2846,6 +2851,8 @@ def plant_profile(name: str, authorization: str | None = Header(default=None)):
         raise
     except sqlite3.Error as e:
         raise HTTPException(status_code=500, detail=f"Errore accesso plants.db: {e}")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Errore accesso database piante: {type(e).__name__}: {e}")
 
     if profile is None:
         raise HTTPException(status_code=404, detail=f"Profilo DB non trovato per '{name}'.")
