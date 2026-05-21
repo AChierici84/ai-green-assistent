@@ -154,6 +154,15 @@ Puoi impostare le variabili in `.env` (caricato automaticamente) o via shell.
 - `WIKI_USER_AGENT` (default: `clorofilla/1.0 (contact: local-dev)`)
 - `OPENAI_API_KEY` (obbligatoria per `/plant/{name}` e `/chat/plant-care`)
 - `OPENAI_MODEL` (default: `gpt-4o-mini`)
+- `MY_SQL` (opzionale; se impostata usa MySQL al posto di SQLite per il DB utente)
+- `MYSQL_ENABLED` (opzionale; se `1/true/yes/on` forza l'attivazione MySQL)
+- `MYSQL_USER` (opzionale; se impostata attiva configurazione MySQL a variabili separate)
+- `MYSQL_DATABASE` (obbligatoria con configurazione MySQL a variabili separate)
+- `MYSQL_PASSWORD` oppure `DB_PASSWORD` (password raw, senza URL encoding)
+- `MYSQL_USE_UNIX_SOCKET` (default: `0`; se `1/true/yes/on` usa socket Unix)
+- `MYSQL_UNIX_SOCKET` (obbligatoria se `MYSQL_USE_UNIX_SOCKET=1`)
+- `MYSQL_HOST` (default: `localhost`, usata se non si usa socket Unix)
+- `MYSQL_PORT` (default: `3306`, usata se non si usa socket Unix)
 - `GOOGLE_CLIENT_ID` (uno o piu client id Google OAuth separati da virgola)
 - `REQUIRE_GOOGLE_AUTH` (default: `0`; se `1/true/yes/on` richiede Bearer Google token)
 
@@ -171,7 +180,27 @@ USER_PLANTS_SQLITE_PATH=data/user_plants.db
 WIKI_USER_AGENT=clorofilla/1.0 (contact: local-dev)
 GOOGLE_CLIENT_ID=xxxxxxxxxxxx-abcdefg.apps.googleusercontent.com
 REQUIRE_GOOGLE_AUTH=0
+# MySQL TCP
+# MY_SQL=mysql://utente:password@127.0.0.1:3306/nome_db
+# MySQL Unix socket (tipico su Plesk)
+# MY_SQL=mysql://utente:password@localhost/nome_db?unix_socket=/var/lib/mysql/mysql.sock
+
+# MySQL a variabili separate (consigliato su Plesk)
+MYSQL_USER=clorousr_
+MYSQL_DATABASE=clorodb_
+DB_PASSWORD=change_me
+MYSQL_USE_UNIX_SOCKET=1
+MYSQL_UNIX_SOCKET=/var/lib/mysql/mysql.sock
+
+# Se MYSQL_USE_UNIX_SOCKET=0 usa TCP (default host/port)
+# MYSQL_HOST=127.0.0.1
+# MYSQL_PORT=3306
 ```
+
+Precedenza configurazione MySQL:
+- Se `MYSQL_ENABLED=1`, il backend entra in modalita MySQL.
+- Se almeno una variabile `MYSQL_*`/`DB_PASSWORD` e presente, viene usata la configurazione a variabili separate.
+- In assenza di variabili separate, viene usata `MY_SQL` (DSN legacy).
 
 Variabili `.env` lato PWA (`pwa-app/.env`):
 

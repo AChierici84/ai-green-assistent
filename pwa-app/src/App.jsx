@@ -1420,12 +1420,12 @@ export default function App({ googleClientIdConfigured = false }) {
               </p>
             </div>
 
-            <button type="submit" disabled={busy.search}>
-              {busy.search ? "Riconoscimento in corso..." : "Riconosci pianta"}
-            </button>
-
             <button type="button" className="btn-secondary" onClick={openCameraDialog} disabled={busy.search}>
               Scatta foto
+            </button>
+
+            <button type="submit" disabled={busy.search}>
+              {busy.search ? "Riconoscimento in corso..." : "Riconosci pianta"}
             </button>
 
             {busy.search && (

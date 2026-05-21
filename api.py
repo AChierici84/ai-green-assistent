@@ -11,7 +11,7 @@ from datetime import datetime, timedelta
 from logging.handlers import TimedRotatingFileHandler
 from pathlib import Path
 from typing import Any
-from urllib.parse import urlparse, unquote
+from urllib.parse import parse_qs, urlparse, unquote
 from uuid import uuid4
 
 import cloudinary
@@ -65,6 +65,35 @@ def _default_user_plants_db_path() -> str:
 PLANTS_SQLITE_PATH = os.getenv("PLANTS_SQLITE_PATH", _default_plants_db_path())
 USER_PLANTS_SQLITE_PATH = os.getenv("USER_PLANTS_SQLITE_PATH", _default_user_plants_db_path())
 MY_SQL_CONNECTION_STRING = os.getenv("MY_SQL", "").strip()
+MYSQL_USER = os.getenv("MYSQL_USER", "").strip()
+MYSQL_PASSWORD = os.getenv("MYSQL_PASSWORD", "").strip() or os.getenv("DB_PASSWORD", "")
+MYSQL_DATABASE = os.getenv("MYSQL_DATABASE", "").strip()
+MYSQL_HOST = os.getenv("MYSQL_HOST", "localhost").strip() or "localhost"
+MYSQL_PORT_RAW = os.getenv("MYSQL_PORT", "").strip()
+MYSQL_ENABLED = os.getenv("MYSQL_ENABLED", "").strip().lower() in {
+    "1",
+    "true",
+    "yes",
+    "on",
+}
+MYSQL_USE_UNIX_SOCKET = os.getenv("MYSQL_USE_UNIX_SOCKET", "0").strip().lower() in {
+    "1",
+    "true",
+    "yes",
+    "on",
+}
+MYSQL_UNIX_SOCKET = os.getenv("MYSQL_UNIX_SOCKET", "").strip()
+MYSQL_COMPONENTS_PRESENT = any(
+    [
+        MYSQL_USER,
+        os.getenv("MYSQL_PASSWORD", "").strip(),
+        MYSQL_DATABASE,
+        os.getenv("MYSQL_HOST", "").strip(),
+        MYSQL_PORT_RAW,
+        os.getenv("MYSQL_USE_UNIX_SOCKET", "").strip(),
+        MYSQL_UNIX_SOCKET,
+    ]
+)
 
 
 class _MySQLResult:
@@ -80,22 +109,27 @@ class _MySQLResult:
 
 
 class _MySQLCompatConnection:
-    def __init__(self, dsn: str):
+    def __init__(self, config: str | dict[str, Any]):
         pymysql_mod, dict_cursor = _load_pymysql()
         if pymysql_mod is None or dict_cursor is None:
-            raise RuntimeError("MY_SQL impostato ma pymysql non disponibile. Installa pymysql.")
+            raise RuntimeError("Configurazione MySQL impostata ma pymysql non disponibile. Installa pymysql.")
 
-        params = _parse_mysql_dsn(dsn)
-        self._conn = pymysql_mod.connect(
-            host=params["host"],
-            port=params["port"],
-            user=params["user"],
-            password=params["password"],
-            database=params["database"],
-            charset="utf8mb4",
-            autocommit=False,
-            cursorclass=dict_cursor,
-        )
+        params = _parse_mysql_dsn(config) if isinstance(config, str) else config
+        connect_kwargs: dict[str, Any] = {
+            "user": params["user"],
+            "password": params["password"],
+            "database": params["database"],
+            "charset": "utf8mb4",
+            "autocommit": False,
+            "cursorclass": dict_cursor,
+        }
+        if params.get("unix_socket"):
+            connect_kwargs["unix_socket"] = params["unix_socket"]
+        else:
+            connect_kwargs["host"] = params["host"]
+            connect_kwargs["port"] = params["port"]
+
+        self._conn = pymysql_mod.connect(**connect_kwargs)
 
     def execute(self, query: str, params: tuple | list | None = None):
         converted = _to_mysql_query(query)
@@ -135,23 +169,32 @@ class _MySQLCompatConnection:
 def _parse_mysql_dsn(dsn: str) -> dict[str, Any]:
     parsed = urlparse(dsn)
     if parsed.scheme not in {"mysql", "mysql+pymysql"}:
-        raise RuntimeError("MY_SQL non valido: usa formato mysql://user:pass@host:3306/database")
+        raise RuntimeError(
+            "MY_SQL non valido: usa mysql://user:pass@host:3306/database oppure "
+            "mysql://user:pass@localhost/database?unix_socket=/percorso/mysql.sock"
+        )
 
-    host = parsed.hostname or "localhost"
-    port = int(parsed.port or 3306)
     user = unquote(parsed.username or "")
     password = unquote(parsed.password or "")
     database = (parsed.path or "").lstrip("/")
+    query = parse_qs(parsed.query)
+    socket_values = query.get("unix_socket") or query.get("socket") or []
+    unix_socket = unquote(socket_values[0]).strip() if socket_values else ""
     if not user or not database:
         raise RuntimeError("MY_SQL non valido: user e database sono obbligatori")
 
-    return {
-        "host": host,
-        "port": port,
+    params: dict[str, Any] = {
         "user": user,
         "password": password,
         "database": database,
     }
+    if unix_socket:
+        params["unix_socket"] = unix_socket
+    else:
+        params["host"] = parsed.hostname or "localhost"
+        params["port"] = int(parsed.port or 3306)
+
+    return params
 
 
 def _load_pymysql():
@@ -171,7 +214,42 @@ def _to_mysql_query(query: str) -> str:
 
 
 def _is_mysql_enabled() -> bool:
-    return bool(MY_SQL_CONNECTION_STRING)
+    if MYSQL_ENABLED:
+        return True
+    return bool(MY_SQL_CONNECTION_STRING or MYSQL_COMPONENTS_PRESENT)
+
+
+def _parse_mysql_components_from_env() -> dict[str, Any] | None:
+    if not MYSQL_COMPONENTS_PRESENT:
+        return None
+
+    if not MYSQL_USER or not MYSQL_DATABASE:
+        raise RuntimeError(
+            "Configurazione MySQL incompleta: MYSQL_USER e MYSQL_DATABASE sono obbligatori."
+        )
+
+    params: dict[str, Any] = {
+        "user": MYSQL_USER,
+        "password": MYSQL_PASSWORD,
+        "database": MYSQL_DATABASE,
+    }
+
+    if MYSQL_USE_UNIX_SOCKET:
+        if not MYSQL_UNIX_SOCKET:
+            raise RuntimeError(
+                "MYSQL_USE_UNIX_SOCKET=1 ma MYSQL_UNIX_SOCKET non e impostata."
+            )
+        params["unix_socket"] = MYSQL_UNIX_SOCKET
+        return params
+
+    try:
+        port = int(MYSQL_PORT_RAW or 3306)
+    except ValueError as exc:
+        raise RuntimeError("MYSQL_PORT non valido: usa un numero intero") from exc
+
+    params["host"] = MYSQL_HOST
+    params["port"] = port
+    return params
 
 
 def _is_mysql_conn(conn: Any) -> bool:
@@ -1043,7 +1121,8 @@ def _migrate_user_plants_if_needed(user_conn: sqlite3.Connection) -> None:
 
 def get_user_plants_db_connection() -> sqlite3.Connection:
     if _is_mysql_enabled():
-        conn = _MySQLCompatConnection(MY_SQL_CONNECTION_STRING)
+        mysql_params = _parse_mysql_components_from_env()
+        conn = _MySQLCompatConnection(mysql_params or MY_SQL_CONNECTION_STRING)
         ensure_user_plants_table(conn)
         ensure_registered_users_table(conn)
         ensure_recognition_logs_table(conn)
