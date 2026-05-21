@@ -25,6 +25,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse, JSONResponse, FileResponse
 from openai import OpenAI
 from pydantic import BaseModel, Field
+import pymysql
 
 load_dotenv()
 
@@ -577,51 +578,8 @@ def _insert_draft_plant_if_missing(species_name: str, api_key: str) -> bool:
         if row is not None:
             return False
 
-    # Generate a basic care profile via GPT
-    profile: dict = {}
-    if api_key:
-        try:
-            client = OpenAI(api_key=api_key)
-            resp = client.chat.completions.create(
-                model=OPENAI_MODEL,
-                temperature=0,
-                response_format={"type": "json_object"},
-                messages=[
-                    {
-                        "role": "system",
-                        "content": (
-                            "Sei un botanico professionista. Usa conoscenza generale per stimare "
-                            "i campi di cura della pianta. Rispondi SOLO con JSON valido. "
-                            "Se non sei ragionevolmente sicuro, usa null."
-                        ),
-                    },
-                    {
-                        "role": "user",
-                        "content": (
-                            f"Specie: {species_name}\n\n"
-                            "Compila in JSON con queste chiavi esatte (null se incerto):\n"
-                            "annaffiatura_gg (intero o null), annaffiatura_time (mattino|sera|entrambi|null),\n"
-                            "luce, temperatura, umidita, altezza_media, pulizia, terriccio, concimazione, prevenzione."
-                        ),
-                    },
-                ],
-            )
-            data = json.loads((resp.choices[0].message.content or "{}").strip())
-            profile = {
-                "annaffiatura_gg": data.get("annaffiatura_gg") if isinstance(data.get("annaffiatura_gg"), int) else None,
-                "annaffiatura_time": data.get("annaffiatura_time"),
-                "luce": data.get("luce"),
-                "temperatura": data.get("temperatura"),
-                "umidita": data.get("umidita"),
-                "altezza_media": data.get("altezza_media"),
-                "pulizia": data.get("pulizia"),
-                "terriccio": data.get("terriccio"),
-                "concimazione": data.get("concimazione"),
-                "prevenzione": data.get("prevenzione"),
-            }
-        except Exception as exc:
-            logger.warning(f"GPT care profile generation failed for '{species_name}': {exc}")
-
+    # Keep a minimal draft payload; enrichment is handled by async build job.
+    profile: dict[str, Any] = {}
     now_iso = datetime.utcnow().isoformat()
     with get_plants_db_connection() as conn:
         conn.execute(
@@ -874,7 +832,33 @@ def get_rag_collection():
     return rag_collection
 
 
-def ensure_plant_cards_cache_table(conn: sqlite3.Connection) -> None:
+def ensure_plant_cards_cache_table(conn: Any) -> None:
+    if _is_mysql_conn(conn):
+        conn.execute(
+            """
+            CREATE TABLE IF NOT EXISTS plant_cards_cache (
+                species_name VARCHAR(255) NOT NULL,
+                lang VARCHAR(10) NOT NULL,
+                title TEXT NOT NULL,
+                common_name TEXT,
+                summary TEXT NOT NULL,
+                markdown TEXT NOT NULL,
+                images_json TEXT NOT NULL,
+                source VARCHAR(64) NOT NULL,
+                updated_at VARCHAR(40) NOT NULL,
+                PRIMARY KEY (species_name, lang)
+            )
+            """
+        )
+        try:
+            conn.execute(
+                "CREATE INDEX idx_plant_cards_cache_updated_at ON plant_cards_cache(updated_at)"
+            )
+        except Exception:
+            pass
+        conn.commit()
+        return
+
     conn.execute(
         """
         CREATE TABLE IF NOT EXISTS plant_cards_cache (
@@ -961,22 +945,60 @@ def upsert_cached_plant_card(name: str, lang: str, payload: dict[str, Any]) -> N
 
     with get_plants_db_connection() as conn:
         ensure_plant_cards_cache_table(conn)
-        conn.execute(
-            (
-                "INSERT INTO plant_cards_cache "
-                "(species_name, lang, title, common_name, summary, markdown, images_json, source, updated_at) "
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?) "
-                "ON CONFLICT(species_name, lang) DO UPDATE SET "
-                "title=excluded.title, "
-                "common_name=excluded.common_name, "
-                "summary=excluded.summary, "
-                "markdown=excluded.markdown, "
-                "images_json=excluded.images_json, "
-                "source=excluded.source, "
-                "updated_at=excluded.updated_at"
-            ),
-            (species_name, lang_code, title, common_name, summary, markdown, images_json, source, updated_at),
-        )
+        if _is_mysql_conn(conn):
+            conn.execute(
+                (
+                    "INSERT INTO plant_cards_cache "
+                    "(species_name, lang, title, common_name, summary, markdown, images_json, source, updated_at) "
+                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?) "
+                    "ON DUPLICATE KEY UPDATE "
+                    "title=VALUES(title), "
+                    "common_name=VALUES(common_name), "
+                    "summary=VALUES(summary), "
+                    "markdown=VALUES(markdown), "
+                    "images_json=VALUES(images_json), "
+                    "source=VALUES(source), "
+                    "updated_at=VALUES(updated_at)"
+                ),
+                (
+                    species_name,
+                    lang_code,
+                    title,
+                    common_name,
+                    summary,
+                    markdown,
+                    images_json,
+                    source,
+                    updated_at,
+                ),
+            )
+        else:
+            conn.execute(
+                (
+                    "INSERT INTO plant_cards_cache "
+                    "(species_name, lang, title, common_name, summary, markdown, images_json, source, updated_at) "
+                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?) "
+                    "ON CONFLICT(species_name, lang) DO UPDATE SET "
+                    "title=excluded.title, "
+                    "common_name=excluded.common_name, "
+                    "summary=excluded.summary, "
+                    "markdown=excluded.markdown, "
+                    "images_json=excluded.images_json, "
+                    "source=excluded.source, "
+                    "updated_at=excluded.updated_at"
+                ),
+                (
+                    species_name,
+                    lang_code,
+                    title,
+                    common_name,
+                    summary,
+                    markdown,
+                    images_json,
+                    source,
+                    updated_at,
+                ),
+            )
         conn.commit()
 
 
@@ -997,9 +1019,12 @@ PLANT_PROFILE_FIELDS = (
 )
 
 
-def get_plants_db_connection() -> sqlite3.Connection:
-    db_path = Path(PLANTS_SQLITE_PATH)
+def get_plants_db_connection() -> Any:
+    if _is_mysql_enabled():
+        mysql_params = _parse_mysql_components_from_env()
+        return _MySQLCompatConnection(mysql_params or MY_SQL_CONNECTION_STRING)
 
+    db_path = Path(PLANTS_SQLITE_PATH)
     if not db_path.exists():
         bundled_db = Path("data") / "plants.db"
         if bundled_db.exists() and bundled_db.resolve() != db_path.resolve():
@@ -1042,7 +1067,14 @@ def _get_species_images_from_db(species_name: str) -> list[str]:
     return [str(v).strip() for v in parsed if str(v).strip()]
 
 
-def _sqlite_table_exists(conn: sqlite3.Connection, table_name: str) -> bool:
+def _sqlite_table_exists(conn: Any, table_name: str) -> bool:
+    if _is_mysql_conn(conn):
+        row = conn.execute(
+            "SELECT 1 FROM information_schema.tables WHERE table_schema = DATABASE() AND table_name = ? LIMIT 1",
+            (table_name,),
+        ).fetchone()
+        return row is not None
+
     row = conn.execute(
         "SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = ? LIMIT 1",
         (table_name,),
@@ -2017,11 +2049,20 @@ def get_index():
 
             leafsnap_aliases: dict[str, str] = {}
             try:
-                with sqlite3.connect(PLANTS_SQLITE_PATH) as _conn:
+                with get_plants_db_connection() as _conn:
                     rows = _conn.execute(
                         "SELECT leafsnap_label, db_species_name FROM leafsnap_aliases"
                     ).fetchall()
-                    leafsnap_aliases = {r[0]: r[1] for r in rows}
+                    normalized_rows = [
+                        (
+                            r["leafsnap_label"] if hasattr(r, "keys") else r[0],
+                            r["db_species_name"] if hasattr(r, "keys") else r[1],
+                        )
+                        for r in rows
+                    ]
+                    leafsnap_aliases = {
+                        str(left): str(right) for left, right in normalized_rows if left and right
+                    }
             except Exception:
                 pass  # table may not exist yet; aliases simply won't be applied
 
