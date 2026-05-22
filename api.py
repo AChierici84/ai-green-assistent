@@ -2704,9 +2704,23 @@ def plant_info(
                             "ma i contenuti descrittivi sono ancora in preparazione."
                         )
                 else:
-                    raise HTTPException(
-                        status_code=404,
-                        detail=f"Pianta '{normalized_name}' non trovata nella RAG, in Wikipedia o nel database locale.",
+                    retrieval_mode = "db_draft"
+                    rag_used = False
+                    title = normalized_name
+                    common_name = ""
+                    image_paths = []
+                    try:
+                        _insert_draft_plant_if_missing(title, api_key)
+                    except Exception as draft_exc:
+                        logger.warning(
+                            "Impossibile inserire draft per '%s': %s",
+                            title,
+                            draft_exc,
+                        )
+                    _ensure_species_build_job(title)
+                    extract = (
+                        "Specie non presente in RAG/Wikipedia/catalogo locale: "
+                        "ho creato una scheda bozza e avviato la costruzione automatica dei contenuti."
                     )
         else:
             retrieval_mode = "rag"
