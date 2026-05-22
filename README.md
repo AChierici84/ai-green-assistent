@@ -60,7 +60,8 @@ Passi:
   - `OPENAI_MODEL`
   - `REQUIRE_GOOGLE_AUTH` (consigliato `1` in produzione)
   - `RAG_DB_PATH` (default `data/plant_rag`)
-  - `PLANTS_SQLITE_PATH` (default `data/plants.db`)
+  - `MYSQL_USER`, `MYSQL_DATABASE`, `DB_PASSWORD`
+  - `MYSQL_USE_UNIX_SOCKET` + `MYSQL_UNIX_SOCKET` (se usi socket)
 5. Avvia il build dello Space.
 
 Note operative:
@@ -149,15 +150,19 @@ Puoi impostare le variabili in `.env` (caricato automaticamente) o via shell.
 - `LEAFSNAP_CACHE_PATH` (default: `data/leafsnap_cache.pt`, oppure `/data/greenassistent-assets/...` su Spaces con persistent storage)
 - `HF_ASSETS_DATASET_REPO` (default: `AChierici84/GreenAssistent-assets`)
 - `RAG_DB_PATH` (default: `data/plant_rag`)
-- `PLANTS_SQLITE_PATH` (default: `data/plants.db`)
-- `USER_PLANTS_SQLITE_PATH` (default: `data/user_plants.db`)
 - `WIKI_USER_AGENT` (default: `clorofilla/1.0 (contact: local-dev)`)
-- `OPENAI_API_KEY` (obbligatoria per `/plant/{name}` e `/chat/plant-care`)
+- `OPENAI_API_KEY` (obbligatoria per `/chat/plant-care`; opzionale per `/plant/{name}`)
 - `OPENAI_MODEL` (default: `gpt-4o-mini`)
-- `MY_SQL` (opzionale; se impostata usa MySQL al posto di SQLite per il DB utente)
+- `OPENAI_VISION_MODEL` (default: `gpt-4o`, usato per fallback visivo su `/search`)
+- `PWA_DIST_DIR` (default: `pwa-app/dist`)
+- `PLANT_CARD_CACHE_ENABLED` (default: `1`)
+- `FAISS_CONFIDENCE_THRESHOLD` (default: `0.82`)
+- `FAISS_AMBIGUITY_MARGIN` (default: `0.015`)
+- `RRF_AMBIGUITY_MARGIN` (default: `0.0025`)
+- `FORCE_OPENAI_FALLBACK` (default: `0`)
 - `MYSQL_ENABLED` (opzionale; se `1/true/yes/on` forza l'attivazione MySQL)
-- `MYSQL_USER` (opzionale; se impostata attiva configurazione MySQL a variabili separate)
-- `MYSQL_DATABASE` (obbligatoria con configurazione MySQL a variabili separate)
+- `MYSQL_USER` (richiesta per la connessione MySQL)
+- `MYSQL_DATABASE` (richiesta per la connessione MySQL)
 - `MYSQL_PASSWORD` oppure `DB_PASSWORD` (password raw, senza URL encoding)
 - `MYSQL_USE_UNIX_SOCKET` (default: `0`; se `1/true/yes/on` usa socket Unix)
 - `MYSQL_UNIX_SOCKET` (obbligatoria se `MYSQL_USE_UNIX_SOCKET=1`)
@@ -165,6 +170,11 @@ Puoi impostare le variabili in `.env` (caricato automaticamente) o via shell.
 - `MYSQL_PORT` (default: `3306`, usata se non si usa socket Unix)
 - `GOOGLE_CLIENT_ID` (uno o piu client id Google OAuth separati da virgola)
 - `REQUIRE_GOOGLE_AUTH` (default: `0`; se `1/true/yes/on` richiede Bearer Google token)
+- `ADMIN_USERS` (email admin separate da virgola per endpoint amministrativi)
+- `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET` (upload foto utente)
+- `LOG_LEVEL` (default: `INFO`)
+- `LOG_DIR` (default: `logs`)
+- `LOG_FILE` (default: `api.log`)
 
 Esempio `.env`:
 
@@ -175,16 +185,9 @@ PLANCLEF_INDEX_PATH=data/planclef.faiss
 PLANCLEF_CACHE_PATH=data/planclef_cache.pt
 PLANCLEF_MODEL_NAME=ViT-B-32
 RAG_DB_PATH=data/plant_rag
-PLANTS_SQLITE_PATH=data/plants.db
-USER_PLANTS_SQLITE_PATH=data/user_plants.db
 WIKI_USER_AGENT=clorofilla/1.0 (contact: local-dev)
 GOOGLE_CLIENT_ID=xxxxxxxxxxxx-abcdefg.apps.googleusercontent.com
 REQUIRE_GOOGLE_AUTH=0
-# MySQL TCP
-# MY_SQL=mysql://utente:password@127.0.0.1:3306/nome_db
-# MySQL Unix socket (tipico su Plesk)
-# MY_SQL=mysql://utente:password@localhost/nome_db?unix_socket=/var/lib/mysql/mysql.sock
-
 # MySQL a variabili separate (consigliato su Plesk)
 MYSQL_USER=clorousr_
 MYSQL_DATABASE=clorodb_
@@ -192,15 +195,34 @@ DB_PASSWORD=change_me
 MYSQL_USE_UNIX_SOCKET=1
 MYSQL_UNIX_SOCKET=/var/lib/mysql/mysql.sock
 
+# Admin console (opzionale)
+ADMIN_USERS=admin@example.com
+
+# Logging (opzionale)
+LOG_LEVEL=INFO
+LOG_DIR=logs
+LOG_FILE=api.log
+
+# Ricerca/fallback GPT (opzionale)
+FAISS_CONFIDENCE_THRESHOLD=0.82
+FAISS_AMBIGUITY_MARGIN=0.015
+RRF_AMBIGUITY_MARGIN=0.0025
+FORCE_OPENAI_FALLBACK=0
+OPENAI_VISION_MODEL=gpt-4o
+
+# Cache schede e percorso build PWA (opzionale)
+PLANT_CARD_CACHE_ENABLED=1
+PWA_DIST_DIR=pwa-app/dist
+
 # Se MYSQL_USE_UNIX_SOCKET=0 usa TCP (default host/port)
 # MYSQL_HOST=127.0.0.1
 # MYSQL_PORT=3306
 ```
 
-Precedenza configurazione MySQL:
-- Se `MYSQL_ENABLED=1`, il backend entra in modalita MySQL.
-- Se almeno una variabile `MYSQL_*`/`DB_PASSWORD` e presente, viene usata la configurazione a variabili separate.
-- In assenza di variabili separate, viene usata `MY_SQL` (DSN legacy).
+Configurazione MySQL nel backend (post-refactor):
+- Connessione gestita tramite variabili `MYSQL_*`.
+- Se `MYSQL_ENABLED` non e impostata, la presenza di `MYSQL_USER` + `MYSQL_DATABASE` abilita automaticamente MySQL.
+- Con `MYSQL_ENABLED=1`, MySQL diventa obbligatoria e il backend risponde `503` se la configurazione e incompleta.
 
 Variabili `.env` lato PWA (`pwa-app/.env`):
 
@@ -216,6 +238,9 @@ Nota autenticazione:
 - endpoint sempre autenticati: `POST /user/plants`, `GET /user/plants`
 
 ## Build database SQLite piante
+
+Nota: questa pipeline genera/arricchisce un DB SQLite locale utile per ingest e manutenzione dati.
+La API runtime post-refactor usa connessione MySQL configurata via variabili `MYSQL_*`.
 
 Per creare un database SQLite con tabella `plants`, campo `indexed` (0/1) e campi di cura estratti da RAG + OpenAI:
 
@@ -264,172 +289,95 @@ Con `--external-sources` (attivo di default), lo script prova anche a integrare 
 Infine usa OpenAI come normalizzatore finale dei dati aggregati (RAG + fonti esterne) verso il JSON strutturato del DB.
 
 ## Endpoint API
+La API e stata rifattorizzata in servizi separati (`app_config.py`, `data_storage.py`, `google_auth.py`, `species.py`) mantenendo `api.py` come orchestratore dei route handler.
 
-### 1) Health
+### Endpoint principali
 
-- Metodo: `GET`
-- Path: `/health`
+- `GET /health` - stato servizio + disponibilita backend ricerca
+- `GET /search/status` - diagnostica moduli (`torch/faiss/open_clip`) e file indice/cache
+- `GET /app-config` - configurazione pubblica frontend (`google_client_id`, `require_google_auth`)
+- `POST /search` - riconoscimento immagine con fallback GPT vision quando il match FAISS e ambiguo
+- `GET /plant/{name}` - scheda pianta da RAG, fallback Wikipedia, fallback bozza DB
+- `GET /plant/{name}/profile` - profilo strutturato dal DB (`plants`)
+- `POST /chat/plant-care` - risposta OpenAI con contesto RAG/Wikipedia + profilo DB
+- `GET /species/previews` - URL preview immagini per specie
+- `GET /species/common-names` - nomi comuni da metadati RAG
+- `GET /species/{name}/build-status` - stato build asincrona specie bozza
+- `GET /images/{full_path}` - serving immagini locali sotto `data/images`
 
-Esempio risposta:
+### Endpoint autenticazione e utente
 
-```json
-{
-  "status": "ok",
-  "model": "ViT-B-32",
-  "search_backend_ready": true
-}
-```
+- `POST /auth/google` - valida token Google e registra utente se nuovo
+- `POST /user/plants` - salva una pianta utente (auth richiesta)
+- `GET /user/plants` - elenco piante utente (auth richiesta)
+- `DELETE /user/plants/{plant_id}` - elimina pianta utente (auth richiesta)
+- `PATCH /user/plants/{plant_id}/first-watering-date` - aggiorna prima annaffiatura (auth richiesta)
+- `POST /user/plants/{plant_id}/photo` - upload foto su Cloudinary (auth richiesta)
+- `POST /recognitions/log` - log riconoscimento (guest o utente autenticato)
 
-### 2) Stato backend ricerca immagine
+### Endpoint amministrativi
 
-- Metodo: `GET`
-- Path: `/search/status`
+- `GET /admin/console` - dashboard admin con statistiche utenti, riconoscimenti e inventario
+- `GET /debug/routes` - elenco route registrate
 
-Restituisce diagnostica modulo/file (`torch`, `faiss`, `open_clip`, presenza index/cache).
+### Endpoint PWA/static
 
-### 3) Ricerca immagini simili
+- `GET /` - landing page classica (`ui.html`)
+- `GET /app` e `GET /app/` - PWA React buildata (`pwa-app/dist/index.html`)
+- `GET /sw.js`, `GET /registerSW.js`, `GET /manifest.webmanifest`, `GET /favicon.ico`
 
-- Metodo: `POST`
-- Path: `/search`
-- Query:
-  - `k` (default `5`, min `1`, max `50`)
-- Body: `multipart/form-data` con `file=<immagine>`
-
-Esempio:
-
-```bash
-curl -X POST "http://localhost:8000/search?k=5" -F "file=@foto_pianta.jpg"
-```
-
-Esempio risposta:
+Esempio risposta aggiornata di `POST /search`:
 
 ```json
 {
   "results": [
-    {"species": "Rosa canina", "score": 0.9212},
-    {"species": "Prunus spinosa", "score": 0.8731}
-  ]
+    {
+      "species": "Rosa canina",
+      "score": 0.9212,
+      "is_draft": false,
+      "build_status": {
+        "species": "Rosa canina",
+        "status": "completed"
+      }
+    }
+  ],
+  "gpt_fallback_used": false,
+  "recognition_ms": 842
 }
 ```
 
-### 4) Scheda pianta (RAG + OpenAI, fallback Wikipedia)
-
-- Metodo: `GET`
-- Path: `/plant/{name}`
-- Query:
-  - `lang` (default `it`, usata nel fallback Wikipedia)
-
-Esempio:
-
-```bash
-curl "http://localhost:8000/plant/Rosa%20canina?lang=it"
-```
-
-Esempio risposta:
-
-```json
-{
-  "title": "Rosa canina",
-  "common_name": "Rosa canina",
-  "markdown": "# Rosa canina\n...",
-  "summary": "...",
-  "images": ["/images/images/rosa_canina/xxx.jpg"],
-  "source": "rag"
-}
-```
-
-### 5) Profilo strutturato da plants.db
-
-- Metodo: `GET`
-- Path: `/plant/{name}/profile`
-
-Restituisce i campi salvati nel database SQLite `plants.db` per la specie richiesta.
-
-Esempio:
-
-```bash
-curl "http://localhost:8000/plant/Rosa%20canina/profile"
-```
-
-Esempio risposta:
-
-```json
-{
-  "species_name": "Rosa canina",
-  "indexed": true,
-  "annaffiatura_gg": 4,
-  "annaffiatura_time": "mattino",
-  "luce": "piena luce",
-  "temperatura": "temperata",
-  "umidita": "media",
-  "altezza_media": "2-3 m",
-  "pulizia": "rimuovere foglie secche",
-  "terriccio": "ben drenato",
-  "concimazione": "primavera",
-  "prevenzione": "controllare afidi e oidio",
-  "updated_at": "2026-04-29T10:03:16.214041+00:00"
-}
-```
-
-### 6) Chatbot cura pianta
-
-- Metodo: `POST`
-- Path: `/chat/plant-care`
-- Body JSON:
-
-```json
-{
-  "plant_name": "Rosa canina",
-  "question": "Ogni quanto devo annaffiarla in primavera?",
-  "lang": "it"
-}
-```
-
-Esempio risposta:
-
-```json
-{
-  "plant": "Rosa canina",
-  "common_name": "",
-  "question": "Ogni quanto devo annaffiarla in primavera?",
-  "answer": "...",
-  "source": "RAG",
-  "source_url": "",
-  "model": "gpt-4o-mini"
-}
-```
-
-### 6) Servizio immagini locali
-
-- Metodo: `GET`
-- Path: `/images/{full_path}`
-
-Serve le immagini presenti sotto `data/images`.
-
-Nota: `/plant/{name}` accetta anche URL remoti salvati in `image_paths`; il servizio locale resta utile solo se mantieni una cache su disco.
+`GET /plant/{name}` usa cache tabella `plant_cards_cache` (se `PLANT_CARD_CACHE_ENABLED=1`) e include `build_status` nella risposta.
 
 ## UI
 
-La UI servita da `/` include tre tab:
-- Ricerca per immagine
-- Info su una pianta
-- Chatbot cura
+- `GET /` serve la landing classica (`ui.html`).
+- La UI principale e la PWA React servita su `GET /app`.
+- In sviluppo frontend separato: `cd pwa-app ; npm run dev` su `http://localhost:5173`.
 
 ## Note operative
 
 - Al primo avvio il caricamento del modello puo richiedere tempo.
 - Se policy aziendali bloccano `pip.exe`, usa `python -m pip ...`.
 - Se Windows App Control blocca librerie native (`torch`, `faiss`), `/search` puo rispondere `503`.
-- Gli endpoint che usano OpenAI richiedono `OPENAI_API_KEY` valida.
+- `/chat/plant-care` richiede `OPENAI_API_KEY` valida.
+- `/plant/{name}` funziona anche senza key OpenAI (riassunto locale ridotto), ma con qualita inferiore.
 
-## Struttura progetto (sintesi)
+## Struttura progetto (post-refactor)
 
 ```text
 ai-green-assistent/
   api.py
+  app_config.py
+  api_logging.py
+  data_storage.py
+  db_config.py
+  google_auth.py
+  species.py
+  openai_gpt.py
   build_plant_rag.py
   plentclef.py
   ui.html
+  pwa-app/
   requirements.txt
   unique_species_labels.csv
   data/
