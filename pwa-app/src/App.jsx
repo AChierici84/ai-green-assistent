@@ -1043,7 +1043,7 @@ export default function App({ googleClientIdConfigured = false }) {
 
     const startToken = formatDateTimeGcal(startDate);
     const endToken = formatDateTimeGcal(endDate);
-    const recur = `RRULE:FREQ=DAILY;INTERVAL=${wateringPlan.intervalDays};COUNT=${wateringPlan.occurrences}`;
+    const recur = `RRULE:FREQ=DAILY;INTERVAL=${wateringPlan.intervalDays}`;
 
     const params = new URLSearchParams({
       action: "TEMPLATE",

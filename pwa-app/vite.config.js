@@ -9,13 +9,15 @@ export default defineConfig({
       registerType: "autoUpdate",
       includeAssets: ["icons/icon-192.svg", "icons/icon-512.svg", "icons/favicon.svg"],
       manifest: {
+        id: "/app/",
         name: "Clorofilla",
         short_name: "Clorofilla",
         description: "Riconoscimento piante e consigli di cura",
         theme_color: "#1e7a56",
         background_color: "#f2efe6",
         display: "standalone",
-        start_url: "/",
+        start_url: "/app/",
+        scope: "/app/",
         icons: [
           {
             src: "icons/icon-192.svg",
