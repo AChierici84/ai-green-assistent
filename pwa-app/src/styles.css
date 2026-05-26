@@ -987,6 +987,17 @@ pre {
   color: #38654f;
 }
 
+.admin-build-form {
+  display: grid;
+  grid-template-columns: minmax(220px, 1fr) auto auto;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.admin-build-form input[type="text"] {
+  margin: 0;
+}
+
 .admin-filter-row {
   display: flex;
   align-items: center;
@@ -1372,6 +1383,10 @@ pre {
 
   .admin-column-track {
     height: 96px;
+  }
+
+  .admin-build-form {
+    grid-template-columns: 1fr;
   }
 
   .watering-date-editor {

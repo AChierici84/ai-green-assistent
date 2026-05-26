@@ -322,6 +322,37 @@ class SpeciesService:
         thread.start()
         return self._species_build_status(species_name)
 
+    def trigger_species_build(self, species_name: str, force_rebuild: bool = False) -> dict[str, Any]:
+        normalized = str(species_name or "").strip()
+        if not normalized:
+            raise HTTPException(status_code=400, detail="Nome specie obbligatorio.")
+
+        current = self._species_build_status(normalized)
+        if current.get("status") in {"queued", "running"}:
+            return current
+
+        if force_rebuild:
+            self._set_species_build_job(
+                normalized,
+                species=normalized,
+                status="queued",
+                started_at=None,
+                finished_at=None,
+                error=None,
+                result=None,
+            )
+
+            thread = threading.Thread(
+                target=self._run_species_build_job,
+                args=(normalized,),
+                daemon=True,
+                name=f"species-rebuild-{normalized[:24]}",
+            )
+            thread.start()
+            return self._species_build_status(normalized)
+
+        return self._ensure_species_build_job(normalized)
+
     def _species_to_folder_name(self, species_name: str) -> str:
         return re.sub(r"[^a-z0-9]+", "_", str(species_name or "").lower()).strip("_")
 

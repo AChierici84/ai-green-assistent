@@ -171,7 +171,7 @@ Puoi impostare le variabili in `.env` (caricato automaticamente) o via shell.
 - `GOOGLE_CLIENT_ID` (uno o piu client id Google OAuth separati da virgola)
 - `REQUIRE_GOOGLE_AUTH` (default: `0`; se `1/true/yes/on` richiede Bearer Google token)
 - `ADMIN_USERS` (email admin separate da virgola per endpoint amministrativi)
-- `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET` (upload foto utente)
+- `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET` (fallback upload foto utente)
 - `LOG_LEVEL` (default: `INFO`)
 - `LOG_DIR` (default: `logs`)
 - `LOG_FILE` (default: `api.log`)
@@ -312,12 +312,17 @@ La API e stata rifattorizzata in servizi separati (`app_config.py`, `data_storag
 - `GET /user/plants` - elenco piante utente (auth richiesta)
 - `DELETE /user/plants/{plant_id}` - elimina pianta utente (auth richiesta)
 - `PATCH /user/plants/{plant_id}/first-watering-date` - aggiorna prima annaffiatura (auth richiesta)
-- `POST /user/plants/{plant_id}/photo` - upload foto su Cloudinary (auth richiesta)
+- `POST /user/plants/{plant_id}/photo` - upload foto su Google Drive utente con fallback Cloudinary (auth richiesta)
 - `POST /recognitions/log` - log riconoscimento (guest o utente autenticato)
+
+Per salvare le foto nel Drive del singolo utente, il frontend invia anche l'header `X-Google-Access-Token`
+ottenuto con scope OAuth `https://www.googleapis.com/auth/drive.file`. Se manca o fallisce l'upload Drive,
+il backend tenta automaticamente Cloudinary (se configurato).
 
 ### Endpoint amministrativi
 
 - `GET /admin/console` - dashboard admin con statistiche utenti, riconoscimenti e inventario
+- `POST /admin/species/build` - avvia build/rebuild asincrona per una specie (auth admin richiesta)
 - `GET /debug/routes` - elenco route registrate
 
 ### Endpoint PWA/static

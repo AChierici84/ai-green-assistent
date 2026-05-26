@@ -340,20 +340,28 @@ def add_to_faiss(
     index_path: Path = DEFAULT_INDEX_PATH,
     cache_path: Path = DEFAULT_CACHE_PATH,
 ) -> dict:
-    from build_plants_sqlite import (
-        SQLITE_DB_PATH,
-        init_db,
-    )
+    # --- DB setup: support MySQL if enabled ---
     import chromadb
-    
+    from db_config import load_mysql_config, is_mysql_enabled
+    from data_storage import DataStorage
+    from build_plants_sqlite import SQLITE_DB_PATH, init_db
+    import sqlite3
+
+    mysql_config = load_mysql_config()
+    use_mysql = is_mysql_enabled(mysql_config)
+    data_storage = None
+    if use_mysql:
+        # Dummy format_datetime_display for CLI
+        data_storage = DataStorage(mysql_config, plant_card_cache_enabled=False, format_datetime_display=lambda x: x)
+
     # Check what's already in the system
     cache = _load_cache(cache_path)
     cache_labels = cache.get("labels", [])
     species_in_faiss = species_name in cache_labels
-    
+
     # Load imports for RAG/DB checks
     from build_plant_rag import COLLECTION_NAME, RAG_DIR
-    
+
     rag_client = chromadb.PersistentClient(path=str(RAG_DIR))
     try:
         rag_collection = rag_client.get_collection(name=COLLECTION_NAME)
@@ -364,14 +372,19 @@ def add_to_faiss(
         species_in_rag = bool(rag_results.get("ids"))
     except Exception:
         species_in_rag = False
-    
-    with sqlite3.connect(SQLITE_DB_PATH) as conn:
-        init_db(conn)
-        db_row = conn.execute(
-            "SELECT indexed FROM plants WHERE species_name = ?",
-            (species_name,),
-        ).fetchone()
-        species_in_db = bool(db_row and db_row[0])
+
+    # --- Check if species already in DB (MySQL or SQLite) ---
+    if use_mysql:
+        profile_row = data_storage.get_plant_profile_from_db(species_name)
+        species_in_db = bool(profile_row and profile_row.get("indexed"))
+    else:
+        with sqlite3.connect(SQLITE_DB_PATH) as conn:
+            init_db(conn)
+            db_row = conn.execute(
+                "SELECT indexed FROM plants WHERE species_name = ?",
+                (species_name,),
+            ).fetchone()
+            species_in_db = bool(db_row and db_row[0])
     
     # Step 1: FAISS + cache (skip if already present)
     before = None
@@ -485,34 +498,38 @@ def add_to_faiss(
                 rag_collection.upsert(ids=ids, documents=chunks, metadatas=metadatas)
                 print(f"Added {len(chunks)} chunks to RAG for {species_name} ({lang}:{rag_title})")
 
-    # Step 3: Sync plants.db: indexed=1 and enrich missing profile data
+    # Step 3: Sync DB (MySQL o SQLite): indexed=1 e arricchimento profilo
+    # --- Estrazione immagini Wikipedia ---
+    # image_urls è già calcolato nella fase precedente (usato per FAISS)
+    # used_urls contiene quelle effettivamente embeddate
+    image_paths_json = json.dumps(used_urls or image_urls or [], ensure_ascii=False)
     api_key = os.getenv("OPENAI_API_KEY", "").strip()
+    from openai import OpenAI
     openai_client = OpenAI(api_key=api_key) if api_key else None
-    
+
     profile = None
+    backend_label = "MySQL" if use_mysql else "plants.db"
+    # Lettura profilo esistente
     if species_in_db:
-        print(f"[update] {species_name}: already in plants.db, filling missing fields only")
-        # Load current profile from DB to see what's missing
-        with sqlite3.connect(SQLITE_DB_PATH) as conn:
-            row = conn.execute(
-                """SELECT annaffiatura_gg, annaffiatura_time, luce, temperatura, umidita, 
-                          altezza_media, pulizia, terriccio, concimazione, prevenzione 
-                   FROM plants WHERE species_name = ?""",
-                (species_name,),
-            ).fetchone()
-        
-        existing_profile = {}
-        if row:
-            keys = ("annaffiatura_gg", "annaffiatura_time", "luce", "temperatura", "umidita",
-                   "altezza_media", "pulizia", "terriccio", "concimazione", "prevenzione")
-            existing_profile = {k: v for k, v in zip(keys, row)}
-        
-        # Only try to fill missing fields if OpenAI client available
+        print(f"[update] {species_name}: already in {backend_label}, filling missing fields only")
+        if use_mysql:
+            existing_profile = data_storage.get_plant_profile_from_db(species_name) or {}
+        else:
+            with sqlite3.connect(SQLITE_DB_PATH) as conn:
+                row = conn.execute(
+                    """SELECT annaffiatura_gg, annaffiatura_time, luce, temperatura, umidita, \
+                              altezza_media, pulizia, terriccio, concimazione, prevenzione \
+                       FROM plants WHERE species_name = ?""",
+                    (species_name,),
+                ).fetchone()
+                keys = ("annaffiatura_gg", "annaffiatura_time", "luce", "temperatura", "umidita",
+                        "altezza_media", "pulizia", "terriccio", "concimazione", "prevenzione")
+                existing_profile = {k: v for k, v in zip(keys, row)} if row else {}
+        # Solo se OpenAI disponibile e ci sono campi mancanti
         if openai_client and any(v is None for v in existing_profile.values()):
             rag_collection_for_context = get_rag_collection()
             rag_context = get_rag_context(rag_collection_for_context, species_name)
             external_sources = fetch_external_sources(species_name)
-            
             fallback_profile = extract_plant_profile_generic(
                 openai_client,
                 DEFAULT_MODEL,
@@ -532,7 +549,7 @@ def add_to_faiss(
         else:
             profile = existing_profile
     else:
-        print(f"[new] {species_name}: adding to plants.db with enrichment")
+        print(f"[new] {species_name}: adding to {backend_label} with enrichment")
         rag_collection_for_context = get_rag_collection()
         rag_context = get_rag_context(rag_collection_for_context, species_name)
         external_sources = fetch_external_sources(species_name)
@@ -575,11 +592,46 @@ def add_to_faiss(
                 )
                 profile = merge_missing_fields(profile, fallback_profile)
 
-    with sqlite3.connect(SQLITE_DB_PATH) as conn:
-        init_db(conn)
-        upsert_plant(conn, species_name=species_name, indexed=True, profile=profile)
-        conn.commit()
-    
+    # Scrittura su DB
+    if use_mysql:
+        # upsert su MySQL
+        now_iso = __import__('datetime').datetime.utcnow().replace(microsecond=0).isoformat() + "Z"
+        fields = [
+            "species_name", "indexed", "image_paths", "annaffiatura_gg", "annaffiatura_time", "luce", "temperatura",
+            "umidita", "altezza_media", "pulizia", "terriccio", "concimazione", "prevenzione", "updated_at"
+        ]
+        values = [
+            species_name,
+            1,
+            image_paths_json,
+            profile.get("annaffiatura_gg") if profile else None,
+            profile.get("annaffiatura_time") if profile else None,
+            profile.get("luce") if profile else None,
+            profile.get("temperatura") if profile else None,
+            profile.get("umidita") if profile else None,
+            profile.get("altezza_media") if profile else None,
+            profile.get("pulizia") if profile else None,
+            profile.get("terriccio") if profile else None,
+            profile.get("concimazione") if profile else None,
+            profile.get("prevenzione") if profile else None,
+            now_iso,
+        ]
+        query = (
+            "INSERT INTO plants (" + ", ".join(fields) + ") "
+            "VALUES (" + ", ".join(["%s"] * len(fields)) + ") "
+            "ON DUPLICATE KEY UPDATE "
+            + ", ".join([f"{f}=VALUES({f})" for f in fields[1:]])
+        )
+        with data_storage.get_plants_db_connection() as conn:
+            conn.execute(query, tuple(values))
+            conn.commit()
+    else:
+        with sqlite3.connect(SQLITE_DB_PATH) as conn:
+            init_db(conn)
+            from build_plants_sqlite import upsert_plant
+            upsert_plant(conn, species_name=species_name, indexed=True, profile=profile, image_paths=image_paths_json)
+            conn.commit()
+
     if before is None:
         before = "skipped"
     if after is None:

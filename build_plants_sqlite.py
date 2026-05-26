@@ -446,9 +446,18 @@ def main() -> None:
     if not species:
         raise RuntimeError("Nessuna specie trovata nel CSV.")
 
-    SQLITE_DB_PATH.parent.mkdir(parents=True, exist_ok=True)
-    conn = sqlite3.connect(SQLITE_DB_PATH)
-    init_db(conn)
+    # --- DB setup: support MySQL if enabled ---
+    from db_config import load_mysql_config, is_mysql_enabled
+    from data_storage import DataStorage
+    mysql_config = load_mysql_config()
+    use_mysql = is_mysql_enabled(mysql_config)
+    data_storage = None
+    if use_mysql:
+        data_storage = DataStorage(mysql_config, plant_card_cache_enabled=False, format_datetime_display=lambda x: x)
+    else:
+        SQLITE_DB_PATH.parent.mkdir(parents=True, exist_ok=True)
+        conn = sqlite3.connect(SQLITE_DB_PATH)
+        init_db(conn)
 
     collection = get_rag_collection()
 
@@ -476,6 +485,8 @@ def main() -> None:
             if any(external_sources.values()):
                 external_sources_count += 1
 
+        backend_label = "MySQL" if use_mysql else "plants.db"
+
         if not is_indexed:
             if client is not None and args.generic_fallback:
                 try:
@@ -499,17 +510,64 @@ def main() -> None:
                     print(f"[{i}/{total}] {species_name}: indexed=0, arricchita (fallback)")
                 except Exception as exc:
                     print(f"[{i}/{total}] {species_name}: indexed=0, errore fallback OpenAI ({exc})")
-            upsert_plant(conn, species_name, indexed=False, profile=profile)
+            # upsert su MySQL o SQLite
+            # Estrazione immagini Wikipedia (fallback)
+            image_paths_json = "[]"
+            if context:
+                # Prova a estrarre immagini da Wikipedia se non già fatto
+                from add_species_to_faiss import fetch_wiki_image_urls, resolve_title
+                try:
+                    lang, resolved_title = resolve_title(species_name, None, ("it", "en"))
+                    wiki_image_urls = fetch_wiki_image_urls(resolved_title, lang, 8)
+                    image_paths_json = json.dumps(wiki_image_urls, ensure_ascii=False)
+                except Exception:
+                    image_paths_json = "[]"
+            if use_mysql:
+                now_iso = __import__('datetime').datetime.utcnow().replace(microsecond=0).isoformat() + "Z"
+                fields = [
+                    "species_name", "indexed", "image_paths", "annaffiatura_gg", "annaffiatura_time", "luce", "temperatura",
+                    "umidita", "altezza_media", "pulizia", "terriccio", "concimazione", "prevenzione", "updated_at"
+                ]
+                values = [
+                    species_name,
+                    0,
+                    image_paths_json,
+                    profile.get("annaffiatura_gg") if profile else None,
+                    profile.get("annaffiatura_time") if profile else None,
+                    profile.get("luce") if profile else None,
+                    profile.get("temperatura") if profile else None,
+                    profile.get("umidita") if profile else None,
+                    profile.get("altezza_media") if profile else None,
+                    profile.get("pulizia") if profile else None,
+                    profile.get("terriccio") if profile else None,
+                    profile.get("concimazione") if profile else None,
+                    profile.get("prevenzione") if profile else None,
+                    now_iso,
+                ]
+                query = (
+                    "INSERT INTO plants (" + ", ".join(fields) + ") "
+                    "VALUES (" + ", ".join(["%s"] * len(fields)) + ") "
+                    "ON DUPLICATE KEY UPDATE "
+                    + ", ".join([f"{f}=VALUES({f})" for f in fields[1:]])
+                )
+                with data_storage.get_plants_db_connection() as conn_mysql:
+                    conn_mysql.execute(query, tuple(values))
+                    conn_mysql.commit()
+            else:
+                upsert_plant(conn, species_name, indexed=False, profile=profile, image_paths=image_paths_json)
             not_indexed_count += 1
             if profile is None:
                 print(f"[{i}/{total}] {species_name}: indexed=0")
             continue
 
         indexed_count += 1
-        if not args.force_refresh and already_enriched(conn, species_name):
-            upsert_plant(conn, species_name, indexed=True, profile=None)
-            print(f"[{i}/{total}] {species_name}: indexed=1 (gia arricchita)")
-            continue
+        # Check se già arricchita (solo SQLite, per MySQL si può estendere se serve)
+        already_enriched_flag = False
+        if not use_mysql:
+            if not args.force_refresh and already_enriched(conn, species_name):
+                upsert_plant(conn, species_name, indexed=True, profile=None)
+                print(f"[{i}/{total}] {species_name}: indexed=1 (gia arricchita)")
+                continue
 
         if client is not None:
             try:
@@ -536,16 +594,49 @@ def main() -> None:
         else:
             print(f"[{i}/{total}] {species_name}: indexed=1")
 
-        upsert_plant(conn, species_name, indexed=True, profile=profile)
+        # upsert su MySQL o SQLite
+        if use_mysql:
+            now_iso = __import__('datetime').datetime.utcnow().replace(microsecond=0).isoformat() + "Z"
+            fields = [
+                "species_name", "indexed", "annaffiatura_gg", "annaffiatura_time", "luce", "temperatura",
+                "umidita", "altezza_media", "pulizia", "terriccio", "concimazione", "prevenzione", "updated_at"
+            ]
+            values = [
+                species_name,
+                1,
+                profile.get("annaffiatura_gg") if profile else None,
+                profile.get("annaffiatura_time") if profile else None,
+                profile.get("luce") if profile else None,
+                profile.get("temperatura") if profile else None,
+                profile.get("umidita") if profile else None,
+                profile.get("altezza_media") if profile else None,
+                profile.get("pulizia") if profile else None,
+                profile.get("terriccio") if profile else None,
+                profile.get("concimazione") if profile else None,
+                profile.get("prevenzione") if profile else None,
+                now_iso,
+            ]
+            query = (
+                "INSERT INTO plants (" + ", ".join(fields) + ") "
+                "VALUES (" + ", ".join(["%s"] * len(fields)) + ") "
+                "ON DUPLICATE KEY UPDATE "
+                + ", ".join([f"{f}=VALUES({f})" for f in fields[1:]])
+            )
+            with data_storage.get_plants_db_connection() as conn_mysql:
+                conn_mysql.execute(query, tuple(values))
+                conn_mysql.commit()
+        else:
+            upsert_plant(conn, species_name, indexed=True, profile=profile)
 
-        if i % 50 == 0:
+        if not use_mysql and i % 50 == 0:
             conn.commit()
 
-    conn.commit()
-    conn.close()
+    if not use_mysql:
+        conn.commit()
+        conn.close()
 
     print("\n=== Completato ===")
-    print(f"DB SQLite: {SQLITE_DB_PATH}")
+    print(f"DB usato: {backend_label}")
     print(f"Specie processate: {total}")
     print(f"Presenti in RAG (indexed=1): {indexed_count}")
     print(f"Non presenti in RAG (indexed=0): {not_indexed_count}")

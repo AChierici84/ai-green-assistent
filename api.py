@@ -1,4 +1,5 @@
-﻿import json
+﻿import httpx
+import json
 import logging
 import os
 import re
@@ -21,6 +22,7 @@ from app_config import load_app_config, configure_cloudinary_if_enabled
 from api_logging import configure_logging, _log_api, _response_payload_for_log
 from data_storage import DataStorage, PLANT_PROFILE_FIELDS
 from google_auth import GoogleAuthService
+from google_drive_storage import GoogleDriveStorageService
 from openai_gpt import _should_trigger_gpt_fallback, _gpt_vision_identify_plant
 from species import SpeciesService
 
@@ -112,6 +114,33 @@ def _format_datetime_display(value: Any) -> Any:
     return parsed.strftime("%d/%m/%Y %H:%M:%S")
 
 
+def _profile_has_care_data(profile: dict[str, Any] | None) -> bool:
+    if not profile:
+        return False
+
+    care_fields = (
+        "annaffiatura_gg",
+        "annaffiatura_time",
+        "luce",
+        "temperatura",
+        "umidita",
+        "altezza_media",
+        "pulizia",
+        "terriccio",
+        "concimazione",
+        "prevenzione",
+    )
+
+    for field in care_fields:
+        value = profile.get(field)
+        if value is None:
+            continue
+        if isinstance(value, str) and not value.strip():
+            continue
+        return True
+    return False
+
+
 def _normalize_image_path(raw_path: str) -> str:
     """Normalize image path to be relative to data/images."""
     normalized = str(raw_path or "").replace("\\", "/").strip().lstrip("/")
@@ -170,6 +199,8 @@ google_auth_service = GoogleAuthService(
     admin_users=ADMIN_USERS,
     data_storage=data_storage,
 )
+
+google_drive_storage_service = GoogleDriveStorageService()
 
 
 def ensure_plant_cards_cache_table(conn: Any) -> None:
@@ -342,6 +373,11 @@ class RecognitionLogRequest(BaseModel):
     used_openai: bool = Field(default=False, description="True se nel riconoscimento e stato usato OpenAI")
     image_url: str | None = Field(default=None, max_length=1200, description="URL immagine se salvata")
     recognition_ms: int | None = Field(default=None, ge=0, le=300000, description="Durata riconoscimento in ms")
+
+
+class AdminSpeciesBuildRequest(BaseModel):
+    species_name: str = Field(..., min_length=2, max_length=160, description="Nome specie")
+    force_rebuild: bool = Field(default=False, description="Se true forza rebuild anche se gia completata")
 
 
 @app.post("/search")
@@ -608,6 +644,23 @@ def save_user_plant(payload: SaveUserPlantRequest, authorization: str | None = H
         user=user,
     )
 
+    species_name = str(saved.get("plant_name") or payload.plant_name or "").strip()
+    if species_name:
+        try:
+            profile = get_plant_profile_from_db(species_name)
+            needs_enrichment = (not _profile_has_care_data(profile)) or bool(profile and not profile.get("indexed"))
+            if profile is None:
+                species_service._insert_draft_plant_if_missing(species_name, os.getenv("OPENAI_API_KEY", "").strip())
+
+            if needs_enrichment:
+                species_service._ensure_species_build_job(species_name)
+        except Exception as exc:
+            logger.warning(
+                "Impossibile avviare arricchimento automatico per '%s': %s",
+                species_name,
+                exc,
+            )
+
     _log_api(
         "/user/plants",
         "saved",
@@ -669,19 +722,17 @@ def update_user_plant_first_watering_date(
     return JSONResponse(content={"updated": updated})
 
 
+
 @app.post("/user/plants/{plant_id}/photo")
 async def upload_user_plant_photo(
     plant_id: int,
     file: UploadFile = File(...),
     authorization: str | None = Header(default=None),
 ):
-    """Upload a user photo for a saved plant, store it on Cloudinary."""
+    """Upload a user photo, preferring Google Drive and falling back to Cloudinary."""
     user = google_auth_service.get_google_user_from_authorization(authorization)
     if not user:
         raise HTTPException(status_code=401, detail="Accedi con Google per caricare una foto.")
-
-    if not (CLOUDINARY_CLOUD_NAME and CLOUDINARY_API_KEY and CLOUDINARY_API_SECRET):
-        raise HTTPException(status_code=503, detail="Servizio foto non configurato.")
 
     if not file.content_type or not file.content_type.startswith("image/"):
         raise HTTPException(status_code=400, detail="Il file caricato non è un'immagine valida.")
@@ -693,31 +744,81 @@ async def upload_user_plant_photo(
     if not data_storage.user_plant_exists_for_user(plant_id, user_id):
         raise HTTPException(status_code=404, detail="Pianta non trovata.")
 
-    suffix = os.path.splitext(file.filename or "")[1] or ".jpg"
-    with tempfile.NamedTemporaryFile(delete=False, suffix=suffix) as tmp:
-        tmp.write(await file.read())
-        tmp_path = tmp.name
+    file_bytes = await file.read()
+    if not file_bytes:
+        raise HTTPException(status_code=400, detail="File immagine vuoto.")
 
+    photo_url = ""
+    storage_provider = ""
+    drive_error = ""
+    cloudinary_error = ""
+
+    # Usa il token di autenticazione utente anche per Google Drive
     try:
-        result = cloudinary.uploader.upload(
-            tmp_path,
-            folder="clorofilla/user-plants",
-            public_id=f"plant_{plant_id}_user_{user_id[:12]}_{uuid4().hex[:10]}",
-            overwrite=False,
-            resource_type="image",
-            transformation=[{"width": 1200, "crop": "limit", "quality": "auto:good"}],
+        drive_result = google_drive_storage_service.upload_user_plant_photo(
+            access_token=authorization.split(" ")[-1] if authorization else "",
+            user_id=user_id,
+            plant_id=plant_id,
+            filename=file.filename or "plant-photo.jpg",
+            content_type=file.content_type,
+            file_content=file_bytes,
         )
-        photo_url = result.get("secure_url", "")
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Errore upload foto: {e}")
-    finally:
-        if os.path.exists(tmp_path):
-            os.remove(tmp_path)
+        photo_url = str(drive_result.get("photo_url") or "").strip()
+        if photo_url:
+            storage_provider = "google_drive"
+    except Exception as exc:
+        drive_error = _truncate(exc, 300)
+        logger.error("[!!! ERRORE DRIVE !!!] plant_id=%s user_id=%s: %s", plant_id, user_id, drive_error)
+        print(f"[!!! ERRORE DRIVE !!!] plant_id={plant_id} user_id={user_id}: {drive_error}")
+
+    if not photo_url:
+        if CLOUDINARY_CLOUD_NAME and CLOUDINARY_API_KEY and CLOUDINARY_API_SECRET:
+            suffix = os.path.splitext(file.filename or "")[1] or ".jpg"
+            tmp_path: str | None = None
+            try:
+                with tempfile.NamedTemporaryFile(delete=False, suffix=suffix) as tmp:
+                    tmp.write(file_bytes)
+                    tmp_path = tmp.name
+
+                result = cloudinary.uploader.upload(
+                    tmp_path,
+                    folder="clorofilla/user-plants",
+                    public_id=f"plant_{plant_id}_user_{user_id[:12]}_{uuid4().hex[:10]}",
+                    overwrite=False,
+                    resource_type="image",
+                    transformation=[{"width": 1200, "crop": "limit", "quality": "auto:good"}],
+                )
+                photo_url = str(result.get("secure_url") or "").strip()
+                if photo_url:
+                    storage_provider = "cloudinary"
+                else:
+                    cloudinary_error = "Cloudinary non ha restituito URL immagine."
+            except Exception as exc:
+                cloudinary_error = _truncate(exc, 300)
+            finally:
+                if tmp_path and os.path.exists(tmp_path):
+                    os.remove(tmp_path)
+        else:
+            cloudinary_error = "Cloudinary non configurato."
+
+    if not photo_url:
+        detail = "Upload foto fallito."
+        if drive_error and cloudinary_error:
+            detail = f"Upload fallito su Google Drive e Cloudinary: {drive_error} | {cloudinary_error}"
+        elif drive_error:
+            detail = f"Upload Google Drive fallito: {drive_error}"
+        elif cloudinary_error:
+            detail = f"Upload Cloudinary fallito: {cloudinary_error}"
+        raise HTTPException(status_code=500, detail=detail)
 
     updated_payload = data_storage.save_user_plant_photo(plant_id, user_id, photo_url)
 
-    _log_api("/user/plants/{plant_id}/photo", "uploaded", {"plant_id": plant_id})
-    return JSONResponse(content={"updated": updated_payload})
+    _log_api(
+        "/user/plants/{plant_id}/photo",
+        "uploaded",
+        {"plant_id": plant_id, "provider": storage_provider or "unknown"},
+    )
+    return JSONResponse(content={"updated": updated_payload, "storage_provider": storage_provider})
 
 
 @app.get("/health")
@@ -808,6 +909,49 @@ def species_build_status(name: str, authorization: str | None = Header(default=N
     profile = get_plant_profile_from_db(name)
     ready = bool(profile and profile.get("indexed"))
     return JSONResponse(content={"species": name, "ready": ready, "status": status})
+
+
+@app.post("/admin/species/build")
+def admin_species_build(
+    payload: AdminSpeciesBuildRequest,
+    authorization: str | None = Header(default=None),
+):
+    admin_user = google_auth_service.require_admin_user(authorization)
+
+    species_name = str(payload.species_name or "").strip()
+    if not species_name:
+        raise HTTPException(status_code=400, detail="Nome specie obbligatorio.")
+
+    try:
+        species_service._insert_draft_plant_if_missing(species_name, os.getenv("OPENAI_API_KEY", "").strip())
+    except Exception as exc:
+        logger.warning("Inserimento draft non riuscito per '%s': %s", species_name, exc)
+
+    status = species_service.trigger_species_build(
+        species_name,
+        force_rebuild=bool(payload.force_rebuild),
+    )
+
+    action = "rebuild" if payload.force_rebuild else "build"
+    _log_api(
+        "/admin/species/build",
+        "triggered",
+        {
+            "admin": admin_user.get("email", ""),
+            "species": species_name,
+            "action": action,
+            "status": status.get("status"),
+        },
+    )
+
+    return JSONResponse(
+        content={
+            "ok": True,
+            "species": species_name,
+            "action": action,
+            "status": status,
+        }
+    )
 
 
 @app.get("/", response_class=HTMLResponse)
@@ -1074,6 +1218,29 @@ def plant_info(
 
     return JSONResponse(content=payload)
 
+# Endpoint proxy per immagini Google Drive pubbliche
+@app.get("/proxy/drive-image/{file_id}")
+def proxy_drive_image(file_id: str):
+    """Proxy per servire immagini pubbliche da Google Drive, dato un file_id."""
+    if not file_id or not re.match(r"^[a-zA-Z0-9_-]{10,}$", file_id):
+        raise HTTPException(status_code=400, detail="ID file non valido.")
+    drive_url = f"https://drive.google.com/uc?export=download&id={file_id}"
+    try:
+        with httpx.Client(follow_redirects=True, timeout=15.0) as client:
+            resp = client.get(drive_url)
+            if resp.status_code != 200:
+                raise HTTPException(status_code=404, detail="Immagine non trovata su Google Drive.")
+            content_type = resp.headers.get("content-type", "image/jpeg")
+            from fastapi import Response
+            return Response(
+                content=resp.content,
+                media_type=content_type,
+                headers={
+                    "Content-Disposition": f'inline; filename="drive-image-{file_id}"'
+                }
+            )
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"Errore proxy Google Drive: {exc}")
 
 @app.get("/plant/{name}/profile")
 def plant_profile(name: str, authorization: str | None = Header(default=None)):

@@ -73,9 +73,11 @@ export async function searchPlantImage(file, k = 5) {
   return parseResponse(response);
 }
 
-export async function getPlantCard(name) {
+export async function getPlantCard(name, options = {}) {
   const encoded = encodeURIComponent(name);
-  const response = await apiFetch(`/plant/${encoded}?lang=it`);
+  const refreshCache = Boolean(options?.refreshCache);
+  const query = refreshCache ? "?lang=it&refresh_cache=1" : "?lang=it";
+  const response = await apiFetch(`/plant/${encoded}${query}`);
   return parseResponse(response);
 }
 
@@ -161,9 +163,11 @@ export async function updateMyPlantFirstWaterDate(plantId, firstWateringDate) {
   return parseResponse(response);
 }
 
+
 export async function uploadMyPlantPhoto(plantId, file) {
   const formData = new FormData();
   formData.append("file", file);
+  // Nessun header custom: Authorization viene gestito da apiFetch
   const response = await apiFetch(`/user/plants/${plantId}/photo`, {
     method: "POST",
     body: formData,
@@ -176,6 +180,18 @@ export async function getAdminConsoleData(limit = 300, chartDays = 30) {
   const normalizedDays = Number(chartDays);
   const safeChartDays = [7, 30, 90].includes(normalizedDays) ? normalizedDays : 30;
   const response = await apiFetch(`/admin/console?limit=${safeLimit}&chart_days=${safeChartDays}`);
+  return parseResponse(response);
+}
+
+export async function triggerAdminSpeciesBuild(speciesName, forceRebuild = false) {
+  const response = await apiFetch("/admin/species/build", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      species_name: String(speciesName || "").trim(),
+      force_rebuild: Boolean(forceRebuild),
+    }),
+  });
   return parseResponse(response);
 }
 
@@ -203,6 +219,11 @@ export async function logRecognition(payload) {
 export function toAbsoluteImage(urlOrPath) {
   if (!urlOrPath) {
     return "";
+  }
+  // Gestione Google Drive: usa il proxy se l'URL è di tipo drive.google.com/uc?export=view&id=...
+  const driveMatch = String(urlOrPath).match(/https?:\/\/drive\.google\.com\/uc\?[^#]*[?&]id=([a-zA-Z0-9_-]{10,})/);
+  if (driveMatch && driveMatch[1]) {
+    return buildUrl(`/proxy/drive-image/${driveMatch[1]}`);
   }
   if (urlOrPath.startsWith("http://") || urlOrPath.startsWith("https://")) {
     return urlOrPath;

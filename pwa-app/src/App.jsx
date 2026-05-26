@@ -6,6 +6,7 @@ import {
   askPlantCare,
   getAdminConsoleData,
   getApiHealth,
+  triggerAdminSpeciesBuild,
   deleteMyPlant,
   getMyPlants,
   getPlantCard,
@@ -163,6 +164,62 @@ function parseJwtPayload(token) {
   }
 }
 
+function requestGoogleDriveAccessToken(idToken, interactive = true) {
+  const payload = parseJwtPayload(idToken || "");
+  const clientId = String(payload?.aud || "").trim();
+
+  if (!clientId || !window.google?.accounts?.oauth2) {
+    return Promise.resolve("");
+  }
+
+  return new Promise((resolve) => {
+    let done = false;
+    const finish = (tokenValue) => {
+      if (done) {
+        return;
+      }
+      done = true;
+      resolve(String(tokenValue || ""));
+    };
+
+    const timeoutId = window.setTimeout(() => finish(""), 10000);
+
+    function requestToken(promptValue) {
+      const tokenClient = window.google.accounts.oauth2.initTokenClient({
+        client_id: clientId,
+        scope: "https://www.googleapis.com/auth/drive.file",
+        callback: (response) => {
+          const accessToken = String(response?.access_token || "").trim();
+          if (accessToken || !interactive || promptValue === "consent") {
+            window.clearTimeout(timeoutId);
+            finish(accessToken);
+            return;
+          }
+
+          requestToken("consent");
+        },
+        error_callback: () => {
+          if (interactive && promptValue !== "consent") {
+            requestToken("consent");
+            return;
+          }
+          window.clearTimeout(timeoutId);
+          finish("");
+        }
+      });
+
+      tokenClient.requestAccessToken({ prompt: promptValue });
+    }
+
+    try {
+      requestToken("");
+    } catch {
+      window.clearTimeout(timeoutId);
+      finish("");
+    }
+  });
+}
+
 export default function App({ googleClientIdConfigured = false }) {
   const [auth, setAuth] = useState(null);
   const [authBusy, setAuthBusy] = useState(false);
@@ -199,6 +256,8 @@ export default function App({ googleClientIdConfigured = false }) {
   const [adminHealth, setAdminHealth] = useState(null);
   const [adminHealthError, setAdminHealthError] = useState("");
   const [adminChartDays, setAdminChartDays] = useState(30);
+  const [adminSpeciesName, setAdminSpeciesName] = useState("");
+  const [adminSpeciesBuildStatus, setAdminSpeciesBuildStatus] = useState("");
   const [lastSearchUsedOpenAI, setLastSearchUsedOpenAI] = useState(false);
   const [lastSearchDurationMs, setLastSearchDurationMs] = useState(null);
   const [selectedMyPlant, setSelectedMyPlant] = useState(null);
@@ -224,6 +283,7 @@ export default function App({ googleClientIdConfigured = false }) {
     myPlants: false,
     myPlantDetail: false,
     adminConsole: false,
+    adminSpeciesBuild: false,
     updateFirstWaterDate: false
   });
   const [error, setError] = useState("");
@@ -273,9 +333,16 @@ export default function App({ googleClientIdConfigured = false }) {
 
         if (statusData?.ready || status === "completed") {
           const [card, profile] = await Promise.all([
-            getPlantCard(speciesName),
+            getPlantCard(speciesName, { refreshCache: true }),
             getPlantProfile(speciesName).catch(() => null)
           ]);
+
+          const stillDraft = card?.source === "db_draft" || profile?.indexed === false || !profile;
+          if (stillDraft && attempts < maxAttempts) {
+            setDraftBuildMessage("Build completata, sincronizzo la scheda finale...");
+            return;
+          }
+
           if (selectedSpeciesRef.current.toLowerCase() === speciesName.toLowerCase()) {
             setPlantCard(card);
             setPlantProfile(profile);
@@ -434,6 +501,33 @@ export default function App({ googleClientIdConfigured = false }) {
       }))
       .filter((entry) => entry.value !== null && entry.value !== "");
   }, [myPlantProfile]);
+
+  // Controlla se il token ha lo scope Drive
+  function tokenHasDriveScope(idToken) {
+    try {
+      const payload = parseJwtPayload(idToken);
+      const scopes = String(payload?.scope || payload?.scopes || "").split(" ");
+      return scopes.includes("https://www.googleapis.com/auth/drive.file");
+    } catch {
+      return false;
+    }
+  }
+
+  async function ensureDriveScope() {
+    // Se il token non ha lo scope Drive, richiedilo
+    if (!auth?.idToken || tokenHasDriveScope(auth.idToken)) {
+      return true;
+    }
+    // Richiedi lo scope Drive in modo interattivo
+    try {
+      const accessToken = await requestGoogleDriveAccessToken(auth.idToken, true);
+      // Dopo aver ottenuto il consenso, forza il refresh della sessione Google
+      await refreshGoogleSessionSilently();
+      return !!accessToken;
+    } catch {
+      return false;
+    }
+  }
 
   async function refreshGoogleSessionSilently() {
     if (refreshPromiseRef.current) {
@@ -627,6 +721,27 @@ export default function App({ googleClientIdConfigured = false }) {
       }))
       .filter((entry) => entry.value !== null && entry.value !== "");
   }, [plantProfile]);
+
+  async function handleUploadMyPlantPhoto(plantId, file) {
+    setUploadingPhotoId(plantId);
+    setError("");
+    // Assicurati che lo scope Drive sia presente
+    const ok = await ensureDriveScope();
+    if (!ok) {
+      setError("Per caricare la foto serve autorizzare l'accesso a Google Drive.");
+      setUploadingPhotoId(null);
+      return;
+    }
+    try {
+      await uploadMyPlantPhoto(plantId, file);
+      // Aggiorna la lista delle piante dopo l'upload
+      await loadMyPlants();
+    } catch (err) {
+      setError(err?.message || "Errore durante l'upload della foto.");
+    } finally {
+      setUploadingPhotoId(null);
+    }
+  }
 
   function applySelectedFile(nextFile) {
     setFile(nextFile);
@@ -881,7 +996,9 @@ export default function App({ googleClientIdConfigured = false }) {
       let uploadedImageUrl = "";
       if (saved?.id && file) {
         try {
-          const uploadData = await uploadMyPlantPhoto(saved.id, file);
+          const driveAccessToken = await requestGoogleDriveAccessToken(auth?.idToken || "", true);
+          console.log("[DEBUG] Google Drive Access Token:", driveAccessToken);
+          const uploadData = await uploadMyPlantPhoto(saved.id, file, driveAccessToken);
           uploadedImageUrl = String(uploadData?.updated?.user_photo_url || "").trim();
           photoUploaded = true;
         } catch {
@@ -1226,6 +1343,29 @@ export default function App({ googleClientIdConfigured = false }) {
     loadAdminConsole(safeDays);
   }
 
+  async function handleAdminSpeciesBuild(forceRebuild) {
+    const speciesName = String(adminSpeciesName || "").trim();
+    if (!speciesName) {
+      setError("Inserisci il nome specie da buildare.");
+      return;
+    }
+
+    setError("");
+    setAdminSpeciesBuildStatus("");
+    setBusy((prev) => ({ ...prev, adminSpeciesBuild: true }));
+
+    try {
+      const data = await triggerAdminSpeciesBuild(speciesName, forceRebuild);
+      const status = data?.status?.status || "queued";
+      const action = forceRebuild ? "Rebuild" : "Build";
+      setAdminSpeciesBuildStatus(`${action} avviata per ${speciesName}. Stato: ${status}.`);
+    } catch (err) {
+      setError(err.message || "Errore durante avvio build specie.");
+    } finally {
+      setBusy((prev) => ({ ...prev, adminSpeciesBuild: false }));
+    }
+  }
+
   function openRegisterPage() {
     setActiveView("register");
     setError("");
@@ -1247,7 +1387,8 @@ export default function App({ googleClientIdConfigured = false }) {
     setUploadingPhotoId(targetId);
     setError("");
     try {
-      const data = await uploadMyPlantPhoto(targetId, photoFile);
+      const driveAccessToken = await requestGoogleDriveAccessToken(auth?.idToken || "", true);
+      const data = await uploadMyPlantPhoto(targetId, photoFile, driveAccessToken);
       const updated = data.updated;
       if (updated) {
         setMyPlants((prev) => prev.map((item) => (item.id === updated.id ? updated : item)));
@@ -1913,6 +2054,37 @@ export default function App({ googleClientIdConfigured = false }) {
           </div>
 
           <p className="status">Admin: {auth?.user?.email || ""}</p>
+
+          <div className="admin-chart-block">
+            <h3>Build Specie</h3>
+            <p className="admin-section-note">Avvia build o rebuild di una specie inserendo il nome scientifico.</p>
+            <div className="admin-build-form">
+              <input
+                type="text"
+                value={adminSpeciesName}
+                onChange={(event) => setAdminSpeciesName(event.target.value)}
+                placeholder="Es. Plumbago auriculata"
+                maxLength={160}
+              />
+              <button
+                type="button"
+                className="btn-secondary btn-small"
+                onClick={() => handleAdminSpeciesBuild(false)}
+                disabled={busy.adminSpeciesBuild}
+              >
+                {busy.adminSpeciesBuild ? "Avvio..." : "Build"}
+              </button>
+              <button
+                type="button"
+                className="btn-secondary btn-small"
+                onClick={() => handleAdminSpeciesBuild(true)}
+                disabled={busy.adminSpeciesBuild}
+              >
+                {busy.adminSpeciesBuild ? "Avvio..." : "Rebuild"}
+              </button>
+            </div>
+            {adminSpeciesBuildStatus && <p className="status">{adminSpeciesBuildStatus}</p>}
+          </div>
 
           <div className="admin-chart-block">
             <h3>Stato API (/health)</h3>
