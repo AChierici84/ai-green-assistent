@@ -19,6 +19,7 @@ export default defineConfig({
         start_url: "/app/",
         scope: "/app/",
         icons: [
+          // SVG icons
           {
             src: "icons/icon-192.svg",
             sizes: "192x192",
@@ -30,6 +31,32 @@ export default defineConfig({
             sizes: "512x512",
             type: "image/svg+xml",
             purpose: "any maskable"
+          },
+          // PNG icons for iOS/Android
+          {
+            src: "icons/ios/icon_120.png",
+            sizes: "120x120",
+            type: "image/png"
+          },
+          {
+            src: "icons/ios/icon_152.png",
+            sizes: "152x152",
+            type: "image/png"
+          },
+          {
+            src: "icons/ios/icon_167.png",
+            sizes: "167x167",
+            type: "image/png"
+          },
+          {
+            src: "icons/ios/icon_180.png",
+            sizes: "180x180",
+            type: "image/png"
+          },
+          {
+            src: "icons/ios/icon_1024.png",
+            sizes: "1024x1024",
+            type: "image/png"
           }
         ]
       },
