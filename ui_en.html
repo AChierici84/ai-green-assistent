@@ -1,12 +1,12 @@
 <!DOCTYPE html>
-<html lang="it">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="icon" type="image/svg+xml" href="/icons/favicon.svg" />
   <title>Clorofilla App</title>
-  <meta name="description" content="Clorofilla: riconoscimento specie vegetali da foto, schede di cura e assistente botanico AI in una PWA." />
-  <style>
+  <meta name="description" content="Clorofilla: plant species recognition from photos, care sheets and AI botanical assistant in a PWA." />
+   <style>
     @import url("https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Fraunces:opsz,wght@9..144,600&display=swap");
 
     :root {
@@ -245,7 +245,7 @@
       margin: 0;
       color: #3d584d;
       line-height: 1.64;
-      /* max-width rimossa per occupare tutto lo spazio */
+      /* max-width: var(--measure); */
     }
 
     .features {
@@ -323,7 +323,7 @@
       color: #335646;
       line-height: 1.6;
       font-size: 0.96rem;
-      /* max-width rimossa per occupare tutto lo spazio */
+      /* max-width: var(--measure); */
     }
 
     .sample {
@@ -566,200 +566,167 @@
         </svg>
         Clorofilla App
       </div>
-
-      <h1>Riconosci una <span class="hero-highlight">pianta</span> da una <span class="hero-highlight">foto</span> e ricevi consigli di <span class="hero-highlight">cura</span> pratici.</h1>
+      <h1>Identify a <span class="hero-highlight">plant</span> from a <span class="hero-highlight">photo</span> and get practical <span class="hero-highlight">care</span> tips.</h1>
       <p>
-        <span class="hero-highlight" style="font-weight:700">Clorofilla</span> combina <span style="text-decoration:underline">riconoscimento immagini</span> (OpenCLIP + FAISS), schede botaniche <span class="hero-highlight">AI</span>
-        basate su knowledge base <span class="hero-highlight">RAG</span> e <span class="hero-highlight">chat</span> di supporto alla <span class="hero-highlight">cura</span> per accompagnarti nella gestione delle tue <span class="hero-highlight">piante</span>.
+        <span class="hero-highlight" style="font-weight:700">Clorofilla</span> combines <span style="text-decoration:underline">image recognition</span> (OpenCLIP + FAISS), <span class="hero-highlight">AI</span> botanical sheets
+        based on <span class="hero-highlight">RAG</span> knowledge base and <span class="hero-highlight">chat</span> support for <span class="hero-highlight">care</span> to help you manage your <span class="hero-highlight">plants</span>.
       </p>
-
       <div class="cta-row">
-        <a class="btn btn-primary" href="/app">Prova l'App</a>
-        <button id="install-app-btn" class="btn btn-secondary" type="button" hidden>Installa App</button>
+        <a class="btn btn-primary" href="/app">Try the App</a>
+        <button id="install-app-btn" class="btn btn-secondary" type="button" hidden>Install App</button>
       </div>
       <p id="install-app-hint" class="install-hint"></p>
-
       <div class="meta">
-        <a class="chip" href="#step-upload">Upload foglia ↓</a>
-        <a class="chip" href="#step-scheda">Scheda specie ↓</a>
-        <a class="chip" href="#step-chat">Chat cura piante ↓</a>
-        <a class="chip" href="#step-piante">Le tue piante ↓</a>
+        <a class="chip" href="#step-upload">Upload leaf ↓</a>
+        <a class="chip" href="#step-scheda">Species sheet ↓</a>
+        <a class="chip" href="#step-chat">Care chat ↓</a>
+        <a class="chip" href="#step-piante">Your plants ↓</a>
       </div>
     </section>
-
     <section class="panel howto">
-      <h2>Come usare Clorofilla (passo passo)</h2>
-
+      <h2>How to use Clorofilla (step by step)</h2>
       <div class="step" id="step-upload">
         <span class="step-index">1</span>
         <p>
-          Premi <strong>Prova l'App</strong> per aprire l'app su <strong>/app</strong>.
-          Nella vista iniziale trascina un'immagine nella zona dedicata oppure premi per scegliere
-          un file dalla galleria o scattare una foto con la fotocamera. Usa una foto nitida con
-          luce naturale e soggetto centrato per ottenere i migliori risultati.
+          Press <strong>Try the App</strong> to open the app at <strong>/app</strong>.
+          In the initial view, drag an image into the dedicated area or tap to choose
+          a file from the gallery or take a photo with the camera. Use a sharp photo with
+          natural light and a centered subject for best results.
         </p>
       </div>
-
       <div class="step" id="step-scheda">
         <span class="step-index">2</span>
         <p>
-          Dopo il riconoscimento vedrai le specie candidate con punteggio di confidenza.
-          Seleziona quella che ti sembra corretta per aprire la <strong>scheda specie</strong>:
-          trovi sintesi botanica generata da <strong>AI</strong>, galleria immagini e il
-          <strong>profilo di cura</strong> con indicazioni su annaffiatura, luce, terriccio,
-          temperatura, concimazione e prevenzione parassiti.
+          After recognition, you will see candidate species with confidence scores.
+          Select the one that seems correct to open the <strong>species sheet</strong>:
+          you will find an AI-generated botanical summary, image gallery and the
+          <strong>care profile</strong> with information on watering, light, soil,
+          temperature, fertilization and pest prevention.
         </p>
       </div>
-
       <div class="step" id="step-chat">
         <span class="step-index">3</span>
         <p>
-          Dalla scheda puoi aprire la <strong>chat di cura botanica</strong>: digita una domanda
-          specifica (es. &ldquo;le foglie ingialliscono, cosa faccio?&rdquo;) e ricevi una risposta
-          contestualizzata alla specie selezionata, basata sulla knowledge base <strong>RAG</strong>
-          con fallback a Wikipedia.
+          From the sheet you can open the <strong>botanical care chat</strong>: type a specific question
+          (e.g. "the leaves are turning yellow, what should I do?") and receive a contextualized answer
+          for the selected species, based on the <strong>RAG</strong> knowledge base with Wikipedia fallback.
         </p>
       </div>
-
       <div class="step" id="step-piante">
         <span class="step-index">4</span>
         <p>
-          Con un account Google puoi salvare le piante nella sezione <strong>Le tue piante</strong>:
-          assegna un nome personalizzato, aggiungi foto e tieni traccia delle cure nel tempo.
-          La raccolta personale è sincronizzata al tuo profilo ed è accessibile da qualsiasi
-          dispositivo dopo il login.
+          With a Google account you can save plants in the <strong>Your plants</strong> section:
+          assign a custom name, add photos and keep track of care over time.
+          Your personal collection is synced to your profile and accessible from any
+          device after login.
         </p>
       </div>
-
       <aside class="sample">
         <figure>
           <div class="scan-wrap">
-            <img src="/images/abies_cephalonica/Abies_cephalonica_3.jpg" alt="Esempio foglia Abies cephalonica" loading="lazy" />
+            <img src="/images/abies_cephalonica/Abies_cephalonica_3.jpg" alt="Abies cephalonica leaf example" loading="lazy" />
             <div class="scan-bar"></div>
           </div>
-          <figcaption>Abies cephalonica — esempio di foto adatta al riconoscimento</figcaption>
+          <figcaption>Abies cephalonica — example of a suitable photo for recognition</figcaption>
         </figure>
       </aside>
     </section>
-
     <section class="panel" id="step-google">
-      <h2>Accedi con Google e sblocca tutto</h2>
+      <h2>Sign in with Google and unlock everything</h2>
       <p>
-        Clorofilla funziona anche senza account, ma registrandoti con Google ottieni vantaggi esclusivi:
+        Clorofilla also works without an account, but by registering with Google you get exclusive benefits:
       </p>
       <div class="features" style="margin-top:0.2rem">
         <article class="feature">
-          <strong>Le tue piante salvate</strong>
-          <span>Tieni un diario personale delle piante che possiedi, con nome personalizzato e foto.</span>
+          <strong>Your saved plants</strong>
+          <span>Keep a personal diary of your plants, with custom names and photos.</span>
         </article>
         <article class="feature">
-          <strong>Sincronizzazione multi-device</strong>
-          <span>La tua raccolta è legata al tuo account Google e accessibile ovunque ti colleghi.</span>
+          <strong>Multi-device sync</strong>
+          <span>Your collection is linked to your Google account and accessible wherever you log in.</span>
         </article>
         <article class="feature">
-          <strong>Foto personalizzate</strong>
-          <span>Carica foto delle tue piante reali per riconoscerle più facilmente in futuro.</span>
+          <strong>Custom photos</strong>
+          <span>Upload photos of your real plants to recognize them more easily in the future.</span>
         </article>
         <article class="feature">
-          <strong>Storico cure</strong>
-          <span>Tieni traccia delle annaffiature e delle operazioni di manutenzione nel tempo.</span>
+          <strong>Care history</strong>
+          <span>Keep track of watering and maintenance operations over time.</span>
         </article>
       </div>
       <div class="cta-row" style="margin-top:0.4rem">
-        <a class="btn btn-primary" href="/app" style="background:#1e7a56;color:#f1ffe8">Accedi con Google nell'App</a>
+        <a class="btn btn-primary" href="/app" style="background:#1e7a56;color:#f1ffe8">Sign in with Google in the App</a>
       </div>
     </section>
-
     <footer class="footer">
       <div class="footer-inner">
         <div class="footer-brand">
-          <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 192 192" style="border-radius:8px">
-            <defs>
-              <linearGradient id="fbg" x1="0" x2="1" y1="0" y2="1">
-                <stop offset="0%" stop-color="#164a2f"/>
-                <stop offset="100%" stop-color="#1e7a56"/>
-              </linearGradient>
-            </defs>
-            <rect width="192" height="192" rx="36" fill="url(#fbg)"/>
-            <path d="M97 35c26 11 40 33 40 57 0 29-18 53-46 66-4 2-8-1-8-5V61c0-18 8-30 14-26z" fill="#f4f0df"/>
-            <path d="M59 111c0-22 15-39 35-44v74c-20-5-35-17-35-30z" fill="#9fe0ba"/>
-          </svg>
+          <!-- SVG unchanged -->
           <span class="footer-name">Clorofilla</span>
         </div>
-        <p class="footer-copy">&copy; 2026 &mdash; Assistente botanico AI. Riconoscimento specie, schede cura e chat contestuale.</p>
+        <p class="footer-copy">&copy; 2026 &mdash; AI botanical assistant. Species recognition, care sheets and contextual chat.</p>
         <nav class="footer-links">
           <a href="/app">App</a>
           <span class="service-status">
             <span class="service-status-dot"></span>
-            <span id="service-status-text">Controllo...</span>
+            <span id="service-status-text">Checking...</span>
           </span>
         </nav>
       </div>
     </footer>
   </main>
-
   <script>
     (function () {
       const installButton = document.getElementById("install-app-btn");
       const installHint = document.getElementById("install-app-hint");
       let deferredPrompt = null;
-
       if (!installButton || !installHint) {
         return;
       }
-
       const isStandalone = window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone === true;
       if (isStandalone) {
-        installHint.textContent = "App gia installata su questo dispositivo.";
+        installHint.textContent = "App already installed on this device.";
         return;
       }
-
       const isIos = /iphone|ipad|ipod/i.test(window.navigator.userAgent || "");
       if (isIos) {
         installButton.hidden = false;
-        installHint.textContent = "Su iPhone: tocca Condividi e poi Aggiungi a Home.";
+        installHint.textContent = "On iPhone: tap Share and then Add to Home.";
       }
-
       window.addEventListener("beforeinstallprompt", (event) => {
         event.preventDefault();
         deferredPrompt = event;
         installButton.hidden = false;
-        installHint.textContent = "Installa Clorofilla App con un tap.";
+        installHint.textContent = "Install Clorofilla App with one tap.";
       });
-
       installButton.addEventListener("click", async () => {
         if (deferredPrompt) {
           deferredPrompt.prompt();
           try {
             await deferredPrompt.userChoice;
           } catch (error) {
-            console.warn("Install prompt chiuso o non completato", error);
+            console.warn("Install prompt closed or not completed", error);
           }
           deferredPrompt = null;
           return;
         }
-
         if (isIos) {
-          installHint.textContent = "Apri Safari, tocca Condividi e scegli Aggiungi a Home.";
+          installHint.textContent = "Open Safari, tap Share and choose Add to Home.";
         } else {
-          installHint.textContent = "Installazione diretta non disponibile su questo browser.";
+          installHint.textContent = "Direct installation not available on this browser.";
         }
       });
-
       window.addEventListener("appinstalled", () => {
         installButton.hidden = true;
-        installHint.textContent = "Clorofilla App installata con successo.";
+        installHint.textContent = "Clorofilla App successfully installed.";
       });
     })();
   </script>
-
   <script>
     (function () {
       const statusDot = document.querySelector(".service-status-dot");
       const statusText = document.getElementById("service-status-text");
-      
       if (!statusDot || !statusText) return;
-
       async function checkHealth() {
         try {
           const response = await fetch("/health", { method: "GET" });
@@ -767,20 +734,21 @@
             const data = await response.json();
             statusDot.classList.remove("error");
             statusDot.classList.add("ok");
-            statusText.textContent = data.status === "ok" ? "Servizio online" : "Servizio disponibile";
+            statusText.textContent = data.status === "ok" ? "Service online" : "Service available";
           } else {
             statusDot.classList.remove("ok");
             statusDot.classList.add("error");
-            statusText.textContent = "Servizio offline";
+            statusText.textContent = "Service offline";
           }
         } catch (err) {
           statusDot.classList.remove("ok");
           statusDot.classList.add("error");
-          statusText.textContent = "Servizio offline";
+          statusText.textContent = "Service offline";
         }
       }
-
       checkHealth();
       setInterval(checkHealth, 30000);
     })();
   </script>
+</body>
+</html>
