@@ -1133,6 +1133,7 @@ pre {
   margin: 0 0 0.45rem;
   text-transform: capitalize;
   font-weight: 700;
+  font-size: 1.1rem;
 }
 
 .watering-export {
@@ -1201,7 +1202,13 @@ pre {
   align-items: center;
 }
 
-
+.watering-month-nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.2rem;
+  margin-bottom: 0.5rem;
+}
 
 .error {
   margin: 0;

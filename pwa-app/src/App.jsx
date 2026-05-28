@@ -433,14 +433,31 @@ export default function App({ googleClientIdConfigured = false }) {
       .filter(Boolean);
   }, [selectedMyPlant]);
 
+  // Stato per mese/anno visualizzato nel calendario
+  const [calendarMonth, setCalendarMonth] = useState(() => {
+    const now = new Date();
+    return now.getMonth();
+  });
+  const [calendarYear, setCalendarYear] = useState(() => {
+    const now = new Date();
+    return now.getFullYear();
+  });
+
+  // Aggiorna mese/anno quando cambia la pianta selezionata o la schedule
+  useEffect(() => {
+    const now = new Date();
+    setCalendarMonth(now.getMonth());
+    setCalendarYear(now.getFullYear());
+  }, [selectedMyPlant, wateringSchedule.length]);
+
   const wateringMonthCalendar = useMemo(() => {
     if (!wateringSchedule.length) {
       return null;
     }
 
+    const year = calendarYear;
+    const month = calendarMonth;
     const now = new Date();
-    const year = now.getFullYear();
-    const month = now.getMonth();
     const firstDay = new Date(year, month, 1);
     const daysInMonth = new Date(year, month + 1, 0).getDate();
 
@@ -459,7 +476,8 @@ export default function App({ googleClientIdConfigured = false }) {
     }
 
     for (let day = 1; day <= daysInMonth; day += 1) {
-      const isToday = day === now.getDate();
+      // Evidenzia oggi solo se il mese/anno coincidono con oggi
+      const isToday = day === now.getDate() && month === now.getMonth() && year === now.getFullYear();
       cells.push({
         key: `day-${day}`,
         day,
@@ -474,7 +492,7 @@ export default function App({ googleClientIdConfigured = false }) {
       cells,
       highlightedCount: highlightedDays.size
     };
-  }, [wateringSchedule]);
+  }, [wateringSchedule, calendarMonth, calendarYear]);
 
   const myPlantProfileEntries = useMemo(() => {
     if (!myPlantProfile) {
@@ -1074,7 +1092,7 @@ export default function App({ googleClientIdConfigured = false }) {
     }
   }
 
-  function buildWateringSchedule(startIso, intervalDays, totalEvents = 16) {
+  function buildWateringSchedule(startIso, intervalDays) {
     const start = new Date(startIso || "");
     const days = parseWateringIntervalDays(intervalDays);
 
@@ -1082,11 +1100,16 @@ export default function App({ googleClientIdConfigured = false }) {
       return [];
     }
 
+    // Genera tutte le date di annaffiatura fino a fine dell'anno successivo
     const schedule = [];
-    for (let i = 0; i < totalEvents; i += 1) {
+    const end = new Date(start.getFullYear() + 1, 11, 31); // 31 dicembre dell'anno successivo
+    let i = 0;
+    while (true) {
       const date = new Date(start);
       date.setDate(date.getDate() + (i * days));
+      if (date > end) break;
       schedule.push(date);
+      i += 1;
     }
     return schedule;
   }
@@ -1127,7 +1150,6 @@ export default function App({ googleClientIdConfigured = false }) {
         setWateringPlan({
           startIso: item.created_at_iso,
           intervalDays: parsedInterval,
-          occurrences: 16,
           title: item.user_given_name || item.plant_name || "Innaffiatura",
           annaffiaturaTime: profile?.annaffiatura_time || null
         });
@@ -1926,7 +1948,41 @@ export default function App({ googleClientIdConfigured = false }) {
               </p>
             ) : (
               <>
-                <p className="watering-month-title">{wateringMonthCalendar?.monthLabel || "Mese corrente"}</p>
+                <div className="watering-month-nav">
+                  <button
+                    type="button"
+                    className="btn-secondary btn-small"
+                    aria-label="Mese precedente"
+                    onClick={() => {
+                      setCalendarMonth((prev) => {
+                        if (prev === 0) {
+                          setCalendarYear((y) => y - 1);
+                          return 11;
+                        }
+                        return prev - 1;
+                      });
+                    }}
+                  >
+                    ◀
+                  </button>
+                  <span className="watering-month-title">{wateringMonthCalendar?.monthLabel || "Mese corrente"}</span>
+                  <button
+                    type="button"
+                    className="btn-secondary btn-small"
+                    aria-label="Mese successivo"
+                    onClick={() => {
+                      setCalendarMonth((prev) => {
+                        if (prev === 11) {
+                          setCalendarYear((y) => y + 1);
+                          return 0;
+                        }
+                        return prev + 1;
+                      });
+                    }}
+                  >
+                    ▶
+                  </button>
+                </div>
                 {googleCalendarUrl && (
                   <a
                     className="btn-secondary watering-export"
