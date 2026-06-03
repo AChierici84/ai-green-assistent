@@ -963,6 +963,13 @@ def pwa_register_sw_js():
     return _serve_pwa_file("registerSW.js", media_type="application/javascript")
 
 
+@app.get("/workbox-{workbox_hash}.js")
+def pwa_workbox_js(workbox_hash: str):
+    # vite-plugin-pwa generates hashed workbox runtime chunks (workbox-<hash>.js).
+    filename = f"workbox-{workbox_hash}.js"
+    return _serve_pwa_file(filename, media_type="application/javascript")
+
+
 @app.get("/manifest.webmanifest")
 def pwa_manifest():
     return _serve_pwa_file("manifest.webmanifest", media_type="application/manifest+json")
