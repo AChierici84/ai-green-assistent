@@ -446,10 +446,6 @@ export default function App({ googleClientIdConfigured = false }) {
   }, [selectedMyPlant, wateringSchedule.length]);
 
   const wateringMonthCalendar = useMemo(() => {
-    if (!wateringSchedule.length) {
-      return null;
-    }
-
     const year = calendarYear;
     const month = calendarMonth;
     const now = new Date();
@@ -1686,7 +1682,7 @@ export default function App({ googleClientIdConfigured = false }) {
 
       {activeView === "recognize" && busy.plant && <p className="status">{t("loadingPlantCard")}</p>}
 
-      {activeView === "recognize" && plantCard && (
+      {activeView === "recognize" && !busy.plant && plantCard && (
         <section className="panel details">
           <div>
             <h2>{plantCard.title}</h2>
@@ -1929,7 +1925,7 @@ export default function App({ googleClientIdConfigured = false }) {
             </div>
             {myPlantCard?.common_name && <p>{t("commonNameLabel")}: {myPlantCard.common_name}</p>}
 
-            {!myPlantCard && (
+            {!busy.myPlantDetail && !myPlantCard && (
               <p className="status">
                 {t("plantCardNotAvailable")}
               </p>
@@ -1958,12 +1954,15 @@ export default function App({ googleClientIdConfigured = false }) {
 
           <div className="watering-calendar">
             <h3>{t("wateringCalendar")}</h3>
-            {!wateringSchedule.length ? (
-              <p className="status">
-                {t("noWateringSchedule")}
-              </p>
+            {busy.myPlantDetail ? (
+              <p className="status">{t("loadingSavedPlantCard")}</p>
             ) : (
               <>
+                {!wateringSchedule.length && (
+                  <p className="status">
+                    {t("noWateringSchedule")}
+                  </p>
+                )}
                 <div className="watering-month-nav">
                   <button
                     type="button"
@@ -2029,7 +2028,7 @@ export default function App({ googleClientIdConfigured = false }) {
                     </div>
                   ))}
                 </div>
-                {wateringMonthCalendar && wateringMonthCalendar.highlightedCount === 0 && (
+                {wateringSchedule.length > 0 && wateringMonthCalendar.highlightedCount === 0 && (
                   <p className="status">{t("noWateringSchedule2")}</p>
                 )}
 

@@ -49,7 +49,7 @@
     "plantCardNotAvailable": "Botanical card not available at the moment. Your photos remain available here.",
     "descriptionl": "Description",
     "wateringCalendar": "Watering calendar",
-    "noWateringSchedule": "No calendar available: check the watering_gg field in the plants table.",
+    "noWateringSchedule": "No calendar available.",
     "currentMonth": "Current month",
     "exportGoogleCalendar": "Save to Google Calendar",
     "noWateringSchedule2": "No watering scheduled for this month.",

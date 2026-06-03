@@ -49,7 +49,7 @@
     "plantCardNotAvailable": "Scheda botanica non disponibile al momento. Le tue foto restano disponibili qui.",
     "descriptionl": "Descrizione",
     "wateringCalendar": "Calendario innaffiature",
-    "noWateringSchedule": "Nessun calendario disponibile: controlla il campo annaffiatura_gg nella tabella plants.",
+    "noWateringSchedule": "Nessun calendario disponibile.",
     "currentMonth": "Mese corrente",
     "exportGoogleCalendar": "Salva su Google Calendar",
     "noWateringSchedule2": "Nessuna innaffiatura prevista in questo mese.",

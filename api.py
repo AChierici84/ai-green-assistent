@@ -464,6 +464,10 @@ class PlantChatRequest(BaseModel):
     lang: str = Field("it", description="Lingua Wikipedia da usare per il contesto")
 
 
+def _normalize_ui_lang(lang: str | None) -> str:
+    return "en" if (lang or "").strip().lower() == "en" else "it"
+
+
 class SaveUserPlantRequest(BaseModel):
     plant_name: str = Field(..., min_length=2, description="Nome della specie trovata")
     user_given_name: str = Field(..., min_length=1, max_length=80, description="Nome scelto dall'utente")
@@ -1425,13 +1429,14 @@ def plant_profile(
 @app.post("/chat/plant-care")
 def plant_care_chat(payload: PlantChatRequest, authorization: str | None = Header(default=None)):
     google_auth_service.get_google_user_from_authorization(authorization)
+    lang = _normalize_ui_lang(payload.lang)
     _log_api(
         "/chat/plant-care",
         "input",
         {
             "plant_name": payload.plant_name,
             "question": _truncate(payload.question, 300),
-            "lang": payload.lang,
+            "lang": lang,
         },
     )
 
@@ -1467,7 +1472,7 @@ def plant_care_chat(payload: PlantChatRequest, authorization: str | None = Heade
         else:
             # Fallback to Wikipedia if not found in RAG
             retrieval_mode = "wikipedia_fallback"
-            wiki_data = species_service.fetch_wikipedia_text_context(payload.plant_name, payload.lang)
+            wiki_data = species_service.fetch_wikipedia_text_context(payload.plant_name, lang)
             context_text = (wiki_data.get("summary", "") + "\n\n" + wiki_data.get("extended_text", "")).strip()
             if len(context_text) > 8000:
                 context_text = context_text[:8000] + "\n..."
@@ -1493,21 +1498,47 @@ def plant_care_chat(payload: PlantChatRequest, authorization: str | None = Heade
 
     try:
         client = OpenAI(api_key=api_key)
-        
+
         # Build user message with plant info
-        user_message = f"Pianta: {plant_title}"
+        prompt_labels = {
+            "plant": "Plant" if lang == "en" else "Pianta",
+            "question": "Question" if lang == "en" else "Domanda",
+            "context": "Context from the knowledge base" if lang == "en" else "Contesto dalla base di dati",
+            "reply_with": "Reply with" if lang == "en" else "Rispondi con",
+            "short_answer": "Short answer" if lang == "en" else "Risposta breve",
+            "what_to_do_today": "What to do today" if lang == "en" else "Cosa fare oggi",
+            "mistakes_to_avoid": "Mistakes to avoid" if lang == "en" else "Errori da evitare",
+        }
+        user_message = f"{prompt_labels['plant']}: {plant_title}"
         if common_name:
             user_message += f" ({common_name})"
         profile_context = species_service.build_profile_context(profile)
-        user_message += f"\nDomanda: {payload.question}\n\n"
+        user_message += f"\n{prompt_labels['question']}: {payload.question}\n\n"
         if profile_context:
             user_message += f"{profile_context}\n\n"
-        user_message += f"Contesto dalla base di dati:\n{context_text}\n\n"
+        user_message += f"{prompt_labels['context']}:\n{context_text}\n\n"
         user_message += (
-            "Rispondi con:\n"
-            "1) Risposta breve\n"
-            "2) Cosa fare oggi\n"
-            "3) Errori da evitare"
+            f"{prompt_labels['reply_with']}:\n"
+            f"1) {prompt_labels['short_answer']}\n"
+            f"2) {prompt_labels['what_to_do_today']}\n"
+            f"3) {prompt_labels['mistakes_to_avoid']}"
+        )
+
+        system_message = (
+            "You are a practical, clear botanical assistant. "
+            "Reply in English with concrete plant-care advice "
+            "(watering, light, soil, pruning, pests, seasonality). "
+            "If information is uncertain, state that explicitly. "
+            "Do not provide medical advice for people or animals. "
+            "Always write the whole answer in English, even if the retrieved context contains Italian text."
+            if lang == "en"
+            else (
+                "Sei un assistente botanico pratico e chiaro. "
+                "Rispondi in italiano con consigli concreti per la cura della pianta "
+                "(irrigazione, luce, terreno, potatura, parassiti, stagionalita). "
+                "Se l'informazione non e certa, dichiaralo esplicitamente. "
+                "Non dare indicazioni mediche per persone o animali."
+            )
         )
         
         completion = client.chat.completions.create(
@@ -1516,13 +1547,7 @@ def plant_care_chat(payload: PlantChatRequest, authorization: str | None = Heade
             messages=[
                 {
                     "role": "system",
-                    "content": (
-                        "Sei un assistente botanico pratico e chiaro. "
-                        "Rispondi in italiano con consigli concreti per la cura della pianta "
-                        "(irrigazione, luce, terreno, potatura, parassiti, stagionalita). "
-                        "Se l'informazione non e certa, dichiaralo esplicitamente. "
-                        "Non dare indicazioni mediche per persone o animali."
-                    ),
+                    "content": system_message,
                 },
                 {
                     "role": "user",
