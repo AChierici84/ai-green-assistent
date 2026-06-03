@@ -76,14 +76,21 @@ export async function searchPlantImage(file, k = 5) {
 export async function getPlantCard(name, options = {}) {
   const encoded = encodeURIComponent(name);
   const refreshCache = Boolean(options?.refreshCache);
-  const query = refreshCache ? "?lang=it&refresh_cache=1" : "?lang=it";
-  const response = await apiFetch(`/plant/${encoded}${query}`);
+  const lang = options?.lang === "en" ? "en" : "it";
+  const params = new URLSearchParams({ lang });
+  if (refreshCache) {
+    params.set("refresh_cache", "1");
+  }
+
+  const response = await apiFetch(`/plant/${encoded}?${params.toString()}`);
   return parseResponse(response);
 }
 
-export async function getPlantProfile(name) {
+export async function getPlantProfile(name, options = {}) {
   const encoded = encodeURIComponent(name);
-  const response = await apiFetch(`/plant/${encoded}/profile`);
+  const lang = options?.lang === "en" ? "en" : "it";
+  const params = new URLSearchParams({ lang });
+  const response = await apiFetch(`/plant/${encoded}/profile?${params.toString()}`);
   return parseResponse(response);
 }
 
@@ -115,11 +122,12 @@ export async function getSpeciesBuildStatus(speciesName) {
   return parseResponse(response);
 }
 
-export async function askPlantCare(plantName, question) {
+export async function askPlantCare(plantName, question, options = {}) {
+  const lang = options?.lang === "en" ? "en" : "it";
   const response = await apiFetch("/chat/plant-care", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ plant_name: plantName, question, lang: "it" })
+    body: JSON.stringify({ plant_name: plantName, question, lang })
   });
   return parseResponse(response);
 }

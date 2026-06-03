@@ -169,6 +169,80 @@ def _profile_has_care_data(profile: dict[str, Any] | None) -> bool:
     return False
 
 
+def _translate_profile_values_to_en(profile: dict[str, Any]) -> dict[str, Any]:
+    translated = dict(profile)
+    translatable_fields = (
+        "annaffiatura_time",
+        "luce",
+        "temperatura",
+        "umidita",
+        "altezza_media",
+        "pulizia",
+        "terriccio",
+        "concimazione",
+        "prevenzione",
+    )
+
+    source_values: dict[str, str] = {}
+    for key in translatable_fields:
+        value = translated.get(key)
+        if not isinstance(value, str):
+            continue
+        cleaned = value.strip()
+        if not cleaned:
+            continue
+        source_values[key] = cleaned
+
+    if not source_values:
+        return translated
+
+    api_key = os.getenv("OPENAI_API_KEY", "").strip()
+    if not api_key:
+        return translated
+
+    try:
+        client = OpenAI(api_key=api_key)
+        completion = client.chat.completions.create(
+            model=OPENAI_MODEL,
+            temperature=0,
+            response_format={"type": "json_object"},
+            messages=[
+                {
+                    "role": "system",
+                    "content": (
+                        "Translate Italian plant-care profile values to concise English. "
+                        "Return only a JSON object with the same keys received in input. "
+                        "Do not add or remove keys. Keep numbers, ranges, units, and botanical names intact."
+                    ),
+                },
+                {
+                    "role": "user",
+                    "content": json.dumps(source_values, ensure_ascii=False),
+                },
+            ],
+        )
+        content = (completion.choices[0].message.content or "").strip()
+        parsed = json.loads(content) if content else {}
+        if isinstance(parsed, dict):
+            for key, original_value in source_values.items():
+                translated_value = parsed.get(key)
+                if isinstance(translated_value, str) and translated_value.strip():
+                    translated[key] = translated_value.strip()
+                else:
+                    translated[key] = original_value
+    except Exception as exc:
+        logger.warning("Traduzione profilo fallita, uso testo originale: %s", exc)
+
+    return translated
+
+
+def _translate_plant_profile(profile: dict[str, Any], lang: str) -> dict[str, Any]:
+    normalized_lang = (lang or "it").strip().lower()
+    if normalized_lang != "en":
+        return profile
+    return _translate_profile_values_to_en(profile)
+
+
 def _normalize_image_path(raw_path: str) -> str:
     """Normalize image path to be relative to data/images."""
     normalized = str(raw_path or "").replace("\\", "/").strip().lstrip("/")
@@ -1038,9 +1112,17 @@ def plant_info(
 
     normalized_name = (name or "").strip()
     normalized_lang = (lang or "it").strip().lower()
+    is_english = normalized_lang == "en"
 
     if not refresh_cache:
         cached_payload = get_cached_plant_card(normalized_name, normalized_lang)
+        if cached_payload is not None:
+            cached_markdown = str(cached_payload.get("markdown") or "")
+            if is_english and ("**Nome comune:**" in cached_markdown or "\n---\nFonte:" in cached_markdown):
+                cached_payload = None
+            if not is_english and ("**Common name:**" in cached_markdown or "\n---\nSource:" in cached_markdown):
+                cached_payload = None
+
         if cached_payload is not None:
             cached_payload["build_status"] = species_service._species_build_status(cached_payload.get("title") or normalized_name)
             _log_api(
@@ -1095,15 +1177,27 @@ def plant_info(
                     if not db_profile.get("indexed"):
                         species_service._ensure_species_build_job(title)
                     if db_profile.get("indexed"):
-                        extract = (
-                            "Scheda non ancora disponibile dalla base conoscenza RAG. "
-                            "Stiamo completando i contenuti per questa specie."
-                        )
+                        if is_english:
+                            extract = (
+                                "The card is not available yet from the RAG knowledge base. "
+                                "We are completing the content for this species."
+                            )
+                        else:
+                            extract = (
+                                "Scheda non ancora disponibile dalla base conoscenza RAG. "
+                                "Stiamo completando i contenuti per questa specie."
+                            )
                     else:
-                        extract = (
-                            "Scheda in costruzione. Questa specie e stata riconosciuta, "
-                            "ma i contenuti descrittivi sono ancora in preparazione."
-                        )
+                        if is_english:
+                            extract = (
+                                "Card under construction. This species has been recognized, "
+                                "but descriptive content is still being prepared."
+                            )
+                        else:
+                            extract = (
+                                "Scheda in costruzione. Questa specie e stata riconosciuta, "
+                                "ma i contenuti descrittivi sono ancora in preparazione."
+                            )
                 else:
                     retrieval_mode = "db_draft"
                     rag_used = False
@@ -1119,10 +1213,16 @@ def plant_info(
                             draft_exc,
                         )
                     species_service._ensure_species_build_job(title)
-                    extract = (
-                        "Specie non presente in RAG/Wikipedia/catalogo locale: "
-                        "ho creato una scheda bozza e avviato la costruzione automatica dei contenuti."
-                    )
+                    if is_english:
+                        extract = (
+                            "Species not found in RAG/Wikipedia/local catalog: "
+                            "I created a draft card and started automatic content generation."
+                        )
+                    else:
+                        extract = (
+                            "Specie non presente in RAG/Wikipedia/catalogo locale: "
+                            "ho creato una scheda bozza e avviato la costruzione automatica dei contenuti."
+                        )
         else:
             retrieval_mode = "rag"
             rag_used = True
@@ -1147,24 +1247,33 @@ def plant_info(
             if api_key:
                 try:
                     client = OpenAI(api_key=api_key)
+                    system_prompt = (
+                        "You are an expert botanist. Generate a concise and engaging summary "
+                        "of the plant using the provided reference text. Include: description, habitat, "
+                        "distinctive characteristics, and uses. Respond in English."
+                        if is_english
+                        else "Sei un botanico esperto. Genera un riassunto conciso e affascinante "
+                        "della pianta in base al testo fornito. Includi: descrizione, habitat, "
+                        "caratteristiche distintive e usi. Rispondi in italiano."
+                    )
+                    user_prompt = (
+                        f"Create an engaging summary of the plant '{title}'.\n\n"
+                        f"Reference text:\n{combined_text}"
+                        if is_english
+                        else f"Crea un riassunto affascinante della pianta '{title}'.\n\n"
+                        f"Testo di riferimento:\n{combined_text}"
+                    )
                     completion = client.chat.completions.create(
                         model=OPENAI_MODEL,
                         temperature=0.3,
                         messages=[
                             {
                                 "role": "system",
-                                "content": (
-                                    "Sei un botanico esperto. Genera un riassunto conciso e affascinante "
-                                    "della pianta in base al testo fornito. Includi: descrizione, habitat, "
-                                    "caratteristiche distintive e usi. Rispondi in italiano."
-                                ),
+                                "content": system_prompt,
                             },
                             {
                                 "role": "user",
-                                "content": (
-                                    f"Crea un riassunto affascinante della pianta '{title}'.\n\n"
-                                    f"Testo di riferimento:\n{combined_text}"
-                                ),
+                                "content": user_prompt,
                             },
                         ],
                     )
@@ -1204,7 +1313,7 @@ def plant_info(
     md_lines = [f"# {title}\n"]
 
     if common_name:
-        md_lines.append(f"**Nome comune:** {common_name}\n")
+        md_lines.append(f"**{'Common name' if is_english else 'Nome comune'}:** {common_name}\n")
 
     if images:
         img_tags = "".join(
@@ -1216,11 +1325,11 @@ def plant_info(
     md_lines.append(extract + "\n")
 
     if rag_used:
-        source_info = "Fonte: Database RAG"
+        source_info = "Source: RAG database" if is_english else "Fonte: Database RAG"
     elif retrieval_mode.startswith("wikipedia"):
-        source_info = "Fonte: Wikipedia"
+        source_info = "Source: Wikipedia" if is_english else "Fonte: Wikipedia"
     else:
-        source_info = "Fonte: Database locale"
+        source_info = "Source: Local database" if is_english else "Fonte: Database locale"
     md_lines.append(f"\n---\n{source_info}")
 
     markdown = "\n".join(md_lines)
@@ -1279,9 +1388,13 @@ def proxy_drive_image(file_id: str):
         raise HTTPException(status_code=500, detail=f"Errore proxy Google Drive: {exc}")
 
 @app.get("/plant/{name}/profile")
-def plant_profile(name: str, authorization: str | None = Header(default=None)):
+def plant_profile(
+    name: str,
+    lang: str = Query(default="it", description="Codice lingua profilo (es. it, en)"),
+    authorization: str | None = Header(default=None),
+):
     google_auth_service.get_google_user_from_authorization(authorization, require_auth=False)
-    _log_api("/plant/{name}/profile", "input", {"name": name})
+    _log_api("/plant/{name}/profile", "input", {"name": name, "lang": lang})
 
     try:
         profile = get_plant_profile_from_db(name)
@@ -1293,17 +1406,20 @@ def plant_profile(name: str, authorization: str | None = Header(default=None)):
     if profile is None:
         raise HTTPException(status_code=404, detail=f"Profilo DB non trovato per '{name}'.")
 
+    translated_profile = _translate_plant_profile(profile, lang)
+
     _log_api(
         "/plant/{name}/profile",
         "output",
         {
-            "species_name": profile["species_name"],
-            "indexed": profile["indexed"],
-            "updated_at": profile["updated_at"],
+            "species_name": translated_profile["species_name"],
+            "indexed": translated_profile["indexed"],
+            "updated_at": translated_profile["updated_at"],
+            "lang": (lang or "it").strip().lower(),
         },
     )
 
-    return JSONResponse(content=profile)
+    return JSONResponse(content=translated_profile)
 
 
 @app.post("/chat/plant-care")

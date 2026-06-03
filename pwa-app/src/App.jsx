@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useTranslation, Trans } from "react-i18next";
 import { GoogleLogin } from "@react-oauth/google";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -28,18 +29,18 @@ import {
 
 const AUTH_STORAGE_KEY = "clorofilla-auth";
 
-const PROFILE_LABELS = {
-  annaffiatura_gg: "Annaffiatura",
-  annaffiatura_time: "Momento annaffiatura",
-  luce: "Luce",
-  temperatura: "Temperatura",
-  umidita: "Umidita",
-  altezza_media: "Altezza media",
-  pulizia: "Pulizia",
-  terriccio: "Terriccio",
-  concimazione: "Concimazione",
-  prevenzione: "Prevenzione"
-};
+const PROFILE_KEYS = [
+  "annaffiatura_gg",
+  "annaffiatura_time",
+  "luce",
+  "temperatura",
+  "umidita",
+  "altezza_media",
+  "pulizia",
+  "terriccio",
+  "concimazione",
+  "prevenzione"
+];
 
 const PROFILE_ICONS = {
   annaffiatura_gg: "\u{1F4A7}",
@@ -52,19 +53,6 @@ const PROFILE_ICONS = {
   terriccio: "\u{1F331}",
   concimazione: "\u{1F9EA}",
   prevenzione: "\u{1F6E1}\u{FE0F}"
-};
-
-const PROFILE_DESCRIPTIONS = {
-  annaffiatura_gg: "Ogni quanti giorni annaffiare la pianta.",
-  annaffiatura_time: "Il momento migliore della giornata per annaffiare.",
-  luce: "Tipo di esposizione alla luce solare consigliata.",
-  temperatura: "Intervallo di temperatura ideale per la crescita.",
-  umidita: "Livello di umidità ambientale preferito.",
-  altezza_media: "Altezza media raggiunta dalla pianta adulta.",
-  pulizia: "Frequenza e modalità di pulizia delle foglie.",
-  terriccio: "Tipo di substrato o terriccio consigliato.",
-  concimazione: "Frequenza e tipo di concimazione raccomandati.",
-  prevenzione: "Principali parassiti e malattie da prevenire."
 };
 
 function shouldAutoSelectTopResult(results) {
@@ -117,7 +105,12 @@ function parseWateringIntervalDays(intervalDays) {
     return null;
   }
 
-  return Math.max(1, Math.round(days));
+  const roundedDays = Math.round(days);
+  if (roundedDays <= 0) {
+    return null;
+  }
+
+  return roundedDays;
 }
 
 function formatDurationMs(ms) {
@@ -221,6 +214,8 @@ function requestGoogleDriveAccessToken(idToken, interactive = true) {
 }
 
 export default function App({ googleClientIdConfigured = false }) {
+  const { t, i18n: i18nInstance } = useTranslation();
+  const getBackendLang = () => (i18nInstance.language === "en" ? "en" : "it");
   const [auth, setAuth] = useState(null);
   const [authBusy, setAuthBusy] = useState(false);
   const [isAuthMenuOpen, setIsAuthMenuOpen] = useState(false);
@@ -289,7 +284,7 @@ export default function App({ googleClientIdConfigured = false }) {
   const [error, setError] = useState("");
   const [searchStepIndex, setSearchStepIndex] = useState(0);
 
-  const searchSteps = ["Leggo i dettagli della foglia", "Confronto con le specie note", "Preparo i risultati migliori"];
+  const searchSteps = [t("searchStep1"), t("searchStep2"), t("searchStep3")];
 
   const activeChatPlantName = activeView === "my-plants"
     ? (selectedMyPlant?.plant_name || "")
@@ -333,8 +328,8 @@ export default function App({ googleClientIdConfigured = false }) {
 
         if (statusData?.ready || status === "completed") {
           const [card, profile] = await Promise.all([
-            getPlantCard(speciesName, { refreshCache: true }),
-            getPlantProfile(speciesName).catch(() => null)
+            getPlantCard(speciesName, { refreshCache: true, lang: getBackendLang() }),
+            getPlantProfile(speciesName, { lang: getBackendLang() }).catch(() => null)
           ]);
 
           const stillDraft = card?.source === "db_draft" || profile?.indexed === false || !profile;
@@ -486,13 +481,17 @@ export default function App({ googleClientIdConfigured = false }) {
       });
     }
 
+    const localeCode = i18nInstance.language === "en" ? "en-US" : "it-IT";
     return {
-      monthLabel: firstDay.toLocaleDateString("it-IT", { month: "long", year: "numeric" }),
-      weekdays: ["Lun", "Mar", "Mer", "Gio", "Ven", "Sab", "Dom"],
+      monthLabel: firstDay.toLocaleDateString(localeCode, { month: "long", year: "numeric" }),
+      weekdays: [
+        t("weekdayShortMon"), t("weekdayShortTue"), t("weekdayShortWed"),
+        t("weekdayShortThu"), t("weekdayShortFri"), t("weekdayShortSat"), t("weekdayShortSun")
+      ],
       cells,
       highlightedCount: highlightedDays.size
     };
-  }, [wateringSchedule, calendarMonth, calendarYear]);
+  }, [wateringSchedule, calendarMonth, calendarYear, t, i18nInstance.language]);
 
   const myPlantProfileEntries = useMemo(() => {
     if (!myPlantProfile) {
@@ -503,22 +502,22 @@ export default function App({ googleClientIdConfigured = false }) {
       if (key === "annaffiatura_gg") {
         const numeric = Number(value);
         if (!Number.isNaN(numeric)) {
-          return `${numeric} ${numeric === 1 ? "giorno" : "giorni"}`;
+          return `${numeric} ${t(numeric === 1 ? "day" : "days_plural")}`;
         }
       }
       return value;
     };
 
-    return Object.entries(PROFILE_LABELS)
-      .map(([key, label]) => ({
+    return PROFILE_KEYS
+      .map((key) => ({
         key,
-        label,
+        label: t(`profile_label_${key}`),
         icon: PROFILE_ICONS[key] || "\u{2139}\u{FE0F}",
-        desc: PROFILE_DESCRIPTIONS[key] || "",
+        desc: t(`profile_desc_${key}`),
         value: formatProfileValue(key, myPlantProfile[key])
       }))
       .filter((entry) => entry.value !== null && entry.value !== "");
-  }, [myPlantProfile]);
+  }, [myPlantProfile, t]);
 
   // Controlla se il token ha lo scope Drive
   function tokenHasDriveScope(idToken) {
@@ -723,22 +722,22 @@ export default function App({ googleClientIdConfigured = false }) {
       if (key === "annaffiatura_gg") {
         const numeric = Number(value);
         if (!Number.isNaN(numeric)) {
-          return `${numeric} ${numeric === 1 ? "giorno" : "giorni"}`;
+          return `${numeric} ${t(numeric === 1 ? "day" : "days_plural")}`;
         }
       }
       return value;
     };
 
-    return Object.entries(PROFILE_LABELS)
-      .map(([key, label]) => ({
+    return PROFILE_KEYS
+      .map((key) => ({
         key,
-        label,
+        label: t(`profile_label_${key}`),
         icon: PROFILE_ICONS[key] || "\u{2139}\u{FE0F}",
-        desc: PROFILE_DESCRIPTIONS[key] || "",
+        desc: t(`profile_desc_${key}`),
         value: formatProfileValue(key, plantProfile[key])
       }))
       .filter((entry) => entry.value !== null && entry.value !== "");
-  }, [plantProfile]);
+  }, [plantProfile, t]);
 
   async function handleUploadMyPlantPhoto(plantId, file) {
     setUploadingPhotoId(plantId);
@@ -909,8 +908,8 @@ export default function App({ googleClientIdConfigured = false }) {
 
     try {
       const [card, profile] = await Promise.all([
-        getPlantCard(speciesName),
-        getPlantProfile(speciesName).catch(() => null)
+        getPlantCard(speciesName, { lang: getBackendLang() }),
+        getPlantProfile(speciesName, { lang: getBackendLang() }).catch(() => null)
       ]);
       setPlantCard(card);
       setPlantProfile(profile);
@@ -962,7 +961,7 @@ export default function App({ googleClientIdConfigured = false }) {
     setBusy((prev) => ({ ...prev, chat: true }));
 
     try {
-      const data = await askPlantCare(activeChatPlantName, question.trim());
+      const data = await askPlantCare(activeChatPlantName, question.trim(), { lang: getBackendLang() });
       setChatAnswer(data.answer || "Nessuna risposta disponibile.");
     } catch (err) {
       setError(err.message);
@@ -1135,8 +1134,8 @@ export default function App({ googleClientIdConfigured = false }) {
 
     try {
       const [card, profile] = await Promise.all([
-        getPlantCard(item.plant_name),
-        getPlantProfile(item.plant_name).catch(() => null)
+        getPlantCard(item.plant_name, { lang: getBackendLang() }),
+        getPlantProfile(item.plant_name, { lang: getBackendLang() }).catch(() => null)
       ]);
       setMyPlantCard(card);
       setMyPlantProfile(profile);
@@ -1443,16 +1442,34 @@ export default function App({ googleClientIdConfigured = false }) {
           <div className="hero-topbar">
             <div className="hero-brand-block">
               <div className="hero-brand">
-                <img src="/icons/icon-512.svg" alt="Icona Clorofilla" className="hero-logo" />
-                <p className="tag">Clorofilla</p>
+                <img src="/icons/icon-512.svg" alt={t("logoAlt")} className="hero-logo" />
+                <p className="tag"><Trans i18nKey="welcome" components={{ highlight: <span className="hero-highlight" /> }} /></p>
               </div>
-              <h1>Ti aiuta a <span className="hero-highlight">riconoscere</span> e <span className="hero-highlight">curare</span> le tue piante.</h1>
+              <h1><Trans i18nKey="description" components={{ highlight: <span className="hero-highlight" />, br: <br /> }} /></h1>
             </div>
 
             <div className="auth-box">
+              <div className="lang-switcher">
+                <button
+                  type="button"
+                  className={`lang-btn ${i18nInstance.language === "it" ? "active" : ""}`}
+                  onClick={() => i18nInstance.changeLanguage("it")}
+                  aria-label="Italiano"
+                >
+                  IT
+                </button>
+                <button
+                  type="button"
+                  className={`lang-btn ${i18nInstance.language === "en" ? "active" : ""}`}
+                  onClick={() => i18nInstance.changeLanguage("en")}
+                  aria-label="English"
+                >
+                  EN
+                </button>
+              </div>
               {!googleClientIdConfigured && (
                 <p className="auth-warning">
-                  Configura GOOGLE_CLIENT_ID nello Space per abilitare il login con Google.
+                  {t("configureGoogleLogin")}
                 </p>
               )}
 
@@ -1460,7 +1477,7 @@ export default function App({ googleClientIdConfigured = false }) {
                 <div className="auth-login">
                   <GoogleLogin
                     onSuccess={handleGoogleSuccess}
-                    onError={() => setError("Login Google annullato o non riuscito.")}
+                    onError={() => setError(t("loginCancelledOrFailed"))}
                     shape="pill"
                     text="signin_with"
                   />
@@ -1471,11 +1488,11 @@ export default function App({ googleClientIdConfigured = false }) {
                 <div className="auth-user">
                   <div className="auth-user-panel" ref={authMenuRef}>
                     <div className="auth-user-header">
-                      <strong>{auth?.user?.name || "Utente Google"}</strong>
+                      <strong>{auth?.user?.name || t("googleuser")}</strong>
                       <button
                         type="button"
                         className="auth-menu-toggle"
-                        aria-label="Apri menu utente"
+                        aria-label={t("openusermenu")}
                         aria-expanded={isAuthMenuOpen}
                         onClick={() => setIsAuthMenuOpen((prev) => !prev)}
                       >
@@ -1488,11 +1505,11 @@ export default function App({ googleClientIdConfigured = false }) {
                       <div className="auth-user-menu" role="menu" aria-label="Menu utente">
                         {isAdmin && (
                           <button type="button" className="auth-user-menu-item" onClick={openAdminConsole}>
-                            Console
+                            {t("console")}
                           </button>
                         )}
                         <button type="button" className="auth-user-menu-item" onClick={handleLogout}>
-                          Esci
+                          {t("logout")}
                         </button>
                       </div>
                     )}
@@ -1500,7 +1517,7 @@ export default function App({ googleClientIdConfigured = false }) {
                 </div>
               )}
 
-              {authBusy && <p className="status">Verifica accesso Google...</p>}
+              {authBusy && <p className="status">{t("googleverification")}</p>}
             </div>
           </div>
         </div>
@@ -1512,7 +1529,7 @@ export default function App({ googleClientIdConfigured = false }) {
           className={`menu-btn ${activeView === "recognize" ? "active" : ""}`}
           onClick={() => setActiveView("recognize")}
         >
-          Riconosci nuova pianta
+          {t("recognizeNewPlant")}
         </button>
         {isLoggedIn && (
           <button
@@ -1520,7 +1537,7 @@ export default function App({ googleClientIdConfigured = false }) {
             className={`menu-btn ${activeView === "my-plants" ? "active" : ""}`}
             onClick={() => setActiveView("my-plants")}
           >
-            Le tue piante
+            {t("myPlants")}
           </button>
         )}
         {!isLoggedIn && (
@@ -1529,7 +1546,7 @@ export default function App({ googleClientIdConfigured = false }) {
             className={`menu-btn ${activeView === "register" ? "active" : ""}`}
             onClick={openRegisterPage}
           >
-            Registrati
+            {t("register")}
           </button>
         )}
       </section>
@@ -1577,18 +1594,18 @@ export default function App({ googleClientIdConfigured = false }) {
                 }
               }}
             >
-              <p className="dropzone-title">Carica immagine pianta</p>
+              <p className="dropzone-title">{t("uploadPlantImage")}</p>
               <p className="dropzone-subtitle">
-                {file ? `Selezionata: ${file.name}` : "Trascina qui una foto oppure clicca per scegliere"}
+                {file ? `${t("selectedFile")}: ${file.name}` : t("dropzoneSubtitle")}
               </p>
             </div>
 
             <button type="button" className="btn-secondary" onClick={openCameraDialog} disabled={busy.search}>
-              Scatta foto
+              {t("takePhoto")}
             </button>
 
             <button type="submit" disabled={busy.search}>
-              {busy.search ? "Riconoscimento in corso..." : "Riconosci pianta"}
+              {busy.search ? t("recognitionInProgress") : t("recognizePlant")}
             </button>
 
             {busy.search && (
@@ -1599,7 +1616,7 @@ export default function App({ googleClientIdConfigured = false }) {
           </form>
           {preview && (
             <div className={`preview-shell ${busy.search ? "scanning" : ""}`}>
-              <img className="preview" src={preview} alt="Anteprima upload" />
+              <img className="preview" src={preview} alt={t("previewAlt")} />
               {busy.search && (
                 <div className="scan-overlay" aria-hidden="true">
                   <span className="scan-line" />
@@ -1615,14 +1632,14 @@ export default function App({ googleClientIdConfigured = false }) {
         <section className="panel">
           {!showSpeciesGrid ? (
             <button className="btn-secondary" onClick={() => setShowSpeciesGrid(true)}>
-              ▾ Visualizza altre specie
+              ▾ {t("showFoundSpecies")}
             </button>
           ) : (
             <>
               <div className="species-header">
-                <h2>Specie trovate</h2>
+                <h2>{t("foundSpecies")}</h2>
                 <button className="btn-secondary btn-small" onClick={() => setShowSpeciesGrid(false)}>
-                  ▴ Nascondi
+                  ▴ {t("hideFoundSpecies")}
                 </button>
               </div>
               <div className="result-grid">
@@ -1636,7 +1653,7 @@ export default function App({ googleClientIdConfigured = false }) {
                       <img
                         className="result-preview"
                         src={toOptimizedImage(speciesPreviews[item.species], 420)}
-                        alt={`Esempio ${item.species}`}
+                        alt={`${t("exampleAlt")} ${item.species}`}
                         loading="lazy"
                         decoding="async"
                       />
@@ -1646,7 +1663,7 @@ export default function App({ googleClientIdConfigured = false }) {
                       <span className="result-common-name">({speciesCommonNames[item.species]})</span>
                     )}
                     {!!item.is_draft && (
-                      <span className="badge-draft">🔨 scheda in costruzione</span>
+                      <span className="badge-draft">🔨 {t("draftCard")}</span>
                     )}
                     <div className="score-bar" aria-label={`Affinita ${(Number(item.displayScore ?? item.score ?? 0) * 100).toFixed(1)} percento`}>
                       <div className="score-fill" style={{ width: `${Math.max(0, Math.min(100, Number(item.displayScore ?? item.score ?? 0) * 100))}%` }} />
@@ -1660,24 +1677,23 @@ export default function App({ googleClientIdConfigured = false }) {
                 onClick={loadMoreSpecies}
                 disabled={busy.moreSpecies}
               >
-                {busy.moreSpecies ? "Cerco..." : "+ Altre specie"}
+                {busy.moreSpecies ? t("searching") : `+ ${t("moreSpecies")}`}
               </button>
             </>
           )}
         </section>
       )}
 
-      {activeView === "recognize" && busy.plant && <p className="status">Caricamento scheda pianta...</p>}
+      {activeView === "recognize" && busy.plant && <p className="status">{t("loadingPlantCard")}</p>}
 
       {activeView === "recognize" && plantCard && (
         <section className="panel details">
           <div>
             <h2>{plantCard.title}</h2>
-            {plantCard.common_name && <p>Nome comune: {plantCard.common_name}</p>}
+            {plantCard.common_name && <p>{t("commonNameLabel")}: {plantCard.common_name}</p>}
             {!!isSelectedDraft && (
               <div className="banner-draft">
-                🔨 <strong>Scheda in costruzione</strong> — questa specie è stata identificata
-                dall'IA ma la sua scheda completa non è ancora disponibile.
+                🔨 <strong>{t("draftBannerTitle")}</strong> — {t("draftCardDescription")}
               </div>
             )}
             {!!draftBuildMessage && <p className="status">{draftBuildMessage}</p>}
@@ -1688,7 +1704,7 @@ export default function App({ googleClientIdConfigured = false }) {
                   type="button"
                   className="gallery-nav"
                   onClick={prevImage}
-                  aria-label="Foto precedente"
+                  aria-label={t("previousPhoto")}
                 >
                   &lt;
                 </button>
@@ -1716,7 +1732,7 @@ export default function App({ googleClientIdConfigured = false }) {
                   type="button"
                   className="gallery-nav"
                   onClick={nextImage}
-                  aria-label="Foto successiva"
+                  aria-label={t("nextPhoto")}
                 >
                   &gt;
                 </button>
@@ -1756,24 +1772,24 @@ export default function App({ googleClientIdConfigured = false }) {
             )}
           </div>
 
-          <h3>Descrizione</h3>
+          <h3>{t("descriptionl")}</h3>
           <div className="summary markdown-content">
             <ReactMarkdown remarkPlugins={[remarkGfm]}>{plantCard.summary || ""}</ReactMarkdown>
           </div>
 
           {isLoggedIn && selectedSpecies && (
             <div className="my-plant-save">
-              <h3>Salva tra le tue piante</h3>
+              <h3>{t("saveOnYourPlants")}</h3>
               <form className="my-plant-form" onSubmit={handleSavePlant}>
                 <input
                   type="text"
                   value={userPlantName}
                   onChange={(event) => setUserPlantName(event.target.value)}
-                  placeholder="Nome dato dall'utente (es. Basilico balcone)"
+                  placeholder={t("enterPlantName")}
                   maxLength={80}
                 />
                 <button type="submit" disabled={busy.savePlant}>
-                  {busy.savePlant ? "Salvataggio..." : "Salva questa pianta"}
+                  {busy.savePlant ? t("saving") : t("savePlant")}
                 </button>
               </form>
               {saveStatus && <p className="status">{saveStatus}</p>}
@@ -1785,7 +1801,7 @@ export default function App({ googleClientIdConfigured = false }) {
       {isLoggedIn && activeView === "my-plants" && (
         <section className="panel">
           <div className="species-header">
-            <h2>Le tue piante</h2>
+            <h2>{t("myPlants")}</h2>
             <div className="my-plants-header-actions">
               {!!selectedMyPlant && isMyPlantsListCollapsed && (
                 <button
@@ -1793,7 +1809,7 @@ export default function App({ googleClientIdConfigured = false }) {
                   className="btn-secondary btn-small"
                   onClick={() => setIsMyPlantsListCollapsed(false)}
                 >
-                  Scegli un'altra pianta
+                  {t("chooseAnotherPlant")}
                 </button>
               )}
               <button
@@ -1802,13 +1818,13 @@ export default function App({ googleClientIdConfigured = false }) {
                 onClick={loadMyPlants}
                 disabled={busy.myPlants}
               >
-                {busy.myPlants ? "Aggiorno..." : "Aggiorna"}
+                {busy.myPlants ? t("updating") : t("update")}
               </button>
             </div>
           </div>
 
           {!myPlants.length && !busy.myPlants && (
-            <p className="status">Non hai ancora salvato piante.</p>
+            <p className="status">{t("noPlantsSaved")}</p>
           )}
 
           {!!myPlants.length && !isMyPlantsListCollapsed && (
@@ -1843,7 +1859,7 @@ export default function App({ googleClientIdConfigured = false }) {
                       onClick={(event) => handleDeleteMyPlant(item, event)}
                       disabled={deletingPlantId === item.id}
                     >
-                      {deletingPlantId === item.id ? "Elimino..." : "Elimina"}
+                      {deletingPlantId === item.id ? t("deleting") : t("delete")}
                     </button>
                   </div>
                   {cardPhoto && (
@@ -1853,15 +1869,15 @@ export default function App({ googleClientIdConfigured = false }) {
                       className="my-plant-item-photo"
                     />
                   )}
-                  <p>Specie: {item.plant_name}</p>
-                  <p>Inserita: {item.created_at}</p>
+                  <p>{t("speciesLabel")}: {item.plant_name}</p>
+                  <p>{t("addedAtLabel")}: {item.created_at}</p>
                   <button
                     type="button"
                     className="btn-secondary btn-small btn-upload-photo"
                     onClick={(event) => { event.stopPropagation(); openPlantPhotoDialog(item.id); }}
                     disabled={uploadingPhotoId === item.id}
                   >
-                    {uploadingPhotoId === item.id ? "Carico..." : (photoCount > 0 ? `📷 Aggiungi altra foto (${photoCount})` : "📷 Aggiungi foto")}
+                    {uploadingPhotoId === item.id ? t("uploading") : (photoCount > 0 ? t("addAnotherPhoto", { count: photoCount }) : t("addPhoto"))}
                   </button>
                 </article>
                 );
@@ -1872,26 +1888,26 @@ export default function App({ googleClientIdConfigured = false }) {
       )}
 
       {isLoggedIn && activeView === "my-plants" && busy.myPlantDetail && (
-        <p className="status">Caricamento scheda pianta salvata...</p>
+        <p className="status">{t("loadingSavedPlantCard")}</p>
       )}
 
       {isLoggedIn && activeView === "my-plants" && selectedMyPlant && (
         <section className="panel details">
           <div>
-            <h2>{myPlantCard?.title || selectedMyPlant?.plant_name || "Scheda pianta"}</h2>
+            <h2>{myPlantCard?.title || selectedMyPlant?.plant_name || t("plantCard")}</h2>
             {selectedMyPlant?.user_given_name && (
-              <p>Il tuo nome: {selectedMyPlant.user_given_name}</p>
+              <p>{t("yourNameLabel")}: {selectedMyPlant.user_given_name}</p>
             )}
             <div className="my-plant-user-gallery">
               <div className="my-plant-user-gallery-head">
-                <p className="my-plant-user-gallery-title">Le tue foto</p>
+                <p className="my-plant-user-gallery-title">{t("yourPhotos")}</p>
                 <button
                   type="button"
                   className="btn-secondary btn-small"
                   onClick={() => selectedMyPlant?.id && openPlantPhotoDialog(selectedMyPlant.id)}
                   disabled={!selectedMyPlant?.id || uploadingPhotoId === selectedMyPlant?.id}
                 >
-                  {uploadingPhotoId === selectedMyPlant?.id ? "Carico..." : "Aggiungi foto"}
+                  {uploadingPhotoId === selectedMyPlant?.id ? t("uploading") : t("addPhoto")}
                 </button>
               </div>
 
@@ -1908,14 +1924,14 @@ export default function App({ googleClientIdConfigured = false }) {
                   ))}
                 </div>
               ) : (
-                <p className="status">Nessuna foto caricata per questa pianta.</p>
+                <p className="status">{t("noPhotos")}</p>
               )}
             </div>
-            {myPlantCard?.common_name && <p>Nome comune: {myPlantCard.common_name}</p>}
+            {myPlantCard?.common_name && <p>{t("commonNameLabel")}: {myPlantCard.common_name}</p>}
 
             {!myPlantCard && (
               <p className="status">
-                Scheda botanica non disponibile al momento. Le tue foto restano disponibili qui.
+                {t("plantCardNotAvailable")}
               </p>
             )}
 
@@ -1933,7 +1949,7 @@ export default function App({ googleClientIdConfigured = false }) {
 
           {!!myPlantCard?.summary && (
             <>
-              <h3>Descrizione</h3>
+              <h3>{t("descriptionl")}</h3>
               <div className="summary markdown-content">
                 <ReactMarkdown remarkPlugins={[remarkGfm]}>{myPlantCard.summary || ""}</ReactMarkdown>
               </div>
@@ -1941,10 +1957,10 @@ export default function App({ googleClientIdConfigured = false }) {
           )}
 
           <div className="watering-calendar">
-            <h3>Calendario innaffiature</h3>
+            <h3>{t("wateringCalendar")}</h3>
             {!wateringSchedule.length ? (
               <p className="status">
-                Nessun calendario disponibile: controlla il campo annaffiatura_gg nella tabella plants.
+                {t("noWateringSchedule")}
               </p>
             ) : (
               <>
@@ -1965,7 +1981,7 @@ export default function App({ googleClientIdConfigured = false }) {
                   >
                     ◀
                   </button>
-                  <span className="watering-month-title">{wateringMonthCalendar?.monthLabel || "Mese corrente"}</span>
+                  <span className="watering-month-title">{wateringMonthCalendar?.monthLabel || t("currentMonth")}</span>
                   <button
                     type="button"
                     className="btn-secondary btn-small"
@@ -1990,7 +2006,7 @@ export default function App({ googleClientIdConfigured = false }) {
                     target="_blank"
                     rel="noreferrer"
                   >
-                    Salva su Google Calendar
+                    {t("exportGoogleCalendar")}
                   </a>
                 )}
                 <div className="watering-weekdays">
@@ -2014,7 +2030,7 @@ export default function App({ googleClientIdConfigured = false }) {
                   ))}
                 </div>
                 {wateringMonthCalendar && wateringMonthCalendar.highlightedCount === 0 && (
-                  <p className="status">Nessuna innaffiatura prevista in questo mese.</p>
+                  <p className="status">{t("noWateringSchedule2")}</p>
                 )}
 
                 <div className="watering-actions">
@@ -2023,7 +2039,7 @@ export default function App({ googleClientIdConfigured = false }) {
                     className="btn-secondary"
                     onClick={() => setIsEditingFirstWaterDate((prev) => !prev)}
                   >
-                    Cambia data prima innaffiatura
+                    {t("changeFirstWaterDate")}
                   </button>
 
                   {isEditingFirstWaterDate && (
@@ -2038,7 +2054,7 @@ export default function App({ googleClientIdConfigured = false }) {
                         onClick={applyFirstWateringDateChange}
                         disabled={!firstWaterDateInput || busy.updateFirstWaterDate}
                       >
-                        {busy.updateFirstWaterDate ? "Salvo..." : "Applica data"}
+                        {busy.updateFirstWaterDate ? t("savingShort") : t("applyDate")}
                       </button>
                     </div>
                   )}
@@ -2051,21 +2067,21 @@ export default function App({ googleClientIdConfigured = false }) {
 
       {!isLoggedIn && activeView === "register" && (
         <section className="panel guest-register-panel">
-          <h2>Registrati o accedi con Google</h2>
+          <h2>{t("registerOrLoginWithGoogle")}</h2>
           <p className="status guest-register-text">
-            Accedi con Google per salvare le tue piante e chiedere consigli personalizzati sulla loro cura.
+            {t("loginWithGoogleToSavePlants")}
           </p>
           {googleClientIdConfigured ? (
             <div className="auth-login">
               <GoogleLogin
                 onSuccess={handleGoogleSuccess}
-                onError={() => setError("Login Google annullato o non riuscito.")}
+                onError={() => setError(t("loginCancelledOrFailed"))}
                 shape="pill"
                 text="signin_with"
               />
             </div>
           ) : (
-            <p className="auth-warning">Configura GOOGLE_CLIENT_ID per abilitare la registrazione Google.</p>
+            <p className="auth-warning">{t("configureGoogleRegister")}</p>
           )}
         </section>
       )}
@@ -2073,7 +2089,7 @@ export default function App({ googleClientIdConfigured = false }) {
       {isLoggedIn && activeView === "my-plants" && selectedMyPlant?.plant_name && (
         <section className="panel">
           <h2>
-            Domanda sulla cura
+            {t("askForCareAdvice")}
             {activeChatPlantName ? `: ${activeChatPlantName}` : ""}
           </h2>
           <form onSubmit={handleQuestion} className="chat-form">
@@ -2081,10 +2097,10 @@ export default function App({ googleClientIdConfigured = false }) {
               value={question}
               onChange={(event) => setQuestion(event.target.value)}
               rows={4}
-              placeholder="Esempio: devo rinvasarla ora o aspettare?"
+              placeholder={t("exampleQuestion")}
             />
             <button type="submit" disabled={!canAsk || busy.chat || !isLoggedIn}>
-              {busy.chat ? "Sto preparando la risposta..." : "Chiedi consigli"}
+              {busy.chat ? t("preparingAnswer") : t("askCareBtn")}
             </button>
           </form>
           {chatAnswer && (
@@ -2098,22 +2114,22 @@ export default function App({ googleClientIdConfigured = false }) {
       {isLoggedIn && isAdmin && activeView === "admin" && (
         <section className="panel">
           <div className="species-header">
-            <h2>AD Console</h2>
+            <h2>{t("adminConsole")}</h2>
             <button
               type="button"
               className="btn-secondary btn-small"
               onClick={() => loadAdminConsole(adminChartDays)}
               disabled={busy.adminConsole}
             >
-              {busy.adminConsole ? "Aggiorno..." : "Aggiorna"}
+              {busy.adminConsole ? t("updating") : t("update")}
             </button>
           </div>
 
           <p className="status">Admin: {auth?.user?.email || ""}</p>
 
           <div className="admin-chart-block">
-            <h3>Build Specie</h3>
-            <p className="admin-section-note">Avvia build o rebuild di una specie inserendo il nome scientifico.</p>
+            <h3>{t("buildSpecies")}</h3>
+            <p className="admin-section-note">{t("buildSpeciesNote")}</p>
             <div className="admin-build-form">
               <input
                 type="text"
@@ -2128,7 +2144,7 @@ export default function App({ googleClientIdConfigured = false }) {
                 onClick={() => handleAdminSpeciesBuild(false)}
                 disabled={busy.adminSpeciesBuild}
               >
-                {busy.adminSpeciesBuild ? "Avvio..." : "Build"}
+                {busy.adminSpeciesBuild ? t("buildingBtn") : t("buildBtn")}
               </button>
               <button
                 type="button"
@@ -2136,114 +2152,114 @@ export default function App({ googleClientIdConfigured = false }) {
                 onClick={() => handleAdminSpeciesBuild(true)}
                 disabled={busy.adminSpeciesBuild}
               >
-                {busy.adminSpeciesBuild ? "Avvio..." : "Rebuild"}
+                {busy.adminSpeciesBuild ? t("buildingBtn") : t("rebuildBtn")}
               </button>
             </div>
             {adminSpeciesBuildStatus && <p className="status">{adminSpeciesBuildStatus}</p>}
           </div>
 
           <div className="admin-chart-block">
-            <h3>Stato API (/health)</h3>
+            <h3>{t("ApiStatus")} (/health)</h3>
             <div className="admin-stats-grid">
               <div className="admin-stat-card">
                 <strong>{adminHealth?.status || "-"}</strong>
-                <span>API status</span>
+                <span>{t("ApiStatus")}</span>
               </div>
               <div className="admin-stat-card">
                 <strong>{adminHealth?.model || "-"}</strong>
-                <span>Modello ricerca</span>
+                <span>{t("searchModel")}</span>
               </div>
               <div className="admin-stat-card">
                 <strong>
                   {typeof adminHealth?.search_backend_ready === "boolean"
-                    ? (adminHealth.search_backend_ready ? "SI" : "NO")
+                    ? (adminHealth.search_backend_ready ? t("yes") : t("no"))
                     : "-"}
                 </strong>
-                <span>Backend ricerca pronto</span>
+                <span>{t("searchBackendReady")}</span>
               </div>
             </div>
             {adminHealthError && <p className="status">{adminHealthError}</p>}
           </div>
 
           <div className="admin-chart-block">
-            <h3>Utenti e Raccolta</h3>
-            <p className="admin-section-note">Panoramica rapida su utenti registrati e contenuti personali salvati.</p>
+            <h3>{t("usersAndCollection")}</h3>
+            <p className="admin-section-note">{t("usersAndCollectionNote")}</p>
             <div className="admin-stats-grid">
               <div className="admin-stat-card">
                 <strong>{adminConsole?.stats?.registered_users_total ?? 0}</strong>
-                <span>Utenti registrati</span>
+                <span>{t("registeredUsers")}</span>
               </div>
               <div className="admin-stat-card">
                 <strong>{adminConsole?.stats?.saved_plants_total ?? 0}</strong>
-                <span>Piante salvate</span>
+                <span>{t("savedPlants")}</span>
               </div>
               <div className="admin-stat-card">
                 <strong>{adminConsole?.stats?.external_user_images_total ?? 0}</strong>
-                <span>Immagini utente su store esterno</span>
+                <span>{t("externalUserImages")}</span>
               </div>
             </div>
           </div>
 
           <div className="admin-chart-block">
-            <h3>Riconoscimenti</h3>
-            <p className="admin-section-note">Volume, qualità e tempi medi del motore di riconoscimento.</p>
+            <h3>{t("recognitions")}</h3>
+            <p className="admin-section-note">{t("recognitionsNote")}</p>
             <div className="admin-stats-grid">
               <div className="admin-stat-card">
                 <strong>{adminConsole?.recognition?.total ?? 0}</strong>
-                <span>Riconoscimenti totali</span>
+                <span>{t("totalRecognitions")}</span>
               </div>
               <div className="admin-stat-card">
                 <strong>{adminConsole?.recognition?.guest_total ?? 0}</strong>
-                <span>Riconoscimenti guest</span>
+                <span>{t("guestRecognitions")}</span>
               </div>
               <div className="admin-stat-card">
                 <strong>{adminConsole?.recognition?.openai_total ?? 0}</strong>
-                <span>Con supporto OpenAI</span>
+                <span>{t("openaiSupport")}</span>
               </div>
               <div className="admin-stat-card">
                 <strong>{adminConsole?.recognition?.with_image_total ?? 0}</strong>
-                <span>Con URL immagine salvata</span>
+                <span>{t("withImageUrl")}</span>
               </div>
               <div className="admin-stat-card">
                 <strong>{formatDurationMs(adminConsole?.recognition?.avg_recognition_ms)}</strong>
-                <span>Tempo medio riconoscimento</span>
+                <span>{t("avgRecognitionTime")}</span>
               </div>
             </div>
           </div>
 
           <div className="admin-chart-block">
-            <h3>Inventario e Indici</h3>
-            <p className="admin-section-note">Copertura specie nel catalogo e disponibilità negli indici vettoriali.</p>
+            <h3>{t("inventoryAndIndices")}</h3>
+            <p className="admin-section-note">{t("inventoryAndIndicesNote")}</p>
             <div className="admin-stats-grid">
               <div className="admin-stat-card">
                 <strong>{adminConsole?.inventory?.catalog?.species_db_total ?? 0}</strong>
-                <span>Specie totali su DB</span>
+                <span>{t("speciesDbTotal")}</span>
               </div>
               <div className="admin-stat-card">
                 <strong>{adminConsole?.inventory?.catalog?.species_rag_total ?? 0}</strong>
-                <span>Specie totali su RAG</span>
+                <span>{t("speciesRagTotal")}</span>
               </div>
               <div className="admin-stat-card">
                 <strong>{adminConsole?.inventory?.faiss?.plantclef?.species_total ?? 0}</strong>
-                <span>PlantCLEF specie indicizzate</span>
+                <span>{t("plantclefSpeciesIndexed")}</span>
               </div>
               <div className="admin-stat-card">
                 <strong>{adminConsole?.inventory?.faiss?.plantclef?.images_total ?? 0}</strong>
-                <span>PlantCLEF immagini indicizzate</span>
+                <span>{t("plantclefImagesIndexed")}</span>
               </div>
               <div className="admin-stat-card">
                 <strong>{adminConsole?.inventory?.faiss?.leafsnap?.species_total ?? 0}</strong>
-                <span>LeafSnap specie indicizzate</span>
+                <span>{t("leafsnapSpeciesIndexed")}</span>
               </div>
               <div className="admin-stat-card">
                 <strong>{adminConsole?.inventory?.faiss?.leafsnap?.images_total ?? 0}</strong>
-                <span>LeafSnap immagini indicizzate</span>
+                <span>{t("leafsnapImagesIndexed")}</span>
               </div>
             </div>
           </div>
 
-          <div className="admin-filter-row" role="group" aria-label="Filtro giorni grafici">
-            <span className="admin-filter-label">Grafici:</span>
+          <div className="admin-filter-row" role="group" aria-label={t("charts")}>
+            <span className="admin-filter-label">{t("charts")}:</span>
             {[7, 30, 90].map((days) => (
               <button
                 key={days}
@@ -2252,14 +2268,14 @@ export default function App({ googleClientIdConfigured = false }) {
                 onClick={() => applyAdminChartDays(days)}
                 disabled={busy.adminConsole}
               >
-                {days} giorni
+                {days} {t("days")}
               </button>
             ))}
           </div>
 
           {!!(adminConsole?.charts?.top_species || []).length && (
             <div className="admin-chart-block">
-              <h3>Specie piu riconosciute (ultimi {adminConsole?.recognition?.chart_days || adminChartDays} giorni)</h3>
+              <h3>{t("topRecognizedSpecies", { days: adminConsole?.recognition?.chart_days || adminChartDays })}</h3>
               <div className="admin-bar-list">
                 {(adminConsole?.charts?.top_species || []).map((row) => {
                   const maxVal = Math.max(...(adminConsole?.charts?.top_species || []).map((r) => Number(r.count || 0)), 1);
@@ -2280,8 +2296,8 @@ export default function App({ googleClientIdConfigured = false }) {
 
           {!!(adminConsole?.charts?.daily_series || []).length && (
             <div className="admin-chart-block">
-              <h3>Trend giornaliero (ultimi {adminConsole?.recognition?.chart_days || adminChartDays} giorni)</h3>
-              <div className="admin-columns-chart" role="img" aria-label="Riconoscimenti giornalieri">
+              <h3>{t("dailyTrend", { days: adminConsole?.recognition?.chart_days || adminChartDays })}</h3>
+              <div className="admin-columns-chart" role="img" aria-label={t("dailyTrendlabel")}>
                 {(adminConsole?.charts?.daily_series || []).map((row) => {
                   const all = adminConsole?.charts?.daily_series || [];
                   const maxVal = Math.max(...all.map((r) => Number(r.total || 0)), 1);
@@ -2304,10 +2320,10 @@ export default function App({ googleClientIdConfigured = false }) {
             </div>
           )}
 
-          {busy.adminConsole && <p className="status">Caricamento dati admin...</p>}
+          {busy.adminConsole && <p className="status">{t("loadingAdminData")}</p>}
 
           {!busy.adminConsole && !(adminConsole?.users || []).length && (
-            <p className="status">Nessun utente registrato disponibile.</p>
+            <p className="status">{t("noRegisteredUsers")}</p>
           )}
 
           {!busy.adminConsole && !!(adminConsole?.users || []).length && (
@@ -2315,8 +2331,8 @@ export default function App({ googleClientIdConfigured = false }) {
               <table className="admin-table">
                 <thead>
                   <tr>
-                    <th>Email</th>
-                    <th>Data registrazione</th>
+                    <th>{t("email")}</th>
+                    <th>{t("registrationDate")}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -2336,9 +2352,9 @@ export default function App({ googleClientIdConfigured = false }) {
       {!isLoggedIn && activeView !== "register" && (
         <section className="panel guest-cta-panel">
           <p className="status guest-cta-text">
-            Per salvare le tue piante o chiedere riguardo la loro cura{" "}
+            {t("registrationLabelInfo")}{" "}
             <button type="button" className="guest-cta-link hero-highlight" onClick={openRegisterPage}>
-              REGISTRATI QUI
+              {t("registerHere")}
             </button>
           </p>
         </section>

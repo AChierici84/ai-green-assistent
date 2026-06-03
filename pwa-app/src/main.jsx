@@ -3,6 +3,7 @@ import ReactDOM from "react-dom/client";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 import { registerSW } from "virtual:pwa-register";
 import App from "./App";
+import "./i18n";
 import "./styles.css";
 
 function getApiBase() {
