@@ -246,7 +246,7 @@ export default function App({ googleClientIdConfigured = false }) {
       .filter((entry) => entry.value !== null && entry.value !== "");
   }, [myPlantsFlow.myPlantProfile, t]);
 
-  async function refreshGoogleSessionSilently() {
+  async function refreshGoogleSession({ interactive = false } = {}) {
     if (refreshPromiseRef.current) {
       return refreshPromiseRef.current;
     }
@@ -269,12 +269,12 @@ export default function App({ googleClientIdConfigured = false }) {
         resolve(ok);
       };
 
-      const timeoutId = window.setTimeout(() => finish(false), 8000);
+      const timeoutId = window.setTimeout(() => finish(false), interactive ? 12000 : 8000);
 
       try {
         window.google.accounts.id.initialize({
           client_id: clientId,
-          auto_select: true,
+          auto_select: !interactive,
           cancel_on_tap_outside: false,
           callback: async (credentialResponse) => {
             const idToken = credentialResponse?.credential || "";
@@ -307,7 +307,11 @@ export default function App({ googleClientIdConfigured = false }) {
         });
 
         window.google.accounts.id.prompt((notification) => {
-          if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
+          if (
+            notification.isNotDisplayed()
+            || notification.isSkippedMoment()
+            || notification.isDismissedMoment()
+          ) {
             window.clearTimeout(timeoutId);
             finish(false);
           }
@@ -324,6 +328,14 @@ export default function App({ googleClientIdConfigured = false }) {
     } finally {
       refreshPromiseRef.current = null;
     }
+  }
+
+  async function refreshGoogleSessionSilently() {
+    return refreshGoogleSession({ interactive: false });
+  }
+
+  async function refreshGoogleSessionInteractively() {
+    return refreshGoogleSession({ interactive: true });
   }
 
   async function handleGoogleSuccess(credentialResponse) {
@@ -407,9 +419,15 @@ export default function App({ googleClientIdConfigured = false }) {
 
   useEffect(() => {
     setUnauthorizedHandler(async () => {
-      const refreshed = await refreshGoogleSessionSilently();
+      let refreshed = await refreshGoogleSessionSilently();
       if (!refreshed) {
-        setError("Sessione Google scaduta. Tocca Accedi per rinnovarla.");
+        refreshed = await refreshGoogleSessionInteractively();
+      }
+      if (!refreshed) {
+        setAuth(null);
+        setAuthToken("");
+        window.localStorage.removeItem(AUTH_STORAGE_KEY);
+        setError("Sessione Google scaduta. Effettua nuovamente l'accesso.");
       }
       return refreshed;
     });
