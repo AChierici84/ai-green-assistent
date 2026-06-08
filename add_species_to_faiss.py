@@ -155,9 +155,15 @@ def _is_probably_species_page(species_name: str, resolved_title: str, extract: s
     if species_low in extract_low[:1200]:
         return True
 
+    aggregate_match = re.search(r"\b(spp\.?|sp\.?|species|hybrid(?:a|us|um)?)\b\.?$", species_low)
+
     # Accept when the genus is in title and lead says it's a species.
     genus = species_low.split()[0]
     if genus and genus in title_low and "species" in extract_low[:500]:
+        return True
+
+    # For aggregate labels like "Calibrachoa spp", a genus page is a valid fallback.
+    if aggregate_match and genus and title_low == genus and not _looks_like_list_or_disambiguation(title_low, extract_low):
         return True
 
     return False
@@ -223,6 +229,39 @@ def fetch_wiki_image_urls(title: str, lang: str, max_images: int) -> list[str]:
                 return urls
 
     return urls
+
+def generate_openai_wiki_extract(species_name: str, client, model: str) -> tuple[str, str]:
+    system_msg = (
+        "Sei un botanico e redattore enciclopedico. Scrivi un testo in italiano, stile Wikipedia, "
+        "su una pianta o un taxon vegetale. Usa solo conoscenza generale, evita numeri troppo specifici "
+        "se non sei sicuro, e non citare fonti o dire che stai inventando. "
+        "Produci un testo con sezioni separate da intestazioni wiki di livello 2, ad esempio "
+        "== Descrizione ==, == Distribuzione ==, == Habitat ==, == Coltivazione ==, == Fioritura ==, == Cura ==."
+    )
+    user_msg = (
+        f"Specie o taxon: {species_name}\n\n"
+        "Scrivi una scheda enciclopedica chiara e utile, in italiano, di circa 500-900 parole. "
+        "Se la pianta e poco documentata, resta prudente e usa formulazioni generali. "
+        "Restituisci solo il testo finale, senza elenco introduttivo o commenti esterni."
+    )
+
+    completion = client.chat.completions.create(
+        model=model,
+        temperature=0.2,
+        max_tokens=1200,
+        messages=[
+            {"role": "system", "content": system_msg},
+            {"role": "user", "content": user_msg},
+        ],
+    )
+    raw_text = (completion.choices[0].message.content or "").strip()
+    if not raw_text:
+        raise RuntimeError("OpenAI ha restituito testo vuoto per la scheda Wikipedia-like")
+
+    if "==" not in raw_text:
+        raw_text = f"== Descrizione ==\n{raw_text}"
+
+    return species_name, raw_text
 
 
 def _download_image(url: str) -> Image.Image | None:
@@ -443,15 +482,26 @@ def add_to_faiss(
     from openai import OpenAI
     import chromadb
 
+    api_key = os.getenv("OPENAI_API_KEY", "").strip()
+    openai_client = OpenAI(api_key=api_key) if api_key else None
+
     rag_chunks = 0
     if species_in_rag:
         print(f"[skip] {species_name}: already in RAG")
     else:
+        generated_ai_text = False
         wiki_payload = fetch_wiki_extract_sections(resolved_title, lang)
         if not wiki_payload:
             wiki_payload = fetch_wiki_extract_sections(species_name, "it")
         if not wiki_payload:
             wiki_payload = fetch_wiki_extract_sections(species_name, "en")
+        if not wiki_payload and openai_client is not None:
+            try:
+                wiki_payload = generate_openai_wiki_extract(species_name, openai_client, DEFAULT_MODEL)
+                generated_ai_text = True
+                print(f"  [fallback] Generated OpenAI wiki-like text for '{species_name}'")
+            except Exception as exc:
+                print(f"  [warn] OpenAI wiki-like text generation failed for '{species_name}': {exc}")
 
         if wiki_payload:
             rag_title, wiki_extract = wiki_payload
@@ -473,6 +523,8 @@ def add_to_faiss(
                 ids = [f"{slug}__{i}" for i in range(len(chunks))]
                 lead_text = sections[0][1] if sections else ""
                 common_name = extract_common_name(lead_text, species_name)
+                if generated_ai_text and not common_name:
+                    common_name = species_name
                 encoded_images = json.dumps(used_urls or image_urls or [], ensure_ascii=False)
                 metadatas = [
                     {
@@ -480,10 +532,10 @@ def add_to_faiss(
                         "common_name": common_name,
                         "image_paths": encoded_images,
                         "chunk_index": i,
-                        "lang": lang,
-                        "source_lang": lang,
+                        "lang": "it" if generated_ai_text else lang,
+                        "source_lang": "ai" if generated_ai_text else lang,
                         "translated_it": False,
-                        "content_lang": lang,
+                        "content_lang": "it" if generated_ai_text else lang,
                     }
                     for i in range(len(chunks))
                 ]
@@ -503,9 +555,6 @@ def add_to_faiss(
     # image_urls è già calcolato nella fase precedente (usato per FAISS)
     # used_urls contiene quelle effettivamente embeddate
     image_paths_json = json.dumps(used_urls or image_urls or [], ensure_ascii=False)
-    api_key = os.getenv("OPENAI_API_KEY", "").strip()
-    from openai import OpenAI
-    openai_client = OpenAI(api_key=api_key) if api_key else None
 
     profile = None
     backend_label = "MySQL" if use_mysql else "plants.db"
@@ -686,12 +735,17 @@ def main() -> None:
         raise RuntimeError(f"Species '{species}' already exists in cache labels. Use --force to add more samples")
 
     langs = tuple(x.strip().lower() for x in args.langs.split(",") if x.strip())
-    lang, resolved_title = resolve_title(species, args.wikipedia_url, langs)
-    print(f"Resolved Wikipedia page: {lang}:{resolved_title}")
+    try:
+        lang, resolved_title = resolve_title(species, args.wikipedia_url, langs)
+        print(f"Resolved Wikipedia page: {lang}:{resolved_title}")
+    except RuntimeError as exc:
+        lang = langs[0] if langs else "it"
+        resolved_title = species
+        print(f"[warn] {exc} | continuing with OpenAI text fallback and no images")
 
     urls = fetch_wiki_image_urls(resolved_title, lang, max_images=max(1, args.max_images))
     if not urls:
-        raise RuntimeError("No suitable Wikipedia images found")
+        print("[warn] No suitable Wikipedia images found; continuing without images")
 
     result = add_to_faiss(
         species,

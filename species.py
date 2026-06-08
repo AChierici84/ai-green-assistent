@@ -235,7 +235,16 @@ class SpeciesService:
                 x.strip().lower() for x in os.getenv("WIKI_LANGS", "it,en").split(",") if x.strip()
             )
             max_images = max(4, int(os.getenv("RAG_BUILD_MAX_IMAGES", "8")))
-            lang, resolved_title = resolve_title(species_name, "", langs)
+            try:
+                lang, resolved_title = resolve_title(species_name, "", langs)
+            except RuntimeError as exc:
+                lang = langs[0] if langs else "it"
+                resolved_title = species_name
+                logger.warning(
+                    "Wikipedia not found for '%s'; continuing with OpenAI-generated text and no images: %s",
+                    species_name,
+                    exc,
+                )
             image_urls = fetch_wiki_image_urls(resolved_title, lang, max_images=max_images)
             if not image_urls:
                 logger.warning(
