@@ -12,6 +12,7 @@ from uuid import uuid4
 
 import cloudinary
 import cloudinary.uploader
+import sentry_sdk
 from dotenv import load_dotenv
 from fastapi import FastAPI, File, UploadFile, HTTPException, Query, Header, Request
 from fastapi.middleware.cors import CORSMiddleware
@@ -19,6 +20,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse, JSONResponse, FileResponse
 from openai import OpenAI
 from pydantic import BaseModel, Field
+from sentry_sdk.integrations.fastapi import FastApiIntegration
 from app_config import load_app_config, configure_cloudinary_if_enabled
 from api_logging import configure_logging, _log_api, _response_payload_for_log
 from data_storage import DataStorage, PLANT_PROFILE_FIELDS
@@ -70,6 +72,35 @@ logger = logging.getLogger("ai_green_assistant.api")
 
 
 configure_logging()
+
+
+def _env_float(name: str, default: float) -> float:
+    raw_value = str(os.getenv(name, default)).strip()
+    try:
+        value = float(raw_value)
+        return value if value >= 0 else default
+    except (TypeError, ValueError):
+        return default
+
+
+def _configure_sentry() -> None:
+    dsn = str(os.getenv("SENTRY_DSN", "")).strip()
+    if not dsn:
+        return
+
+    sentry_sdk.init(
+        dsn=dsn,
+        integrations=[FastApiIntegration()],
+        environment=str(os.getenv("SENTRY_ENVIRONMENT", "production")).strip() or "production",
+        release=str(os.getenv("SENTRY_RELEASE", "")).strip() or None,
+        traces_sample_rate=_env_float("SENTRY_TRACES_SAMPLE_RATE", 0.05),
+        profiles_sample_rate=_env_float("SENTRY_PROFILES_SAMPLE_RATE", 0.0),
+        send_default_pii=False,
+    )
+    logger.info("Sentry backend attivo")
+
+
+_configure_sentry()
 
 
 def _truncate(value: Any, max_len: int = 500) -> str:
@@ -947,6 +978,9 @@ def health():
         "search_backend_ready": status["ready"],
     }
 
+@app.get("/sentry-debug")
+async def trigger_error():
+    division_by_zero = 1 / 0
 
 @app.get("/search/status")
 def search_status():

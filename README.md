@@ -231,6 +231,34 @@ VITE_API_BASE=http://localhost:8000
 VITE_GOOGLE_CLIENT_ID=xxxxxxxxxxxx-abcdefg.apps.googleusercontent.com
 ```
 
+Monitoraggio errori con Sentry (opzionale):
+- Dove vedi gli errori: dashboard web su `https://sentry.io` nel progetto creato.
+- Alert: configurabili da Sentry su email/Slack/Teams.
+
+Variabili backend (`.env`):
+
+```env
+SENTRY_DSN=https://<public_key>@o<org_id>.ingest.sentry.io/<project_id>
+SENTRY_ENVIRONMENT=production
+SENTRY_RELEASE=clorofilla-backend@1.0.0
+SENTRY_TRACES_SAMPLE_RATE=0.05
+SENTRY_PROFILES_SAMPLE_RATE=0.0
+```
+
+Variabili frontend PWA (`pwa-app/.env`):
+
+```env
+VITE_SENTRY_DSN=https://<public_key>@o<org_id>.ingest.sentry.io/<project_id>
+VITE_SENTRY_ENVIRONMENT=production
+VITE_SENTRY_RELEASE=clorofilla-pwa@1.0.0
+VITE_SENTRY_TRACES_SAMPLE_RATE=0.05
+```
+
+Note:
+- Se `SENTRY_DSN`/`VITE_SENTRY_DSN` sono vuote, l'integrazione resta disattivata.
+- Consigliato usare due progetti separati in Sentry: uno per backend e uno per frontend.
+- Evita di inviare dati sensibili nei breadcrumb o nei payload applicativi.
+
 Nota autenticazione:
 - endpoint login: `POST /auth/google` (valida l'id_token Google)
 - con `REQUIRE_GOOGLE_AUTH=0` i token Bearer sono opzionali

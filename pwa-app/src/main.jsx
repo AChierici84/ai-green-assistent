@@ -1,10 +1,25 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
+import * as Sentry from "@sentry/react";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 import { registerSW } from "virtual:pwa-register";
 import App from "./App";
 import "./i18n";
 import "./styles.css";
+
+const sentryDsn = String(import.meta.env.VITE_SENTRY_DSN || "").trim();
+const sentryEnabled = Boolean(sentryDsn);
+
+if (sentryEnabled) {
+  const tracesSampleRate = Number(import.meta.env.VITE_SENTRY_TRACES_SAMPLE_RATE || 0.05);
+  Sentry.init({
+    dsn: sentryDsn,
+    environment: import.meta.env.VITE_SENTRY_ENVIRONMENT || import.meta.env.MODE || "production",
+    release: import.meta.env.VITE_SENTRY_RELEASE || undefined,
+    tracesSampleRate: Number.isFinite(tracesSampleRate) ? tracesSampleRate : 0.05,
+    sendDefaultPii: false,
+  });
+}
 
 function getApiBase() {
   if (import.meta.env.VITE_API_BASE) {
@@ -48,14 +63,22 @@ registerSW({
 const root = ReactDOM.createRoot(document.getElementById("root"));
 
 loadAppConfig().then(({ googleClientId }) => {
+  const appNode = googleClientId ? (
+    <GoogleOAuthProvider clientId={googleClientId}>
+      <App googleClientIdConfigured googleClientId={googleClientId} />
+    </GoogleOAuthProvider>
+  ) : (
+    <App googleClientIdConfigured={false} googleClientId="" />
+  );
+
   root.render(
     <React.StrictMode>
-      {googleClientId ? (
-        <GoogleOAuthProvider clientId={googleClientId}>
-          <App googleClientIdConfigured googleClientId={googleClientId} />
-        </GoogleOAuthProvider>
+      {sentryEnabled ? (
+        <Sentry.ErrorBoundary fallback={<p>Si e verificato un errore inatteso.</p>}>
+          {appNode}
+        </Sentry.ErrorBoundary>
       ) : (
-        <App googleClientIdConfigured={false} googleClientId="" />
+        appNode
       )}
     </React.StrictMode>
   );
