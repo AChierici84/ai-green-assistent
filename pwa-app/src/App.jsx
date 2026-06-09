@@ -125,7 +125,7 @@ function requestGoogleDriveAccessToken(idToken, interactive = true) {
   });
 }
 
-export default function App({ googleClientIdConfigured = false }) {
+export default function App({ googleClientIdConfigured = false, googleClientId = "" }) {
   const { t, i18n: i18nInstance } = useTranslation();
   const getBackendLang = () => (i18nInstance.language === "en" ? "en" : "it");
 
@@ -253,7 +253,7 @@ export default function App({ googleClientIdConfigured = false }) {
 
     const currentToken = auth?.idToken || "";
     const payload = parseJwtPayload(currentToken);
-    const clientId = String(payload?.aud || "").trim();
+    const clientId = String(payload?.aud || googleClientId || "").trim();
 
     if (!clientId || !window.google?.accounts?.id) {
       return false;
@@ -421,19 +421,21 @@ export default function App({ googleClientIdConfigured = false }) {
     setUnauthorizedHandler(async () => {
       let refreshed = await refreshGoogleSessionSilently();
       if (!refreshed) {
+        setActiveView("register");
         refreshed = await refreshGoogleSessionInteractively();
       }
       if (!refreshed) {
         setAuth(null);
         setAuthToken("");
         window.localStorage.removeItem(AUTH_STORAGE_KEY);
+        setActiveView("register");
         setError("Sessione Google scaduta. Effettua nuovamente l'accesso.");
       }
       return refreshed;
     });
 
     return () => setUnauthorizedHandler(null);
-  }, [auth?.idToken]);
+  }, [auth?.idToken, googleClientId]);
 
   useEffect(() => {
     const exp = Number(auth?.expiresAt || 0);

@@ -52,10 +52,10 @@ loadAppConfig().then(({ googleClientId }) => {
     <React.StrictMode>
       {googleClientId ? (
         <GoogleOAuthProvider clientId={googleClientId}>
-          <App googleClientIdConfigured />
+          <App googleClientIdConfigured googleClientId={googleClientId} />
         </GoogleOAuthProvider>
       ) : (
-        <App googleClientIdConfigured={false} />
+        <App googleClientIdConfigured={false} googleClientId="" />
       )}
     </React.StrictMode>
   );
